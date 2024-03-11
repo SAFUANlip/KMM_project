@@ -8,7 +8,7 @@ class Aim:
         self.coordinates = coordinates  # x, y, z
 
 
-class MFR_round:
+class RadarRound:
     def __init__(self, coordinates: tuple, pan_start, tilt_start, view_distance: int, pan_per_sec: float, tilt_per_sec: float, pan_cur: float, tilt_cur: float):
         """ Класс, описывающий работу РЛС кругового типа обзора, является родительским классом
          для РЛС секторного типа обзора:
@@ -51,7 +51,7 @@ class MFR_round:
         messages['mfr'] = visible_aims
 
 
-class MFR_sector(MFR_round):
+class RadarSector(RadarRound):
     def __init__(self, coords, dist, pan_angle, tilt_angle, pan_sec, tilt_sec, pan_cur, tilt_cur):
         """ Класс, описывающий работу РЛС секторного обзора, является дочерним классом от РЛС кругового обзора:
          :param pan_angle: максимальный угол раскрыва по азимуту
