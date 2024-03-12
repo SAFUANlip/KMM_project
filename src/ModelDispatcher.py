@@ -46,8 +46,9 @@ class ModelDispatcher:
         simulating_steps_number: int = floor(self.__simulation_time * self.__simulating_rate)
         while self.__current_step < simulating_steps_number:
             self.__messages.append(list())
+            current_time: float = self.__current_step / self.__simulating_rate
             for object in self.__objects:
-                object.runSimulationStep(self.__current_step)
+                object.runSimulationStep(current_time)
             self.__current_step += 1
 
     # Добавить сообщение в массив. 

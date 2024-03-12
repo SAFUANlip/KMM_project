@@ -26,7 +26,7 @@ class Simulated(metaclass=ABCMeta):
     #       time - время на текущем шаге моделирования
     #
     @abstractmethod
-    def runSimulationStep(self, time: int) -> None:
+    def runSimulationStep(self, time: float) -> None:
         pass
 
     # Отправить сконфигурированное сообщение
