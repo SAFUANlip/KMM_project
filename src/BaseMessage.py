@@ -19,7 +19,11 @@ class BaseMessage(metaclass=ABCMeta):
         self.receiver_ID = receiver_ID
 
 
-class BaseMessageRadar(BaseMessage):
-    def __init__(self, type: int, priority: int, time: int, sender_ID: int, receiver_ID: int, visible_targets: list):
+class Radar2CombatControlMsg(BaseMessage):
+    def __init__(self, type: int, priority: int, time: int, sender_ID: int, receiver_ID: int, visible_objects: list):
+        '''
+        :param visible_objects: список видимых объектов из списков типа
+                                [положение объекта, направление скорости объекта, модуль скорости объекта]
+        '''
         super().__init__(type, priority, time, sender_ID, receiver_ID)
-        self.visible_targets = visible_targets
+        self.visible_objects = visible_objects

@@ -1,7 +1,8 @@
 import numpy as np
-from AeroEnv import Airplane
 from Simulated import Simulated
-from BaseMessage import BaseMessageRadar
+from BaseMessage import Radar2CombatControlMsg
+from AeroEnv import AeroEnv
+from constants import SPEED_GuidedMissile, MAX_DIST_ERROR
 
 
 class RadarRound(Simulated):
@@ -27,22 +28,25 @@ class RadarRound(Simulated):
         self.pan_cur = pan_cur
         self.tilt_cur = tilt_cur
 
-    def find_aims(self):
-        all_aims = self._checkAvailableMessages()
-        visible_aims = []
-        for aim in all_aims:
-            r = np.linalg.norm(aim.pos - self.coordinates)
+    def find_objects(self):
+        all_objects = AeroEnv().getEntities()
+        visible_objects = []
+        for obj in all_objects:
+            r = np.linalg.norm(obj.pos - self.coordinates)
             if r < self.view_distance:
-                xa, ya, za, = aim.pos
-                tilt_aim = np.arcsin(za/r) - self.tilt_start
-                pan_aim = np.arcsin(ya/(r*np.cos(tilt_aim))) - self.pan_start
-                if self.pan_cur < pan_aim < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt_aim < self.tilt_cur + self.tilt_per_sec:
-                    visible_aims.append(aim)
-        return visible_aims
+                x, y, z = obj.pos
+                tilt = np.arcsin(z/r) - self.tilt_start
+                pan = np.arcsin(y/(r*np.cos(tilt))) - self.pan_start
+                if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
+                    pos = obj.pos + np.random.randint(-MAX_DIST_ERROR, MAX_DIST_ERROR, size=3)
+                    speed_direction = obj.vel + np.random.randint(-0.001*SPEED_GuidedMissile, -0.001*SPEED_GuidedMissile, size=3)
+                    speed_modul = np.linalg.norm(speed_direction)
+                    visible_objects.append([pos, speed_direction, speed_modul])
+        return visible_objects
 
     def runSimulationStep(self, time: int):
-        visible_aims = self.find_aims()
-        msg = BaseMessageRadar(2000, 1, time, self._ID, 1000, visible_aims)
+        visible_objects = self.find_objects()
+        msg = Radar2CombatControlMsg(2001, 1, time, self._ID, 3000, visible_objects)
         self._sendMessage(msg)
 
     def change_sector_per_sec(self, new_pan_sec: float, new_tilt_sec: float):
