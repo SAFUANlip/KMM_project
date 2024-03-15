@@ -1,6 +1,6 @@
 import numpy as np
 from Simulated import Simulated
-from BaseMessage import Radar2CombatControlMsg
+from Radar2CombatControlMsg import Radar2CombatControlMsg
 from AeroEnv import AeroEnv
 from constants import SPEED_GuidedMissile, MAX_DIST_ERROR
 
