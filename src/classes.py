@@ -1,12 +1,12 @@
 import numpy as np
-from Simulated import Simulated
-from Radar2CombatControlMsg import Radar2CombatControlMsg
-from AeroEnv import AeroEnv
-from constants import SPEED_GuidedMissile, MAX_DIST_ERROR
+from src.Radar2CombatControlMsg import Radar2CombatControlMsg
+from src.Simulated import Simulated
+from src.AeroEnv import AeroEnv
+from src.constants import SPEED_GuidedMissile, MAX_DIST_ERROR
 
 
 class RadarRound(Simulated):
-    def __init__(self, dispatcher, ID: int, coordinates: tuple, pan_start, tilt_start, view_distance: int, pan_per_sec: float, tilt_per_sec: float, pan_cur: float, tilt_cur: float):
+    def __init__(self, dispatcher, ID: int, cp_ID: int, aero_env: AeroEnv, coordinates: tuple, pan_start, tilt_start, view_distance: int, pan_per_sec: float, tilt_per_sec: float, pan_cur: float, tilt_cur: float):
         """ Класс, описывающий работу РЛС кругового типа обзора, является родительским классом
          для РЛС секторного типа обзора:
          :param coordinates: координаты положения РЛС, относительно глобальной СК (x, y, z)
@@ -18,7 +18,8 @@ class RadarRound(Simulated):
          :param pan_cur: начало секундного сектора обзора в данный момент времени по углу поворота
          :param tilt_cur: начало секундного сектора обзора в данный момент времени по углу наклона"""
         super().__init__(dispatcher, ID)
-
+        self.cp_ID = cp_ID
+        self.aero_env = aero_env
         self.coordinates = coordinates
         self.pan_start = pan_start
         self.tilt_start = tilt_start
@@ -29,7 +30,7 @@ class RadarRound(Simulated):
         self.tilt_cur = tilt_cur
 
     def find_objects(self):
-        all_objects = AeroEnv().getEntities()
+        all_objects = self.aero_env.getEntities()
         visible_objects = []
         for obj in all_objects:
             r = np.linalg.norm(obj.pos - self.coordinates)
@@ -39,14 +40,14 @@ class RadarRound(Simulated):
                 pan = np.arcsin(y/(r*np.cos(tilt))) - self.pan_start
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     pos = obj.pos + np.random.randint(-MAX_DIST_ERROR, MAX_DIST_ERROR, size=3)
-                    speed_direction = obj.vel + np.random.randint(-0.001*SPEED_GuidedMissile, -0.001*SPEED_GuidedMissile, size=3)
+                    speed_direction = obj.vel + np.random.randint(-0.001*SPEED_GuidedMissile, 0.001*SPEED_GuidedMissile, size=3)
                     speed_modul = np.linalg.norm(speed_direction)
                     visible_objects.append([pos, speed_direction, speed_modul])
         return visible_objects
 
     def runSimulationStep(self, time: int):
         visible_objects = self.find_objects()
-        msg = Radar2CombatControlMsg(2001, 1, time, self._ID, 3000, visible_objects)
+        msg = Radar2CombatControlMsg(time, self._ID, self.cp_ID, visible_objects)
         self._sendMessage(msg)
 
     def change_sector_per_sec(self, new_pan_sec: float, new_tilt_sec: float):

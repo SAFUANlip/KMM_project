@@ -2,6 +2,7 @@ from math import floor
 from typing import List
 from src.BaseMessage import BaseMessage
 from src.Simulated import Simulated
+from copy import deepcopy
 
 class ModelDispatcher:
 ###
@@ -74,4 +75,5 @@ class ModelDispatcher:
     def giveMessagesByType(self, receiver_ID: int, msg_type: int) -> List[BaseMessage]:
         return [msg for msg in self.__messages[self.__current_step] if (msg.receiver_ID == receiver_ID or (msg.receiver_ID == -1) and msg.sender_ID != msg.receiver_ID) and msg._type == msg_type]
 
-
+    def getMessageHistory(self):
+        return self.__simulating_rate, deepcopy(self.__messages)
