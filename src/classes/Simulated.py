@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
-from src.BaseMessage import BaseMessage
+from src.messages.BaseMessage import BaseMessage
 
 # Затычка против зацикливания импорта
 # Импорт модуля диспетчера должен быть в конце
