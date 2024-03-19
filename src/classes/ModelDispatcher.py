@@ -1,7 +1,7 @@
 from math import floor
 from typing import List
-from src.BaseMessage import BaseMessage
-from src.Simulated import Simulated
+from src.messages.BaseMessage import BaseMessage
+from src.classes.Simulated import Simulated
 
 class ModelDispatcher:
 ###
