@@ -1,7 +1,8 @@
 from math import floor
 from typing import List
-from src.messages.BaseMessage import BaseMessage
-from src.classes.Simulated import Simulated
+from src.BaseMessage import BaseMessage
+from src.Simulated import Simulated
+from copy import deepcopy
 
 class ModelDispatcher:
 ###
@@ -46,8 +47,9 @@ class ModelDispatcher:
         simulating_steps_number: int = floor(self.__simulation_time * self.__simulating_rate)
         while self.__current_step < simulating_steps_number:
             self.__messages.append(list())
+            current_time: float = self.__current_step / self.__simulating_rate
             for object in self.__objects:
-                object.runSimulationStep(self.__current_step)
+                object.runSimulationStep(current_time)
             self.__current_step += 1
 
     # Добавить сообщение в массив. 
@@ -73,4 +75,5 @@ class ModelDispatcher:
     def giveMessagesByType(self, receiver_ID: int, msg_type: int) -> List[BaseMessage]:
         return [msg for msg in self.__messages[self.__current_step] if (msg.receiver_ID == receiver_ID or (msg.receiver_ID == -1) and msg.sender_ID != msg.receiver_ID) and msg._type == msg_type]
 
-
+    def getMessageHistory(self):
+        return self.__simulating_rate, deepcopy(self.__messages)
