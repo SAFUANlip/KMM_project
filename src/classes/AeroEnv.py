@@ -1,5 +1,5 @@
-from src.Simulated import Simulated
-from src.Vector import Vector
+from src.classes.Simulated import Simulated
+from src.classes.Vector import Vector
 
 class AeroEnv(Simulated):
     def __init__(self, dispatcher, ID: int) -> None:
@@ -9,11 +9,12 @@ class AeroEnv(Simulated):
     def getEntities(self) -> list:
         return self.entities
 
-    def runSimulationStep(self, t: int = 1) -> None:
+    def runSimulationStep(self, t: float = 1) -> None:
         for entity in self.getEntities():
             entity.runSimulationStep(t)
 
     def addEntity(self, entity):
+        print("ent", entity)
         self.entities.append(entity)
 
 
@@ -26,6 +27,8 @@ class Airplane(Simulated):
         self.type_id = 1
 
     def runSimulationStep(self, t: int = 1) -> None:
+        # print(self.pos, self.vel)
+
         self.pos = self.pos + self.vel
 
 
