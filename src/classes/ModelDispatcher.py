@@ -28,6 +28,9 @@ class ModelDispatcher:
     def setSimulatingRate(self, rate: float) -> None:
         self.__simulating_rate = rate
 
+    def getSimulatingTick(self) -> float:
+        return 1 / self.__simulating_rate
+
     # Задание времени моделирования
     # Args:
     #       time - желаемое время моделирования

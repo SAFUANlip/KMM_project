@@ -19,6 +19,7 @@ class Simulated(metaclass=ABCMeta):
     def __init__(self, dispatcher: ModelDispatcher, ID: int) -> None:
         self.__dispatcher = dispatcher
         self._ID = ID
+        self._simulating_tick = dispatcher.getSimulatingTick()
 
     # Сделать шаг моделирования
     # ! Должен быть переопределён дочерним классом !
