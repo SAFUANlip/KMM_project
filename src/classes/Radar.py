@@ -19,10 +19,9 @@ class RadarRound(Simulated):
          :param view_distance: дальность обзора РЛС
          :param pan_per_sec: угол раскрыва по углу поворота за секунду обзора
          :param tilt_per_sec: угол раскрыва по углу наклона за секунду обзора """
-        super().__init__(dispatcher, ID)
+        super().__init__(dispatcher, ID, pos)
         self.cp_ID = cp_ID
         self.aero_env = aero_env
-        self.pos = pos
         self.pan_start = pan_start
         self.tilt_start = tilt_start  # на потом
 
@@ -44,10 +43,10 @@ class RadarRound(Simulated):
                 tilt = np.arcsin(z/r) - self.tilt_start
                 pan = np.arcsin(y/(r*np.cos(tilt))) - self.pan_start
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
-                    pos = obj.pos + np.random.randint(-0.001 * r, 0.001 * r, size=3)
+                    pos = obj.pos + np.random.randint(-int(0.001 * r) - 1, int(0.001 * r) + 1, size=3)
 
                     speed = np.linalg.norm(obj.vel)
-                    velocity_from_radar = obj.vel + np.random.randint(-0.001 * speed, 0.001 * speed, size=3)
+                    velocity_from_radar = obj.vel + np.random.randint(-int(0.001 * speed) - 1, int(0.001 * speed) + 1, size=3)
                     speed_from_radar = np.linalg.norm(velocity_from_radar)
 
                     visible_objects.append([pos, velocity_from_radar, speed_from_radar])
@@ -85,10 +84,20 @@ class RadarSector(RadarRound):
         self.type = type_of_view
 
     def move_to_next_sector(self):
-        if type == "horizontal":
+        if self.type == "horizontal":
             self.pan_cur = (self.pan_cur + self.pan_per_sec) % 360
-            if self.pan_cur == self.pan_start + self.pan_angle:
-                pass
+            if self.pan_cur == (self.pan_start + self.pan_angle) % 360:
+                self.tilt_cur = (self.tilt_cur + self.tilt_per_sec) % 180
+                if self.tilt_cur == (self.tilt_start + self.tilt_angle) % 180:
+                    self.tilt_cur = self.tilt_start
+                self.pan_cur = self.pan_start
+        elif self.type == "vertical":
+            self.tilt_cur = (self.tilt_cur + self.tilt_per_sec) % 180
+            if self.tilt_cur == (self.tilt_start + self.tilt_angle) % 180:
+                self.pan_cur = (self.pan_cur + self.pan_per_sec) % 360
+                if self.pan_cur == (self.pan_start + self.pan_angle) % 360:
+                    self.pan_cur = self.pan_start
+                self.tilt_cur = self.tilt_start
 
     def change_sector(self, new_pan: float, new_tilt: float):
         self.pan_angle = new_pan

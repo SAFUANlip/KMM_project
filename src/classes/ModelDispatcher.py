@@ -5,7 +5,8 @@ from src.classes.Simulated import Simulated
 from copy import deepcopy
 
 class ModelDispatcher:
-    """ Класс диспетчера моделей. Синхронизирует моделирование всех моделей 
+
+    """ Класс диспетчера моделей. Синхронизирует моделирование всех моделей
     и обеспечивает обмен сообщениями между моделями
     :atrib __objects: массив моделей
     :atrib __messages: массив сообщений, предоставляет историю сообщений
@@ -62,7 +63,7 @@ class ModelDispatcher:
             self.__current_step += 1
 
     def addMessage(self, msg: BaseMessage) -> None:
-        """ Добавить сообщение в массив 
+        """ Добавить сообщение в массив
         ! Это сообщение будет получено, только на следующем шаге моделирования !
         :param msg: новое сообщение
         """
@@ -73,18 +74,21 @@ class ModelDispatcher:
         :param receiver_ID: ID получателя. Если ID = -1, то получателеми являются все модели, кроме отправителя
         :return: список сообщений, отправленных получателю на предыдущей итерации моделирования
         """
-        return [msg for msg in self.__messages[self.__current_step] if msg.receiver_ID == receiver_ID or (msg.receiver_ID == -1 and msg.sender_ID != msg.receiver_ID)]
-    
+        return [msg for msg in self.__messages[self.__current_step] if
+                msg.receiver_ID == receiver_ID or (msg.receiver_ID == -1 and msg.sender_ID != msg.receiver_ID)]
+
     def giveMessagesByType(self, receiver_ID: int, msg_type: int) -> List[BaseMessage]:
         """ Отдать сообщения выбранного типа, связанные с выбранным получателем
         :param receiver_ID: ID получателя. Если ID = -1, то получателеми являются все модели, кроме отправителя
         :param msg_type: тип сообщения
         :return: список сообщений выбранного типа, отправленных получателю на предыдущей итерации моделирования
         """
-        return [msg for msg in self.__messages[self.__current_step] if (msg.receiver_ID == receiver_ID or (msg.receiver_ID == -1) and msg.sender_ID != msg.receiver_ID) and msg.type == msg_type]
+        return [msg for msg in self.__messages[self.__current_step] if (msg.receiver_ID == receiver_ID or (
+                    msg.receiver_ID == -1) and msg.sender_ID != msg.receiver_ID) and msg.type == msg_type]
 
     def getMessageHistory(self):
         """ Отдать скорость моделирования и историю сообщений
         :return: количество шагов моделирования в секунду; массив сообщений, разделённый по итерациям
         """
         return self.__simulating_rate, deepcopy(self.__messages)
+
