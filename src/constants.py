@@ -1,1 +1,0 @@
-SPEED_GuidedMissile = 1200  # скорость ЗУР

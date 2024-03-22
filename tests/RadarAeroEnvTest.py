@@ -1,6 +1,6 @@
-from src.AeroEnv import AeroEnv, Airplane
-from src.classes import RadarRound
-from src.ModelDispatcher import ModelDispatcher
+from src.classes.AeroEnv import AeroEnv, Airplane
+from src.classes.Radar import RadarRound
+from src.classes.ModelDispatcher import ModelDispatcher
 from random import randint
 import numpy as np
 
@@ -17,9 +17,10 @@ if __name__ == '__main__':
     for el in targets:
         env.addEntity(el)
     radar = RadarRound(dispatcher, 1, 3000, env, (0, 0, 0), 0, 0, 50000, 120 * np.pi / 180, 60 * np.pi / 180, 0, 0)
-
     dispatcher.configurate([env, radar])
     dispatcher.run()
+
+
     rate, messages = dispatcher.getMessageHistory()
     for i in range(len(messages)):
         print(f"time: {i/rate}")

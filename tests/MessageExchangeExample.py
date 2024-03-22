@@ -1,6 +1,6 @@
-from src.Simulated import Simulated
-from src.ModelDispatcher import ModelDispatcher
-from src.BaseMessage import BaseMessage
+from src.classes.Simulated import Simulated
+from src.classes.ModelDispatcher import ModelDispatcher
+from src.messages.BaseMessage import BaseMessage
 from numpy.random import randint
 
 ############################# Messages ##########################
