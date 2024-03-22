@@ -42,6 +42,7 @@ class RadarRound(Simulated):
                 x, y, z = obj.pos
                 tilt = np.arcsin(z/(r+1.e-10)) - self.tilt_start
                 pan = np.arcsin(y / (r * np.cos(tilt) + 1.e-10)) - self.pan_start
+
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     pos = obj.pos + np.random.randint(-int(0.001 * r) - 1, int(0.001 * r) + 1, size=3)
 

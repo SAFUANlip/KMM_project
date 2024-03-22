@@ -25,7 +25,6 @@ def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-
 class GuidedMissile(Movable):
     def __init__(self, dispatcher: ModelDispatcher, ID: int,
                  pos: np.array,
@@ -60,9 +59,8 @@ class GuidedMissile(Movable):
         self.launch_time = launch_time
         self.__previous_time = launch_time
         self.__status = 1
-
         print(f"Base target pos: {self.pos_target}, Base Guide missile pos: {self.pos}")
-
+        
     def updateTarget(self, pos_target: np.array) -> None:
         """
         Обновление координат цели
@@ -131,4 +129,3 @@ class GuidedMissile(Movable):
 
         self.__previous_time = time
         #print(f"ID: {self._ID}, Rokcet coordinate {self.x}, {self.y}, {self.z}")
-

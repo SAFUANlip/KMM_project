@@ -23,6 +23,7 @@ if __name__ == '__main__':
     radar = RadarRound(dispatcher, 1, 3000, env, (0, 0, 0), 0, 0, 50000, 120 * np.pi / 180, 60 * np.pi / 180)
     combat = CombatControlPoint(dispatcher, 3000)
     startDevice = StartingDevice(dispatcher, 2000, np.array([0, 0, 0]), env)
+
     dispatcher.configurate([env, radar, combat, startDevice])
     dispatcher.run()
 
