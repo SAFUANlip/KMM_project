@@ -25,9 +25,11 @@ def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+
 class GuidedMissile(Movable):
     def __init__(self, dispatcher: ModelDispatcher, ID: int,
-                 pos: np.array,
+                 pos: np.array, aero_env,
                  speed=GuidedMissile_SPEED,
                  life_time=GuidedMissile_LifeTime,
                  expl_radius=GuidedMissile_ExplRadius) -> None:
@@ -40,6 +42,7 @@ class GuidedMissile(Movable):
         :param expl_radius: радиус взрыва ракеты
         """
         super(GuidedMissile, self).__init__(dispatcher, ID, pos, None)
+        self.aero_env = aero_env
         self.speed = speed
         self.pos_target = None
         self.life_time = life_time
@@ -113,17 +116,22 @@ class GuidedMissile(Movable):
 
         if len(messages) != 0:
 
+            print(f"New target pos: {pos_target}")
+
             pos_target = messages[0].new_target_coord
             print(f"ЗУР получила сообщение, новые координаты: {pos_target}")
 
         if self.__status == 1:
+
             self.updateTarget(pos_target)
             self.updateCoordinate()
             self.checkIsHit()
             if self.__status == 2:
                 print(f"HIT Target: {self.pos_target[0]}, {self.pos_target[1]}, {self.pos_target[2]}, is hit by Rocket with ID {self._ID}")
+                self.aero_env.explosion(self.pos, self.expl_radius)
             elif time - self.launch_time > self.life_time:
                 self.__status = 3
+                self.aero_env.explosion(self.pos, self.expl_radius)
                 print(f"MISS Target: {self.pos_target[0]}, {self.pos_target[1]}, {self.pos_target[2]}, is miss, Rocket with ID {self._ID} fell")
 
         if self.__status > 1:
