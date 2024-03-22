@@ -72,8 +72,8 @@ class CCMissile:
         self.target_coord = new_target_coord
 
 class CombatControlPoint(Simulated):
-    def __init__(self, dispatcher: ModelDispatcher, ID: int):
-        super().__init__(dispatcher, ID)
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, pos):
+        super().__init__(dispatcher, ID, pos)
         self.all_id = {}
         self.target_list = []
         self.missile_list = []

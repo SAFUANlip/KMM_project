@@ -3,7 +3,7 @@ from src.classes.Vector import Vector
 
 class AeroEnv(Simulated):
     def __init__(self, dispatcher, ID: int) -> None:
-        super().__init__(dispatcher, ID)
+        super().__init__(dispatcher, ID, None)
         self.entities = []
 
     def getEntities(self) -> list:
@@ -20,9 +20,9 @@ class AeroEnv(Simulated):
 
 class Airplane(Simulated):
     def __init__(self, dispatcher, ID: int, pos: Vector, vel: Vector) -> None:
-        super().__init__(dispatcher, ID)
+        super().__init__(dispatcher, ID, pos)
         self.x, self.y, self.z = pos[0], pos[1], pos[2]
-        self.pos = pos
+        # self.pos = pos
         self.vel = vel
         self.type_id = 1
 

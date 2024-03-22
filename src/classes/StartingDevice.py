@@ -1,4 +1,6 @@
 import typing
+import numpy as np
+
 from typing import List, Tuple
 from config.constants import NUMBER_OF_MISSILES
 from src.classes.AeroEnv import AeroEnv
@@ -11,19 +13,10 @@ from src.messages.Messages import NoMissiles, MissileStarted
 
 # класс ПУ
 class StartingDevice(Simulated):
-    missiles: list # список имеющихся зур
-    # координаты пу
-    x: int
-    y: int
-    z: int
-
-    def __init__(self, dispatcher: ModelDispatcher, ID: int, x: int, y: int, z: int, aero_env: AeroEnv) -> None:
-        super().__init__(dispatcher, ID)
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, pos: np.array([int, int, int]), aero_env: AeroEnv) -> None:
+        super().__init__(dispatcher, ID, pos)
         self.aeroenv = aero_env
-        self.missiles = [GuidedMissile( dispatcher, self._ID * 1000 + i, self.x, self.y, self.z) for i in range(NUMBER_OF_MISSILES)]
+        self.missiles = [GuidedMissile(dispatcher, self._ID * 1000 + i, self.pos) for i in range(NUMBER_OF_MISSILES)]
 
     # проверяем статусы зур, заполняем список убивших цель и неактивных
     def checkMissiles(self) -> Tuple[List[int], List[int]]:
@@ -53,7 +46,7 @@ class StartingDevice(Simulated):
             else:
                 print(msg.coord)
                 # если есть - запускаем
-                free_missiles[0].launch(*msg.coord, time)
+                free_missiles[0].launch(msg.coord, time)
                 #пишу пбу
                 print("here")
                 self._sendMessage(MissileStarted(time, self._ID, msg.sender_ID, free_missiles[0]._ID, msg.order))
