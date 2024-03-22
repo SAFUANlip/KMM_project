@@ -6,7 +6,7 @@ from src.classes.AeroEnv import AeroEnv
 
 class RadarRound(Simulated):
     def __init__(self, dispatcher, ID: int, cp_ID: int, aero_env: AeroEnv,
-                 pos: tuple, pan_start, tilt_start, view_distance: int,
+                 pos: np.array, pan_start, tilt_start, view_distance: int,
                  pan_per_sec: float, tilt_per_sec: float):
         """ Класс, описывающий работу РЛС кругового типа обзора, является родительским классом
          для РЛС секторного типа обзора:
@@ -59,7 +59,7 @@ class RadarRound(Simulated):
         if self.pan_cur == self.pan_start:
             self.tilt_cur = (self.tilt_cur + self.tilt_per_sec) % 180
 
-    def runSimulationStep(self, time: int):
+    def runSimulationStep(self, time: float):
         visible_objects = self.find_objects()
         msg = Radar2CombatControlMsg(time, self._ID, self.cp_ID, visible_objects)
         self._sendMessage(msg)

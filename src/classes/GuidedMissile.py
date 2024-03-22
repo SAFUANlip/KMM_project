@@ -25,6 +25,8 @@ def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+
 class GuidedMissile(Movable):
     def __init__(self, dispatcher: ModelDispatcher, ID: int,
                  pos: np.array,
@@ -112,9 +114,11 @@ class GuidedMissile(Movable):
         pos_target = self.pos_target
 
         if len(messages) != 0:
+            print(f"New target pos: {pos_target}")
             pos_target = messages[0].new_target_coord
 
         if self.__status == 1:
+
             self.updateTarget(pos_target)
             self.updateCoordinate()
             self.checkIsHit()

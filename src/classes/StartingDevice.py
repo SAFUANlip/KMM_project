@@ -13,7 +13,7 @@ from src.messages.Messages import NoMissiles, MissileStarted
 
 # класс ПУ
 class StartingDevice(Simulated):
-    def __init__(self, dispatcher: ModelDispatcher, ID: int, pos: np.array([int, int, int]), aero_env: AeroEnv) -> None:
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, pos: np.array([float, float, float]), aero_env: AeroEnv) -> None:
         super().__init__(dispatcher, ID, pos)
         self.aeroenv = aero_env
         self.missiles = [GuidedMissile(dispatcher, self._ID * 1000 + i, self.pos) for i in range(NUMBER_OF_MISSILES)]
