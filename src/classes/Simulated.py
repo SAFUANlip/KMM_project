@@ -25,7 +25,7 @@ class Simulated(metaclass=ABCMeta):
         self.__dispatcher = dispatcher
         self._ID = ID
         self._simulating_tick: float = dispatcher.getSimulatingTick()
-        self._pos = pos
+        self.pos = pos
 
     @abstractmethod
     def runSimulationStep(self, time: float) -> None:

@@ -29,7 +29,7 @@ class Airplane(Movable):
 
     def runSimulationStep(self, t: int = 1) -> None:
         # print(self.pos, self.vel)
-        self._pos = self._pos + self.vel
+        self._pos = self.pos + self.vel
 
 
 class Helicopter(Airplane):
