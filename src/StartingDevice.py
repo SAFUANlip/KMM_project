@@ -1,5 +1,6 @@
 from src.Simulated import Simulated
 from src.BaseMessage import BaseMessage
+from src.AeroEnv import AeroEnv
 
 NUMBER_OF_MISSILES = 50
 # имитация классов цели и ЗУР
@@ -12,7 +13,7 @@ class GuidedMissile:
         self.z = z
         self.status = status    # 0 - не запущено, 1 - летит, 2 - убилась
 
-    def start(self, x: int, y: int, z: int, status: int = 1):
+    def launch(self, x: int, y: int, z: int, status: int = 1):
         self.x_aim = x
         self.y_aim = y
         self.z_aim = z
@@ -28,14 +29,16 @@ class GuidedMissile:
 #ответное сообщение для пбу
 class MissileStarted(BaseMessage):
 
-    def __init__(self, priority: int, time: int, sender_ID: int, receiver_ID: int, id_missile: int) -> None:
-        super(MissileStarted, self).__init__(6001, priority, time, sender_ID, receiver_ID)
+    def __init__(self, time: int, sender_ID: int, receiver_ID: int, id_missile: int, order: int) -> None:
+        super(MissileStarted, self).__init__(6001, 0, time, sender_ID, receiver_ID, order)
         self.id_missile = id_missile
+        self.order = order
 
 class NoMissiles(BaseMessage):
 
-    def __init__(self, priority: int, time: int, sender_ID: int, receiver_ID: int) -> None:
-        super(NoMissiles, self).__init__(6002, priority, time, sender_ID, receiver_ID)
+    def __init__(self, time: int, sender_ID: int, receiver_ID: int, order: int) -> None:
+        super(NoMissiles, self).__init__(6002, 0, time, sender_ID, receiver_ID, order)
+        self.order = order
 
 # класс ПУ
 class StartingDevice(Simulated):
@@ -47,11 +50,12 @@ class StartingDevice(Simulated):
     y: int
     z: int
 
-    def __init__(self, ID: int, x: int, y: int, z: int, missiles: list) -> None:
+    def __init__(self, ID: int, x: int, y: int, z: int, aero_env: AeroEnv) -> None:
         super().__init__(ID=ID)
         self.x = x
         self.y = y
         self.z = z
+        self.aeroenv = AeroEnv
         self.missiles = [GuidedMissile(self.x, self.y, self.z, self.ID * 1000 + i) for i in range(NUMBER_OF_MISSILES)]
 
     # проверяем статусы зур, заполняем список убивших цель и неактивных
@@ -78,14 +82,14 @@ class StartingDevice(Simulated):
             # проверка наличия свободных зур
             if (len(free_missiles) == 0):
                 # если нет - сигналим
-                Simulated._sendMessage(NoMissiles(msg.priority, msg.time, self.ID, msg.sender_ID)) # если нет - сигналим
+                Simulated._sendMessage(NoMissiles(time, self.ID, msg.sender_ID, msg.order)) # если нет - сигналим
             else:
                 # если есть - запускаем
-                self.missiles[free_missiles[0]].start(msg.x, msg.y, msg.z, time)
+                self.missiles[free_missiles[0]].launch(msg.x, msg.y, msg.z, time)
                 #пишу пбу
-                Simulated._sendMessage(MissileStarted(msg.priority, msg.time, self.ID, msg.sender_ID, self.missiles[free_missiles[0]].ID))
+                Simulated._sendMessage(MissileStarted(time, self.ID, msg.sender_ID, self.missiles[free_missiles[0]].ID, msg.order))
                 # обновляем во
-
+                self.aeroenv.addEntity(free_missiles[0])
                 #удаляем зур
                 free_missiles.pop(0)
 
