@@ -46,7 +46,7 @@ class CCMissile:
         self.speed_mod = GuidedMissile_SPEED
         self.upd_time = time
 
-    def upd_coord(self, new_coord:float, time: float) -> None:
+    def upd_coord(self, new_coord: float, time: float) -> None:
         """
         Функция для обновления координаты ЗУР
         :param new_coord: новая координата ЗУР
