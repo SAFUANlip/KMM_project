@@ -5,6 +5,7 @@ from src.classes.Simulated import Simulated
 from copy import deepcopy
 
 class ModelDispatcher:
+
     """ Класс диспетчера моделей. Синхронизирует моделирование всех моделей
     и обеспечивает обмен сообщениями между моделями
     :atrib __objects: массив моделей
@@ -90,3 +91,4 @@ class ModelDispatcher:
         :return: количество шагов моделирования в секунду; массив сообщений, разделённый по итерациям
         """
         return self.__simulating_rate, deepcopy(self.__messages)
+
