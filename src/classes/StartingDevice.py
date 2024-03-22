@@ -1,14 +1,13 @@
-import typing
+from typing import List, Tuple
+
 import numpy as np
 
-from typing import List, Tuple
 from config.constants import NUMBER_OF_MISSILES
 from src.classes.AeroEnv import AeroEnv
 from src.classes.GuidedMissile import GuidedMissile
 from src.classes.ModelDispatcher import ModelDispatcher
 from src.classes.Simulated import Simulated
 from src.messages.Messages import NoMissiles, MissileStarted
-
 
 
 # класс ПУ
@@ -27,7 +26,7 @@ class StartingDevice(Simulated):
             status = self.missiles[i].getStatus()
             if status == 0:
                 free_missiles.append(self.missiles[i])
-            elif status == 2:
+            elif status == 2 or status == 3:
                 killed_missiles.append(self.missiles[i])
 
         return free_missiles, killed_missiles
