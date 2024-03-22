@@ -1,6 +1,9 @@
 from src.classes.Simulated import Simulated
 from src.classes.Vector import Vector
 
+from src.classes.Movable import Movable
+
+
 class AeroEnv(Simulated):
     def __init__(self, dispatcher, ID: int) -> None:
         super().__init__(dispatcher, ID, None)
@@ -18,18 +21,15 @@ class AeroEnv(Simulated):
         self.entities.append(entity)
 
 
-class Airplane(Simulated):
+class Airplane(Movable):
     def __init__(self, dispatcher, ID: int, pos: Vector, vel: Vector) -> None:
-        super().__init__(dispatcher, ID, pos)
-        self.x, self.y, self.z = pos[0], pos[1], pos[2]
-        # self.pos = pos
+        super().__init__(dispatcher, ID, pos, vel)
         self.vel = vel
         self.type_id = 1
 
     def runSimulationStep(self, t: int = 1) -> None:
         # print(self.pos, self.vel)
-
-        self.pos = self.pos + self.vel
+        self._pos = self.pos + self.vel
 
 
 class Helicopter(Airplane):

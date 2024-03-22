@@ -14,11 +14,13 @@ class Radar2CombatControlMsg(BaseMessage):
         super().__init__(2001, 1, time, sender_ID, receiver_ID)
         self.visible_objects = visible_objects
 
+
 class CombatControl2StartingDeviceMsg(BaseMessage):
     def __init__(self, time: int, sender_ID: int, receiver_ID: int, order: int, coord: np.array) -> None:
         super(CombatControl2StartingDeviceMsg, self).__init__(3001, 1, time, sender_ID, receiver_ID)
         self.order = order
         self.coord = coord
+
 
 #ответное сообщение для пбу
 class MissileStarted(BaseMessage):
@@ -28,14 +30,16 @@ class MissileStarted(BaseMessage):
         self.id_missile = id_missile
         self.order = order
 
+
 class NoMissiles(BaseMessage):
 
     def __init__(self, time: int, sender_ID: int, receiver_ID: int, order: int) -> None:
         super(NoMissiles, self).__init__(6002, 0, time, sender_ID, receiver_ID)
         self.order = order
 
+
 class UpdateCoordinateMSG(BaseMessage):
-    def __init__(self, time: int, sender_ID: int, receiver_ID: int, new_target_coord: List[int]) -> None:
+    def __init__(self, time: int, sender_ID: int, receiver_ID: int, new_target_coord: np.array([int, int, int])) -> None:
         """
         :param time:
         :param sender_ID:

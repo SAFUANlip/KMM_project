@@ -2,7 +2,7 @@ import typing
 
 import numpy as np
 
-from config.constants import SPEED_GuidedMissile
+from config.constants import GuidedMissile_SPEED
 from src.messages.Messages import CombatControl2StartingDeviceMsg
 from src.classes.Simulated import Simulated, ModelDispatcher
 
@@ -43,7 +43,7 @@ class CCMissile:
         self.coord = missile_coord
         self.target_coord = target_coord
         self.id = missile_id
-        self.speed_mod = SPEED_GuidedMissile
+        self.speed_mod = GuidedMissile_SPEED
         self.upd_time = time
 
     def upd_coord(self, new_coord:float, time: float) -> None:
@@ -71,9 +71,10 @@ class CCMissile:
         """
         self.target_coord = new_target_coord
 
+
 class CombatControlPoint(Simulated):
-    def __init__(self, dispatcher: ModelDispatcher, ID: int, pos):
-        super().__init__(dispatcher, ID, pos)
+    def __init__(self, dispatcher: ModelDispatcher, ID: int):
+        super().__init__(dispatcher, ID, None)
         self.all_id = {}
         self.target_list = []
         self.missile_list = []
@@ -153,7 +154,6 @@ class CombatControlPoint(Simulated):
         else:
             # получить id  ЗУР, которые ПУ отправила
             msgsFromStartingDevice = self._checkAvailableMessagesByType(6001)
-            print("aa", msgsFromStartingDevice)
 
             if len(msgsFromStartingDevice) > 0:
                 if not isinstance(msgsFromStartingDevice, list):
@@ -162,9 +162,10 @@ class CombatControlPoint(Simulated):
                 # дальше надо соотнести id ЗУР, координаты ЗУР и координаты их Целей
                 for msgFromStartingDevice in msgsFromStartingDevice:
 
-                    missile_id = msgFromStartingDevice.missile_id
+                    missile_id = msgFromStartingDevice.id_missile
                     startingDevice_id = msgFromStartingDevice.sender_ID
-                    missile_coord = self.StartingDevices_coords[startingDevice_id]
+                    # missile_coord = self.StartingDevices_coords[startingDevice_id]# TODO: Богдан
+                    missile_coord = (100,100,100)
 
                     target_num_list = msgFromStartingDevice.order
 
@@ -194,18 +195,13 @@ class CombatControlPoint(Simulated):
                         self.target_list[idx].upd_coord(obj_coord, time)
                         self.target_list[idx].upd_speed_mod(obj_speed_mod, time)
 
-                        print("I am here!")
                         for i in range(len(self.missile_list)):
                             missile = self.missile_list[i]
                             if missile.target_coord == old_target_coord:
                                 self.missile_list[i].upd_target_coord(obj_coord)
-                                print("found!")
                                 break
 
-
                         print(sim_obj, self.target_list[idx])
-
-
 
                     elif obj_type == 2: # old missile, have to upd fields in missile list
                         idx = self.missile_list.index(sim_obj)
