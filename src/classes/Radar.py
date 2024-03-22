@@ -7,8 +7,7 @@ from src.classes.AeroEnv import AeroEnv
 class RadarRound(Simulated):
     def __init__(self, dispatcher, ID: int, cp_ID: int, aero_env: AeroEnv,
                  pos: tuple, pan_start, tilt_start, view_distance: int,
-                 pan_per_sec: float, tilt_per_sec: float, pan_cur: float,
-                 tilt_cur: float):
+                 pan_per_sec: float, tilt_per_sec: float):
         """ Класс, описывающий работу РЛС кругового типа обзора, является родительским классом
          для РЛС секторного типа обзора:
          :param pos: координаты положения РЛС, относительно глобальной СК (x, y, z)
@@ -38,7 +37,7 @@ class RadarRound(Simulated):
         for obj in all_objects:
             r = np.linalg.norm(obj.pos - self.pos)
             if r < self.view_distance:
-                x, y, z = obj.x, obj.y, obj.z
+                x, y, z = obj.pos
                 tilt = np.arcsin(z/r) - self.tilt_start
                 pan = np.arcsin(y/(r*np.cos(tilt))) - self.pan_start
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
