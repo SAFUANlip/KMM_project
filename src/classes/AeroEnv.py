@@ -14,10 +14,10 @@ class AeroEnv(Simulated):
 
     def runSimulationStep(self, t: float = 1) -> None:
         for entity in self.getEntities():
+
             entity.runSimulationStep(t)
 
     def addEntity(self, entity):
-        print("ent", entity)
         self.entities.append(entity)
 
     def explosion(self, pos, expl_rad):
@@ -32,7 +32,8 @@ class Airplane(Movable):
 
     def runSimulationStep(self, t: int = 1) -> None:
         # print(self.pos, self.vel)
-        self._pos = self.pos + self.vel
+
+        self.pos = self.pos + self.vel
 
 
 class Helicopter(Airplane):
@@ -50,7 +51,5 @@ if __name__ == "__main__":
 
     env = AeroEnv(None, len(targets))
     for el in targets:
-        print(el.type_id)
         env.addEntity(el)
 
-    print(env.getEntities())
