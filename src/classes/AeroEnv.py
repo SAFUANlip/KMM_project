@@ -20,6 +20,9 @@ class AeroEnv(Simulated):
     def addEntity(self, entity):
         self.entities.append(entity)
 
+    def explosion(self, pos, expl_rad):
+        pass
+
 
 class Airplane(Movable):
     def __init__(self, dispatcher, ID: int, pos: Vector, vel: Vector) -> None:
