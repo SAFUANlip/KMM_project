@@ -2,11 +2,12 @@ import numpy as np
 from src.messages.Messages import Radar2CombatControlMsg
 from src.classes.Simulated import Simulated
 from src.classes.AeroEnv import AeroEnv
-from config.constants import SPEED_GuidedMissile, MAX_DIST_ERROR
+from config.constants import MAX_DIST_ERROR
+
 
 class RadarRound(Simulated):
     def __init__(self, dispatcher, ID: int, cp_ID: int, aero_env: AeroEnv,
-                 coordinates: tuple, pan_start, tilt_start, view_distance: int,
+                 pos: tuple, pan_start, tilt_start, view_distance: int,
                  pan_per_sec: float, tilt_per_sec: float, pan_cur: float,
                  tilt_cur: float):
         """ Класс, описывающий работу РЛС кругового типа обзора, является родительским классом
@@ -22,7 +23,7 @@ class RadarRound(Simulated):
         super().__init__(dispatcher, ID)
         self.cp_ID = cp_ID
         self.aero_env = aero_env
-        self.coordinates = coordinates
+        self.pos = pos
         self.pan_start = pan_start
         self.tilt_start = tilt_start
         self.view_distance = view_distance
@@ -35,16 +36,19 @@ class RadarRound(Simulated):
         all_objects = self.aero_env.getEntities()
         visible_objects = []
         for obj in all_objects:
-            r = np.linalg.norm(np.array([obj.x, obj.y, obj.z]) - self.coordinates) #FIXME: pos? x y z?
+            r = np.linalg.norm(obj.pos - self.pos)
             if r < self.view_distance:
                 x, y, z = obj.x, obj.y, obj.z
                 tilt = np.arcsin(z/r) - self.tilt_start
                 pan = np.arcsin(y/(r*np.cos(tilt))) - self.pan_start
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
-                    pos = np.array([obj.x, obj.y, obj.z]) + np.random.randint(-MAX_DIST_ERROR, MAX_DIST_ERROR, size=3)
-                    speed_direction = obj.vel + np.random.randint(-0.001*SPEED_GuidedMissile, 0.001*SPEED_GuidedMissile, size=3)
-                    speed_modul = np.linalg.norm(speed_direction)
-                    visible_objects.append([pos, speed_direction, speed_modul])
+                    pos = obj.pos + np.random.randint(-MAX_DIST_ERROR, MAX_DIST_ERROR, size=3)
+
+                    speed = np.linalg.norm(obj.vel)
+                    velocity_from_radar = obj.vel + np.random.randint(-0.001*speed, 0.001*speed, size=3)
+                    speed_from_radar = np.linalg.norm(velocity_from_radar)
+
+                    visible_objects.append([pos, velocity_from_radar, speed_from_radar])
         return visible_objects
 
     def runSimulationStep(self, time: int):
@@ -58,11 +62,11 @@ class RadarRound(Simulated):
 
 
 class RadarSector(RadarRound):
-    def __init__(self, coords, dist, pan_angle, tilt_angle, pan_sec, tilt_sec, pan_cur, tilt_cur):
+    def __init__(self, pos, dist, pan_angle, tilt_angle, pan_sec, tilt_sec, pan_cur, tilt_cur):
         """ Класс, описывающий работу РЛС секторного обзора, является дочерним классом от РЛС кругового обзора:
          :param pan_angle: максимальный угол раскрыва по азимуту
          :param tilt_angle: максимальный угол раскрыва по углу наклона"""
-        super().__init__(coords, dist, pan_sec, tilt_sec, pan_cur, tilt_cur)
+        super().__init__(pos, dist, pan_sec, tilt_sec, pan_cur, tilt_cur)
         self.pan_angle = pan_angle
         self.tilt_angle = tilt_angle
 
