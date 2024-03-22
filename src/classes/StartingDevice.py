@@ -44,11 +44,9 @@ class StartingDevice(Simulated):
                 # если нет - сигналим
                 self._sendMessage(NoMissiles(time, self._ID, msg.sender_ID, msg.order)) # если нет - сигналим
             else:
-                print(msg.coord)
                 # если есть - запускаем
                 free_missiles[0].launch(msg.coord, time)
                 #пишу пбу
-                print("here")
                 self._sendMessage(MissileStarted(time, self._ID, msg.sender_ID, free_missiles[0]._ID, msg.order))
 
                 # обновляем во
@@ -58,4 +56,4 @@ class StartingDevice(Simulated):
 
         #удаляем мёртвые зур
         for ind in killed_missiles:
-            self.missiles.pop(ind)
+            self.missiles.remove(ind)
