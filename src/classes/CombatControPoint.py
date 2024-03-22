@@ -2,7 +2,7 @@ import typing
 
 import numpy as np
 
-from config.constants import SPEED_GuidedMissile
+from config.constants import GuidedMissile_SPEED
 from src.messages.Messages import CombatControl2StartingDeviceMsg
 from src.classes.Simulated import Simulated, ModelDispatcher
 
@@ -43,7 +43,7 @@ class CCMissile:
         self.coord = missile_coord
         self.target_coord = target_coord
         self.id = missile_id
-        self.speed_mod = SPEED_GuidedMissile
+        self.speed_mod = GuidedMissile_SPEED
         self.upd_time = time
 
     def upd_coord(self, new_coord:float, time: float) -> None:
@@ -71,9 +71,10 @@ class CCMissile:
         """
         self.target_coord = new_target_coord
 
+
 class CombatControlPoint(Simulated):
     def __init__(self, dispatcher: ModelDispatcher, ID: int):
-        super().__init__(dispatcher, ID)
+        super().__init__(dispatcher, ID, None)
         self.all_id = {}
         self.target_list = []
         self.missile_list = []
