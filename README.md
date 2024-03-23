@@ -33,7 +33,7 @@
   
 - config/ конфиг
 
-[Ссылка на YouTrack, где распредены все задачи по ходу проекта](https://km-pgithubroject.youtrack.cloud/agiles/160-2/current)
+[Ссылка на YouTrack, где распределены все задачи по ходу проекта](https://km-pgithubroject.youtrack.cloud/agiles/160-2/current)
 
 ## РЛС
 В РЛС кругового типа обзор происходит по винтовой траектории:
