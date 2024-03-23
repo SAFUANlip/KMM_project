@@ -10,12 +10,12 @@ from src.classes.StartingDevice import StartingDevice
 if __name__ == '__main__':
     dispatcher = ModelDispatcher()
     dispatcher.setSimulatingRate(1)
-    dispatcher.setSimulationTime(10)
+    dispatcher.setSimulationTime(25)
 
     n = 2
     targets = [Airplane(dispatcher=dispatcher, ID=1000+i,
-                       pos=np.array([randint(-1000, 1000)]*3), # np.array([6000, 5000, 7000]
-                       vel=np.array([randint(-100, 100)]*3)) for i in range(n)]
+                       pos=np.array([randint(-100000, 100000)]*3), # np.array([6000, 5000, 7000]
+                       vel=np.array([randint(-300, 300)]*3)) for i in range(n)]
     env = AeroEnv(dispatcher, len(targets))
     for el in targets:
         env.addEntity(el)

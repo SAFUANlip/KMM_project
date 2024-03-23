@@ -5,6 +5,7 @@ from src.classes.Movable import Movable
 from src.messages.BaseMessage import BaseMessage
 from config.constants import (MSG_CCP2GM_type, GuidedMissile_SPEED,
                               GuidedMissile_LifeTime, GuidedMissile_ExplRadius, GuidedMissile_MaxRotAngle)
+from src.utils.logger import logger
 
 
 def unit_vector(vector):
@@ -64,7 +65,7 @@ class GuidedMissile(Movable):
         self.launch_time = launch_time
         self.__previous_time = launch_time
         self.__status = 1
-        # print(f"Base target pos: {self.pos_target}, Base Guide missile pos: {self.pos}")
+        logger.guided_missile(f"Запуск. ЗУР ID: {self._ID}, начальная позиция: {self.pos}, начальная позиция цели: {self.pos_target}")
         
     def updateTarget(self, pos_target: np.array) -> None:
         """
@@ -80,11 +81,16 @@ class GuidedMissile(Movable):
         """
         vel_old = self.vel.copy()
         self.vel = (self.pos_target - self.pos) / np.linalg.norm(self.pos_target - self.pos) * self.speed
-        # print(angle_between(self.vel, vel_old), self.vel, self._simulating_tick)
         if angle_between(self.vel, vel_old) > GuidedMissile_MaxRotAngle:
-            # print("too big angle")
+            logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos},"
+                                  f" корректировка большого угла поворота {round(np.rad2deg(angle_between(self.vel, vel_old)),2)}°")
             self.vel = (self.vel + vel_old) / np.linalg.norm(self.vel + vel_old) * self.speed
-        self.pos = self.pos + self.vel*self._simulating_tick
+
+        dist2target = np.linalg.norm(self.pos_target - self.pos)
+        if dist2target < np.linalg.norm(self.vel*self._simulating_tick):
+            self.pos = self.pos + self.vel * (dist2target)/np.linalg.norm(self.vel)
+        else:
+            self.pos = self.pos + self.vel*self._simulating_tick
 
     def checkIsHit(self):
         """
@@ -92,7 +98,7 @@ class GuidedMissile(Movable):
         """
         if (((self.pos - self.pos_target) ** 2).sum())**0.5 < self.expl_radius:
             self.__status = 2
-        print(f"Distance to target {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}")
+        logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}")
 
     def getStatus(self):
         """
@@ -117,27 +123,27 @@ class GuidedMissile(Movable):
         pos_target = self.pos_target
 
         if len(messages) != 0:
-
-            print(f"New target pos: {pos_target}")
-
             pos_target = messages[0].new_target_coord
-            print(f"ЗУР получила сообщение, новые координаты: {pos_target}")
+            logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от ПБУ, новые координаты цели: {pos_target}")
+
 
         if self.__status == 1:
-
             self.updateTarget(pos_target)
             self.updateCoordinate()
             self.checkIsHit()
             if self.__status == 2:
-                print(f"HIT Target: {self.pos_target[0]}, {self.pos_target[1]}, {self.pos_target[2]}, is hit by Rocket with ID {self._ID}")
+                logger.guided_missile(
+                    f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, поразила цель с координатами: {self.pos_target}")
                 self.aero_env.explosion(self.pos, self.expl_radius)
             elif time - self.launch_time > self.life_time:
                 self.__status = 3
                 self.aero_env.explosion(self.pos, self.expl_radius)
-                print(f"MISS Target: {self.pos_target[0]}, {self.pos_target[1]}, {self.pos_target[2]}, is miss, Rocket with ID {self._ID} fell")
+                logger.guided_missile(
+                    f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, пропустила цель с координатами: {self.pos_target}"
+                    f"Кончилось топливо")
 
         if self.__status > 1:
-            print(f"Rocket with ID {self._ID} was destroyed, with status: {self.__status}")
+            logger.guided_missile(
+                f"ЗУР ID: {self._ID} прекратила существоавние из-за {"поражения цели" if self.__status == 2 else "нехватки топлива"}")
 
         self.__previous_time = time
-        #print(f"ID: {self._ID}, Rokcet coordinate {self.x}, {self.y}, {self.z}")
