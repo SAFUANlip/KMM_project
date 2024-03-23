@@ -4,6 +4,8 @@ from src.messages.BaseMessage import BaseMessage
 from src.classes.Simulated import Simulated
 from copy import deepcopy
 
+from src.utils.logger import logger
+
 
 class ModelDispatcher:
   
@@ -57,6 +59,8 @@ class ModelDispatcher:
         """ Запуск моделирования)) """
         simulating_steps_number = floor(self.__simulation_time * self.__simulating_rate)
         while self.__current_step < simulating_steps_number:
+            logger.info("\n")
+            logger.info(f"Номер текущего шага: {self.__current_step}")
             self.__messages.append(list())
             current_time = self.__current_step / self.__simulating_rate
             for object in self.__objects:

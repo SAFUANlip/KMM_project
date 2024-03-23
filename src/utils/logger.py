@@ -1,5 +1,6 @@
 import logging
 
+
 class CustomFormatter(logging.Formatter):
     logging.COMBAT_CONTROL = 22  # between WARNING and INFO
     logging.addLevelName(logging.COMBAT_CONTROL, 'COMBAT_CONTROL')
@@ -24,7 +25,7 @@ class CustomFormatter(logging.Formatter):
     yellow = '\x1b[33;1m'
     purple = '\x1b[35;1m'
     blue = '\x1b[34;1m'
-    green =  '\x1b[32;1m'
+    green = '\x1b[32;1m'
     white = "\x1b[39;1m"
     red = "\x1b[31;20m"
     reset = "\x1b[0m"
