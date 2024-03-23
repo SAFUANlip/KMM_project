@@ -74,12 +74,12 @@ class CCMissile:
 
 
 class CombatControlPoint(Simulated):
-    def __init__(self, dispatcher: ModelDispatcher, ID: int):
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, StartingDevices_coords):
         super().__init__(dispatcher, ID, None)
         self.all_id = {}
         self.target_list = []
         self.missile_list = []
-        self.StartingDevices_coords = {2000:(100,100,100)}
+        self.StartingDevices_coords = StartingDevices_coords
 
     def find_most_similar(self, visible_object: list, cur_time: float) -> typing.Tuple[
         int, typing.Union[CCMissile, CCTarget]]:
