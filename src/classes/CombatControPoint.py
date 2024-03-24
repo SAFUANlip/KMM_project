@@ -77,7 +77,7 @@ class CombatControlPoint(Simulated):
     def __init__(self, dispatcher: ModelDispatcher, ID: int):
         super().__init__(dispatcher, ID, None)
         self.all_id = {}
-        self.target_list = []
+        self.target_list = [CCTarget((10,10,10), (100,100,100), 43, 0.5)]
         self.missile_list = []
         self.StartingDevices_coords = {2000:(100,100,100)}
 
@@ -186,12 +186,21 @@ class CombatControlPoint(Simulated):
                 visible_objects = msg.visible_objects
                 for visible_object in visible_objects:
                     obj_coord = visible_object[0]
+                    obj_speed_direct = visible_object[1]
                     obj_speed_mod = visible_object[2]
 
                     obj_type, sim_obj = self.find_most_similar(visible_object, time)
                     if obj_type == 0:
-                        # new target
-                        pass
+                        self.target_list.append(CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time))
+                        # положить в память новые цели
+                        # FIXME id of ПУ is not 2000
+                        msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
+                                                                             self._ID, 2000, len(self.target_list) - 1,
+                                                                             obj_coord)
+
+                        logger.combat_control("ПБУ отправила ПУ координаты новой цели")
+                        self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
+                        # ЗУР по координатам coord
 
                     elif obj_type == 1:  # старая цель, надо обновить данные о ней в листах
                         # target list и missiles list и после этого ЗУР, которая летит за ней,
