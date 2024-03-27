@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from config.constants import MSG_CCP2GM_type
+from config.constants import MSG_CCP2GM_type, MSG_CCP2DRAWER_type
 from src.messages.BaseMessage import BaseMessage
 
 
@@ -49,3 +49,9 @@ class CombatControl2MissileMsg(BaseMessage):
         """
         super(CombatControl2MissileMsg, self).__init__(MSG_CCP2GM_type, 10, time, sender_ID, receiver_ID)
         self.new_target_coord = new_target_coord
+
+
+class CombatControl2DrawerMsg(BaseMessage):
+    def init(self, time: int, sender_ID: int, receiver_ID: int, coordinates) -> None:
+        super(CombatControl2DrawerMsg, self).init(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
+        self.coordinates = coordinates

@@ -2,8 +2,8 @@ import typing
 
 import numpy as np
 
-from config.constants import GuidedMissile_SPEED
-from src.messages.Messages import CombatControl2StartingDeviceMsg, CombatControl2MissileMsg
+from config.constants import GuidedMissile_SPEED, TARGET_TYPE_DRAWER, MISSILE_TYPE_DRAWER
+from src.messages.Messages import CombatControl2StartingDeviceMsg, CombatControl2MissileMsg, CombatControl2DrawerMsg
 from src.classes.Simulated import Simulated, ModelDispatcher
 
 from src.utils.logger import logger
@@ -77,7 +77,7 @@ class CombatControlPoint(Simulated):
     def __init__(self, dispatcher: ModelDispatcher, ID: int, StartingDevices_coords):
         super().__init__(dispatcher, ID, None)
         self.all_id = {}
-        self.target_list = [CCTarget((10,10,10), (100,100,100), 43, 0.5)]
+        self.target_list = []
         self.missile_list = []
         self.StartingDevices_coords = StartingDevices_coords
 
@@ -134,11 +134,16 @@ class CombatControlPoint(Simulated):
         :param time: текущее время
         """
         msgFromRadar = self._checkAvailableMessagesByType(2001)
-        if len(msgFromRadar) == 0:
+
+        list_for_drawer = []
+
+        if len(msgFromRadar) == 0 or len(msgFromRadar[0].visible_objects) == 0:
             return
 
         logger.combat_control(f"ПБУ получила от МФР {len(msgFromRadar[0].visible_objects)} объектов")
+
         if len(self.target_list) == 0:  # начало программы, когда на поле только цели
+
             for msg in msgFromRadar:
                 visible_objects = msg.visible_objects
                 for visible_object in visible_objects:
@@ -152,11 +157,13 @@ class CombatControlPoint(Simulated):
                     msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
                                                                          self._ID, 2000, len(self.target_list) - 1,
                                                                          coord)
+                    list_for_drawer.append([TARGET_TYPE_DRAWER, coord])
 
                     logger.combat_control("ПБУ отправила ПУ координаты новой цели")
                     self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
                     # ЗУР по координатам coord
         else:
+
             # получить id  ЗУР, которые ПУ отправила
             msgsFromStartingDevice = self._checkAvailableMessagesByType(6001)
 
@@ -170,7 +177,6 @@ class CombatControlPoint(Simulated):
 
                     missile_id = msgFromStartingDevice.id_missile
                     startingDevice_id = msgFromStartingDevice.sender_ID
-                    # missile_coord = self.StartingDevices_coords[startingDevice_id]# TODO: Богдан
                     missile_coord = self.StartingDevices_coords[startingDevice_id]
 
                     target_num_list = msgFromStartingDevice.order
@@ -200,12 +206,15 @@ class CombatControlPoint(Simulated):
 
                         logger.combat_control("ПБУ отправила ПУ координаты новой цели")
                         self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
+                        list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
+
                         # ЗУР по координатам coord
 
                     elif obj_type == 1:  # старая цель, надо обновить данные о ней в листах
                         # target list и missiles list и после этого ЗУР, которая летит за ней,
                         # перенаправить
                         idx = self.target_list.index(sim_obj)
+                        list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
 
                         old_target_coord = self.target_list[idx].coord
 
@@ -226,9 +235,15 @@ class CombatControlPoint(Simulated):
                                 break
 
                     elif obj_type == 2:  # old missile, have to upd fields in missile list
+                        list_for_drawer.append([MISSILE_TYPE_DRAWER, obj_coord])
+
                         idx = self.missile_list.index(sim_obj)
                         self.missile_list[idx].upd_coord(obj_coord, time)
                         self.missile_list[idx].upd_speed_mod(obj_speed_mod, time)
+
+        # msg2drawer = CombatControl2DrawerMsg(time, self._ID, ## ,list_for_drawer) : TODO: Алина! Напиши сюда id сообщения, пжлйст
+        # self._sendMessage(msg2drawer)
+
 
 
 

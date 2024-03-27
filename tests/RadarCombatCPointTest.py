@@ -12,9 +12,8 @@ if __name__ == '__main__':
     dispatcher.setSimulationTime(25)
 
     n = 2
-    targets = [Airplane(dispatcher=dispatcher, ID=1000+i,
-                       pos=np.array([randint(-100000, 100000)]*3), # np.array([6000, 5000, 7000]
-                       vel=np.array([randint(-300, 300)]*3)) for i in range(n)]
+    targets = [Airplane(dispatcher=dispatcher, ID=i, pos=np.array([0, 0, 0]), rad=5, vel=np.array([1, 1, 1]),
+                        t_start=0, t_end=10) for i in range(n)]
     env = AeroEnv(dispatcher, len(targets))
     for el in targets:
         env.addEntity(el)
@@ -35,4 +34,3 @@ if __name__ == '__main__':
     #
     #     for message in messages[i]:
     #         print(f"time: {i/rate} ", vars(message))
-
