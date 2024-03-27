@@ -1,5 +1,6 @@
 from src.classes.Simulated import Simulated
 from src.classes.Movable import Movable
+from src.classes.GuidedMissile import GuidedMissile
 
 import numpy as np
 import copy
@@ -18,8 +19,11 @@ class AeroEnv(Simulated):
     def runSimulationStep(self, t: float = 1) -> None:
         alive_entities = []
         for entity in self.unpacked_entities:
-            if entity.t_start <= t < entity.t_end:
-                entity.runSimulationStep(t)
+            if isinstance(entity, Airplane) or isinstance(entity, Helicopter):
+                if entity.t_start <= t < entity.t_end:
+                    entity.runSimulationStep(t)
+                    alive_entities.append(entity)
+            else:
                 alive_entities.append(entity)
         self.entities = alive_entities
 
@@ -34,9 +38,9 @@ class AeroEnv(Simulated):
                 updated_entities.append(el)
             else:
                 # chain reaction
-                # if el.type_id == missle_type_id:
-                #     chain_explosion.append(el.pos())
-                pass
+                if isinstance(el, GuidedMissile):
+                    chain_explosion.append(el.pos())
+
         self.entities = updated_entities
         for pos in chain_explosion:
             self.explosion(pos, expl_rad)
@@ -50,7 +54,8 @@ class AeroEnv(Simulated):
 
 
 class Airplane(Movable):
-    def __init__(self, dispatcher, ID: int, pos: np.array, rad: float, vel: np.array,t_start: float, t_end: float) -> None:
+    def __init__(self, dispatcher, ID: int, pos: np.array, rad: float, vel: np.array,
+                 t_start: float = 0.0, t_end: float = np.inf) -> None:
         super().__init__(dispatcher, ID, pos, vel)
         self.vel = vel
         self.type_id = 1
