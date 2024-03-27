@@ -40,3 +40,4 @@
 ![RadarRound](docs/img_RadarRound.png)
 В РЛС секторного типа обзор происходит по зигзагообразной траектории:
 ![RadarSector](docs/img_RadarSector.png)
+
