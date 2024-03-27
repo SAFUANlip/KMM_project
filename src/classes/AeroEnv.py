@@ -30,7 +30,7 @@ class AeroEnv(Simulated):
         updated_entities = []
         chain_explosion = []
         for el in self.entities:
-            if not (self.dist(pos, el.pos()) - el.rad < expl_rad):
+            if not (self._dist(pos, el.pos()) - el.rad < expl_rad):
                 updated_entities.append(el)
             else:
                 # chain reaction
@@ -45,12 +45,12 @@ class AeroEnv(Simulated):
         return np.linalg.norm(pos1 - pos2)
 
     def all_trajectories(self):
-        return [t.trajectory for t in self.unpacked_entities_entities]
+        return [t.trajectory for t in self.unpacked_entities]
 
 
 
 class Airplane(Movable):
-    def __init__(self, dispatcher, ID: int, pos: np.array, rad: float, vel: np.array, t_start: float, t_end: float) -> None:
+    def __init__(self, dispatcher, ID: int, pos: np.array, rad: float, vel: np.array,t_start: float, t_end: float) -> None:
         super().__init__(dispatcher, ID, pos, vel)
         self.vel = vel
         self.type_id = 1
@@ -60,30 +60,37 @@ class Airplane(Movable):
         self.t_end = t_end
         self.t = t_start
 
-    def runSimulationStep(self, t: int = 1) -> None:
+    def runSimulationStep(self, t: float = 1.0) -> None:
         # print(self.pos, self.vel)
-        self.pos = self.pos + self.vel
+        self.pos = self.pos + self.vel * t
         self.t += self._simulating_tick
         self.trajectory.append((self.pos, self.t))
 
-    def pos(self) -> np.array:
-        return copy.deepcopy(self.pos)
+    # def pos_copy(self) -> np.array:
+    #     return copy.deepcopy(self.pos)
 
 
 class Helicopter(Airplane):
-    def __init__(self, dispatcher, ID: int, pos, vel) -> None:
-        super().__init__(dispatcher, ID, pos, vel)
+    def __init__(self, dispatcher, ID: int, pos, rad, vel, t_start, t_end) -> None:
+        super().__init__(dispatcher, ID, pos, rad, vel, t_start, t_end)
         self.type_id = 2
 
 
 if __name__ == "__main__":
     import random
     n = random.randint(3, 10)
-    targets = [Airplane(dispatcher=None, ID=i, pos=Vector(0, 0, 0), vel=Vector(1, 1, 1))
-               if random.randint(1, 100) % 3 else Helicopter(dispatcher=None, ID=i, pos=Vector(0, 0, 0), vel=Vector(1, 1, 1))
-               for i in range(n)]
+    targets = [
+                Airplane(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), rad=5, vel=np.array([1, 1, 1]),
+                          t_start=0, t_end=10)
+
+                if random.randint(1, 100) % 3 else
+
+                Helicopter(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), rad=5,
+                          vel=np.array([1, 1, 1]),  t_start=0, t_end=10)
+
+                for i in range(n)
+    ]
 
     env = AeroEnv(None, len(targets))
     for el in targets:
         env.addEntity(el)
-
