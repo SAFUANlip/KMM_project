@@ -144,6 +144,6 @@ class GuidedMissile(Movable):
 
         if self.__status > 1:
             logger.guided_missile(
-                f"ЗУР ID: {self._ID} прекратила существоавние из-за {"поражения цели" if self.__status == 2 else "нехватки топлива"}")
+                f"ЗУР ID: {self._ID} прекратила существоавние из-за {'поражения цели' if self.__status == 2 else 'нехватки топлива'}")
 
         self.__previous_time = time
