@@ -126,7 +126,6 @@ class GuidedMissile(Movable):
             pos_target = messages[0].new_target_coord
             logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от ПБУ, новые координаты цели: {pos_target}")
 
-
         if self.__status == 1:
             self.updateTarget(pos_target)
             self.updateCoordinate()
