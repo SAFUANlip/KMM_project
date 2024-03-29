@@ -13,19 +13,23 @@ from PyQt5.QtCore import (Qt, pyqtSignal)
 
 class MainWindow(QMainWindow):
     num_items = 15
-    # signals = []
-    # for i in range(num_items):
-    #     signals.append(pyqtSignal(str, name='itemClicked'))
-    sigAirplane = pyqtSignal(str) # (str, name='itemClicked')
+    sigRadar = pyqtSignal(int)
+    sigMissileLauncher = pyqtSignal(int)
+    sigControlStation = pyqtSignal(int)
+    sigAHelicopter = pyqtSignal(int)
+    sigAirplane = pyqtSignal(int)
 
-    # add necessary signals
 
     def __init__(self):
         super().__init__()
         self.initUI()
 
     def initUI(self):
+        self.sigRadar.connect(self.sigAirplaneHandler)
+        self.sigMissileLauncher.connect(self.sigAirplaneHandler)
+        self.sigControlStation.connect(self.sigAirplaneHandler)
         self.sigAirplane.connect(self.sigAirplaneHandler)
+
 
         self.setWindowTitle("SimulationApp")
         main_widget = QWidget()
@@ -56,25 +60,74 @@ class MainWindow(QMainWindow):
         self.left_traj_widget.hide()
         self.layout.addWidget(self.left_traj_widget)
 
-        #self.right_widget = ObjectsList()
-        #self.right_widget.setElements(self.onListItemButtonClicked)
         self.right_widget = QListWidget()
-        for i in range(self.num_items):
-            item = QListWidgetItem()
-            button = QPushButton(text=f"Item{i}", parent=self)
-            button.clicked.connect(self.onListAirplaneClicked)
 
-            #button.setFixedSize(200, 50)
-            button.setFixedHeight(80)
-            #button.setIcon(QIcon("./images/real_aircraft.png"))
-            button.setIcon(QIcon("./images/aircraft_image.png"))
-            button.setIconSize(button.size())
+        # ------ Radar button --------------------------------------------------
+        item = QListWidgetItem()
+        button = QPushButton(text=f" МФР", parent=self)
+        button.clicked.connect(self.onListRadarClicked)
 
-            button.setFixedHeight(100)
-            item.setSizeHint(button.size())
-            # item.setSizeHint(button.sizeHint())
-            self.right_widget.addItem(item)
-            self.right_widget.setItemWidget(item, button)
+        button.setFixedHeight(80)
+        button.setIcon(QIcon("./images/radar_icon.png"))
+        button.setIconSize(button.size())
+
+        button.setFixedHeight(100)
+        item.setSizeHint(button.size())
+        # item.setSizeHint(button.sizeHint())
+        self.right_widget.addItem(item)
+        self.right_widget.setItemWidget(item, button)
+        # --------------------------------------------------------------------------
+
+        # ------ Control Station button --------------------------------------------------
+        item = QListWidgetItem()
+        button = QPushButton(text=f" ПБУ", parent=self)
+        button.clicked.connect(self.onListControlStationClicked)
+
+        button.setFixedHeight(80)
+        button.setIcon(QIcon("images/control_station_icon.png"))
+        button.setIconSize(button.size())
+
+        button.setFixedHeight(100)
+        item.setSizeHint(button.size())
+        # item.setSizeHint(button.sizeHint())
+        self.right_widget.addItem(item)
+        self.right_widget.setItemWidget(item, button)
+        # --------------------------------------------------------------------------
+
+
+        # ------ Missile Launcher button --------------------------------------------------
+        item = QListWidgetItem()
+        button = QPushButton(text=f" ПУ", parent=self)
+        button.clicked.connect(self.onListMissileLauncherClicked)
+
+        button.setFixedHeight(80)
+        button.setIcon(QIcon("images/missile_launcher_icon.png"))
+        button.setIconSize(button.size())
+
+        button.setFixedHeight(100)
+        item.setSizeHint(button.size())
+        # item.setSizeHint(button.sizeHint())
+        self.right_widget.addItem(item)
+        self.right_widget.setItemWidget(item, button)
+        # --------------------------------------------------------------------------
+
+        # ------ Airplane button --------------------------------------------------
+        item = QListWidgetItem()
+        button = QPushButton(text=f" TС", parent=self)
+        button.clicked.connect(self.onListAirplaneClicked)
+
+        button.setFixedHeight(80)
+        button.setIcon(QIcon("images/aircraft_icon.png"))
+        button.setIconSize(button.size())
+
+        button.setFixedHeight(100)
+        item.setSizeHint(button.size())
+        # item.setSizeHint(button.sizeHint())
+        self.right_widget.addItem(item)
+        self.right_widget.setItemWidget(item, button)
+        # --------------------------------------------------------------------------
+
+
 
         self.layout.addWidget(self.right_widget)
 
@@ -82,7 +135,7 @@ class MainWindow(QMainWindow):
         self.layout.setStretchFactor(self.left_traj_widget, 3)
         self.layout.setStretchFactor(self.right_widget, 1)
 
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 1200, 800)
 
     def changeViewTraj(self):
         action = self.sender()
@@ -100,14 +153,50 @@ class MainWindow(QMainWindow):
         self.left_traj_widget.hide()
         self.left_conf_widget.show()
 
+    def onListRadarClicked(self):
+        button = self.sender()
+        if button:
+            print("List item button clicked:", button.text())
+
+        # change STR on necessary INT
+        self.sigControlStation.emit(2001)
+        print("Signal emitted", button.text())
+
+    def onListControlStationClicked(self):
+        button = self.sender()
+        if button:
+            print("List item button clicked:", button.text())
+
+        # change STR on necessary INT
+        self.sigControlStation.emit(1001)
+        print("Signal emitted", button.text())
+
+    def onListMissileLauncherClicked(self):
+        button = self.sender()
+        if button:
+            print("List item button clicked:", button.text())
+
+        # change STR on necessary INT
+        self.sigMissileLauncher.emit(3001)
+        print("Signal emitted", button.text())
+
     def onListAirplaneClicked(self):
         button = self.sender()
         if button:
             print("List item button clicked:", button.text())
 
         # change STR on necessary INT
-        self.sigAirplane.emit(button.text())
+        self.sigAirplane.emit(4001)
         print("Signal emitted", button.text())
+
+    def sigRadarHandler(self, arg):
+        print("Handler:", arg)
+
+    def sigConstrolStationHandler(self, arg):
+        print("Handler:", arg)
+
+    def sigAMisseleLauncherHandler(self, arg):
+        print("Handler:", arg)
 
     def sigAirplaneHandler(self, arg):
         print("Handler:", arg)
