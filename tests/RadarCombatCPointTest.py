@@ -11,14 +11,14 @@ if __name__ == '__main__':
     dispatcher.setSimulatingRate(1)
     dispatcher.setSimulationTime(25)
 
-    n = 2
-    targets = [Airplane(dispatcher=dispatcher, ID=i, pos=np.array([0, 0, 0]), rad=5, vel=np.array([1, 1, 1]),
-                        t_start=0, t_end=10) for i in range(n)]
+    n = 1
+    targets = [Airplane(dispatcher=dispatcher, ID=i, pos=np.array([10000, 10000, 10000]), rad=5, vel=np.array([100, 100, 100]),
+                        t_start=0, t_end=100) for i in range(n)]
     env = AeroEnv(dispatcher, len(targets))
     for el in targets:
         env.addEntity(el)
 
-    radar = RadarRound(dispatcher, 1, 3000, env, (0, 0, 0), 0, 0, 500000, 360 * np.pi / 180, 180 * np.pi / 180)
+    radar = RadarRound(dispatcher, 1, 3000, env, (0, 0, 0), 0, 0, 500000, 360, 180)
     start_devices = [StartingDevice(dispatcher, 2000, np.array([0, 0, 0]), env)]
     starting_devices_coords = {}
     for sd in start_devices:

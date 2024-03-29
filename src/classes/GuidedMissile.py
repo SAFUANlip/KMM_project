@@ -35,7 +35,8 @@ class GuidedMissile(Movable):
                  pos: np.array, aero_env,
                  speed=GuidedMissile_SPEED,
                  life_time=GuidedMissile_LifeTime,
-                 expl_radius=GuidedMissile_ExplRadius) -> None:
+                 expl_radius=GuidedMissile_ExplRadius,
+                 rad=2.0) -> None:
         """
         :param dispatcher: диспетчер, для синхронизации с другими модулями
         :param ID: ID этой ракеты
@@ -43,8 +44,9 @@ class GuidedMissile(Movable):
         :param speed:
         :param life_time: возможное время жизни ракеты
         :param expl_radius: радиус взрыва ракеты
+        :param rad: характерный рамзер ракеты
         """
-        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None)
+        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None, rad)
         self.aero_env = aero_env
         self.speed = speed
         self.pos_target = None
@@ -61,7 +63,7 @@ class GuidedMissile(Movable):
         :param launch_time: время запуска
         """
         self.pos_target = pos_target
-        self.vel = (self.pos_target - self.pos) / np.linalg.norm(self.pos_target - self.pos) * self.speed
+        self.vel = (self.pos_target - self.pos) / (np.linalg.norm(self.pos_target - self.pos) + 0.0000001) * self.speed
         self.launch_time = launch_time
         self.__previous_time = launch_time
         self.__status = 1
@@ -117,10 +119,13 @@ class GuidedMissile(Movable):
         MSG_CCP2GM_type, сообщения корректирующие положение цели
         :param time: текущее время в симуляции
         """
+        #logger.guided_missile(f"жду сообщения типа {MSG_CCP2GM_type}")
         messages = self._checkAvailableMessagesByType(msg_type=MSG_CCP2GM_type)
         messages.sort(key=lambda x: x.priority, reverse=True)
 
         pos_target = self.pos_target
+
+        #logger.guided_missile(f"ЗУР ID: {self._ID}, получила сообщение от ПБУ, столько сообщение: {len(messages)}")
 
         if len(messages) != 0:
             pos_target = messages[0].new_target_coord
