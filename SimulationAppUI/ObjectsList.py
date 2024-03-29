@@ -17,7 +17,7 @@
 #             button = QPushButton(text=f"Item{i}", parent=self)
 #             button.clicked.connect(func)
 #
-#             button.setIcon(QIcon("./images/aircraft_image.png"))
+#             button.setIcon(QIcon("./images/aircraft_icon.png"))
 #
 #             item.setSizeHint(button.sizeHint())
 #             self.addItem(item)
