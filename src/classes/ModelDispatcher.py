@@ -4,8 +4,11 @@ from src.messages.BaseMessage import BaseMessage
 from src.classes.Simulated import Simulated
 from copy import deepcopy
 
-class ModelDispatcher:
+from src.utils.logger import logger
 
+
+class ModelDispatcher:
+  
     """ Класс диспетчера моделей. Синхронизирует моделирование всех моделей
     и обеспечивает обмен сообщениями между моделями
     :atrib __objects: массив моделей
@@ -14,7 +17,7 @@ class ModelDispatcher:
     :atrib __simulating_rate: количество шагов моделирования в секунду(скорость моделирования)
     :atrib __simulation_time: время моделирования конфигурации моделей
     """
-
+    
     def __init__(self, objects: List[Simulated] = list(),
                  simulating_rate: float = 1, simulation_time: float = 100) -> None:
         """ Класс диспетчера моделей
@@ -56,6 +59,8 @@ class ModelDispatcher:
         """ Запуск моделирования)) """
         simulating_steps_number = floor(self.__simulation_time * self.__simulating_rate)
         while self.__current_step < simulating_steps_number:
+            logger.info("\n")
+            logger.info(f"Номер текущего шага: {self.__current_step}")
             self.__messages.append(list())
             current_time = self.__current_step / self.__simulating_rate
             for object in self.__objects:
