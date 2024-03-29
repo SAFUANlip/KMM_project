@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsObject, QAction, QMenu
 from PyQt5.QtCore import  Qt, QLineF, QPointF, QRectF, QObject, pyqtSignal
-
+from PyQt5.QtGui import QColor
 
 class SimpleGraphicComponent(QGraphicsObject):
 
@@ -47,9 +47,19 @@ class SimpleGraphicComponent(QGraphicsObject):
 class RadarGraphicComponent(SimpleGraphicComponent):
     def __init__(self, pixmap, start_drag_distance, parent = None):
         super(RadarGraphicComponent, self).__init__(pixmap, start_drag_distance, parent)
-        self.radius = 10
-        self.arc_len = 20
-        self.direction = 30
+        self.radiusx = 0
+        self.radiusy = 0
+        self.arc_len = 0
+        self.direction = 0
+        self.is_round = True
 
     def paint(self, painter, option, widget):
+        if self.is_round:
+            painter.setBrush(QColor(0,0,255,10))
+            painter.drawEllipse(QPointF(0, 0), self.radiusx, self.radiusy)
+            painter.setBrush(Qt.NoBrush)
+        painter.setPen(Qt.red)
+        painter.drawPie(-self.radiusx, -self.radiusy, 2*self.radiusx, 2*self.radiusy,
+                        self.direction*16, self.arc_len*16)
+        painter.setPen(Qt.black)
         super().paint(painter, option, widget)

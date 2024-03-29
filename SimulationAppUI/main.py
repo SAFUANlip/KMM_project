@@ -1,11 +1,13 @@
 import sys
+import pathlib
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QToolBar, QListWidget, QTextEdit,
                              QAction)
 
 from PyQt5.QtWidgets import QPushButton, QListWidgetItem
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap
 
+from ConfigureView.ConfiguratingViewport import ConfiguratingViewport
 from TrajectoryViews import TrajectoryViews
 #from ObjectsList import ObjectsList
 from PyQt5.QtCore import (Qt, pyqtSignal)
@@ -18,10 +20,23 @@ class MainWindow(QMainWindow):
     sigControlStation = pyqtSignal(int)
     sigAHelicopter = pyqtSignal(int)
     sigAirplane = pyqtSignal(int)
-
+    sigItemAddRequested = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
+
+        self.pixmaps = {1 : QPixmap(str(pathlib.Path().resolve() / 'SimulationAppUI/images/control_station_icon.png')).scaledToHeight(50), 
+                2 : QPixmap(str(pathlib.Path().resolve() / 'SimulationAppUI/images/radar_icon.png')).scaledToHeight(50),
+                3 : QPixmap(str(pathlib.Path().resolve() / 'SimulationAppUI/images/missile_launcher_icon.png')).scaledToHeight(50),
+                4 : QPixmap(str(pathlib.Path().resolve() / 'SimulationAppUI/images/aircraft_icon.png')).scaledToHeight(25)}
+
+        # потом перепишем)
+        self.sigRadar.connect(self.sigItemAddRequested)
+        self.sigMissileLauncher.connect(self.sigItemAddRequested) 
+        self.sigControlStation.connect(self.sigItemAddRequested)
+        self.sigAHelicopter.connect(self.sigItemAddRequested)
+        self.sigAirplane.connect(self.sigItemAddRequested)
+
         self.initUI()
 
     def initUI(self):
@@ -54,8 +69,10 @@ class MainWindow(QMainWindow):
         self.traj_view = False
         self.configure_view = False
 
-        self.left_conf_widget = QTextEdit()
+        self.left_conf_widget = ConfiguratingViewport(self.pixmaps, QApplication.startDragDistance(), parent=self)
+        self.sigItemAddRequested.connect(self.left_conf_widget.addItem)
         self.layout.addWidget(self.left_conf_widget)
+
         self.left_traj_widget = TrajectoryViews()
         self.left_traj_widget.hide()
         self.layout.addWidget(self.left_traj_widget)
@@ -64,11 +81,11 @@ class MainWindow(QMainWindow):
 
         # ------ Radar button --------------------------------------------------
         item = QListWidgetItem()
-        button = QPushButton(text=f" МФР", parent=self)
+        button = QPushButton(text=f" МФР(дальность 150км)", parent=self)
         button.clicked.connect(self.onListRadarClicked)
 
         button.setFixedHeight(80)
-        button.setIcon(QIcon("./images/radar_icon.png"))
+        button.setIcon(QIcon(self.pixmaps[2]))
         button.setIconSize(button.size())
 
         button.setFixedHeight(100)
@@ -84,7 +101,7 @@ class MainWindow(QMainWindow):
         button.clicked.connect(self.onListControlStationClicked)
 
         button.setFixedHeight(80)
-        button.setIcon(QIcon("images/control_station_icon.png"))
+        button.setIcon(QIcon(self.pixmaps[1]))
         button.setIconSize(button.size())
 
         button.setFixedHeight(100)
@@ -101,7 +118,7 @@ class MainWindow(QMainWindow):
         button.clicked.connect(self.onListMissileLauncherClicked)
 
         button.setFixedHeight(80)
-        button.setIcon(QIcon("images/missile_launcher_icon.png"))
+        button.setIcon(QIcon(self.pixmaps[3]))
         button.setIconSize(button.size())
 
         button.setFixedHeight(100)
@@ -117,7 +134,7 @@ class MainWindow(QMainWindow):
         button.clicked.connect(self.onListAirplaneClicked)
 
         button.setFixedHeight(80)
-        button.setIcon(QIcon("images/aircraft_icon.png"))
+        button.setIcon(QIcon(self.pixmaps[4]))
         button.setIconSize(button.size())
 
         button.setFixedHeight(100)
@@ -135,7 +152,7 @@ class MainWindow(QMainWindow):
         self.layout.setStretchFactor(self.left_traj_widget, 3)
         self.layout.setStretchFactor(self.right_widget, 1)
 
-        self.setGeometry(100, 100, 1200, 800)
+        self.setGeometry(100, 100, 1280, 960)
 
     def changeViewTraj(self):
         action = self.sender()
@@ -143,6 +160,7 @@ class MainWindow(QMainWindow):
             print("ToolBarButton clicked:", action.text())
         print("Swapping widgets")
         self.left_conf_widget.hide()
+        self.right_widget.hide()
         self.left_traj_widget.show()
 
     def changeViewConf(self):
@@ -152,6 +170,7 @@ class MainWindow(QMainWindow):
         print("Swapping widgets")
         self.left_traj_widget.hide()
         self.left_conf_widget.show()
+        self.right_widget.show()
 
     def onListRadarClicked(self):
         button = self.sender()

@@ -4,14 +4,14 @@ import pathlib
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog
 
-from GraphicComponents import *
-from GraphicComponentPresenter import *
-from Models import *
+from ConfigureView.GraphicComponents import *
+from ConfigureView.GraphicComponentPresenter import *
+from ConfigureView.Models import *
 
-from ConfigurationWindows import *
-from ConfigurationPresenters import *
-from CoordinatesTranslator import CoordinatesTranslator
-from MVPCreator import MVPCreator
+from ConfigureView.ConfigurationWindows import *
+from ConfigureView.ConfigurationPresenters import *
+from ConfigureView.CoordinatesTranslator import CoordinatesTranslator
+from ConfigureView.MVPCreator import MVPCreator
 
 world_max_coord = 300000
 
@@ -31,8 +31,8 @@ class ConfiguratingViewport(QGraphicsView):
         self.view = self
         self.view.setScene(self.scene)
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
-        self.view.setResizeAnchor(QGraphicsView.AnchorViewCenter)
-        self.view.setAlignment(Qt.AlignCenter)
+        self.view.setResizeAnchor(QGraphicsView.NoAnchor)
+        self.view.setAlignment(Qt.AlignLeft|Qt.AlignTop)
         self.view.show()
 
         self.config_windows = [ControlPointWindow(self), RadarWindow(self),
@@ -45,10 +45,13 @@ class ConfiguratingViewport(QGraphicsView):
 
     def resizeEvent(self, event):
         new_size = event.size()
-        #self.translator.setNewWidgetSize(new_size.width() // 2, new_size.height() // 2)
+        self.translator.setNewWidgetSize(new_size.width() // 2, new_size.height() // 2)
         super().resizeEvent(event)
 
-    def addItem(self, model_type, x, y):
+    @pyqtSlot(int)
+    def addItem(self, model_type, x=None, y=None):
+        if x is None or y is None:
+            x, y = self.size().width() // 2, self.size().height() // 2
         model, component, presenter = self.mvp_creator.create(model_type, self.id_counter, x, y, 
                                                          self.translator, self.pixmaps[model_type // 1000],
                                                          self.start_drag_distance)

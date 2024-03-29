@@ -1,12 +1,12 @@
-from Models import *
-from GraphicComponents import *
-from GraphicComponentPresenter import *
+from ConfigureView.Models import *
+from ConfigureView.GraphicComponents import *
+from ConfigureView.GraphicComponentPresenter import *
 
 class MVPCreator:
     def __init__(self):
         self.map = {
             1 : [ControlPointSource, SimpleGraphicComponent, GraphicComponentPresenter],
-            2 : [RadarSource, RadarGraphicComponent, GraphicComponentPresenter],
+            2 : [RadarSource, RadarGraphicComponent, GraphicRadarPresenter],
             3 : [StartDeviceSource, SimpleGraphicComponent, GraphicComponentPresenter],
             4 : [AeroTargetSource, SimpleGraphicComponent, GraphicAeroTargetPresenter] }
 

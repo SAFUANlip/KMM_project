@@ -21,6 +21,12 @@ class CoordinatesTranslator(QObject):
         s_y = int(-y * self.widget_hh/ self.world_hh + self.widget_hh)
         return s_x, s_y
 
+    def getC2WWidthRatio(self):
+        return self.widget_hw / self.world_hw
+
+    def getC2WHeightRatio(self):
+        return self.widget_hh / self.world_hh
+    
     def setNewWidgetSize(self, new_widget_hw, new_widget_hh):
         self.widget_hw = new_widget_hw
         self.widget_hh = new_widget_hh

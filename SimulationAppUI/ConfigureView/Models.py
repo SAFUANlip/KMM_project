@@ -48,7 +48,7 @@ class RadarSource(BaseSource):
         self.tilt_start = 0
         self.pan_per_sec = 60
         self.tilt_per_sec = 120
-        self.view_distance = 50000
+        self.view_distance = 150000
 
     def setOverviewMode(self, overview_mode):
         self.overview_mode = overview_mode

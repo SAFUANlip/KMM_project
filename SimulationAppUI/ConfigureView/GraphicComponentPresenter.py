@@ -46,6 +46,24 @@ class GraphicComponentPresenter(QObject):
         self.deleteRequested.emit(self)
 
 
+class GraphicRadarPresenter(GraphicComponentPresenter):
+    def __init__(self, model, component, translator):
+        super(GraphicRadarPresenter, self).__init__(model, component, translator)
+        self.component.radiusx = int(self.model.view_distance * self.translator.getC2WWidthRatio())
+        self.component.radiusy = int(self.model.view_distance * self.translator.getC2WHeightRatio())
+        self.component.arc_len = self.model.pan_per_sec
+        self.component.direction = -self.model.pan_start + self.model.pan_per_sec
+        self.component.is_round = self.model.overview_mode == 0
+
+    @pyqtSlot()
+    def updateUI(self):
+        super().updateUI()
+        self.component.radiusx = int(self.model.view_distance * self.translator.getC2WWidthRatio())
+        self.component.radiusy = int(self.model.view_distance * self.translator.getC2WHeightRatio())
+        self.component.direction = -self.model.pan_start + self.model.pan_per_sec
+        self.component.is_round = self.model.overview_mode == 0
+
+
 class GraphicAeroTargetPresenter(GraphicComponentPresenter):
     def __init__(self, model, component, translator):
         super(GraphicAeroTargetPresenter, self).__init__(model, component, translator)
