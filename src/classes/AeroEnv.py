@@ -38,15 +38,15 @@ class AeroEnv(Simulated):
         updated_entities = []
         chain_explosion = []
         for el in self.entities:
-            if not (self._dist(pos, el.pos()) - el.rad < expl_rad):
+            if not (self._dist(pos, el.pos) - el.rad < expl_rad):
                 updated_entities.append(el)
             else:
                 # chain reaction
                 if isinstance(el, GuidedMissile):
-                    chain_explosion.append(el.pos())
+                    chain_explosion.append((el.pos, el.expl_radius))
 
         self.entities = updated_entities
-        for pos in chain_explosion:
+        for pos, expl_rad in chain_explosion:
             self.explosion(pos, expl_rad)
 
     def _dist(self, pos1: np.array, pos2: np.array) -> float:
@@ -56,15 +56,13 @@ class AeroEnv(Simulated):
         return [t.trajectory for t in self.unpacked_entities]
 
 
-
 class Airplane(Movable):
     def __init__(self, dispatcher, ID: int, pos: np.array, rad: float, vel: np.array,
                  t_start: float = 0.0, t_end: float = np.inf) -> None:
-        super().__init__(dispatcher, ID, pos, vel)
+        super().__init__(dispatcher, ID, pos, vel, rad)
         self.vel = vel
         self.type_id = 1
         self.trajectory = [pos]
-        self.rad = rad
         self.t_start = t_start
         self.t_end = t_end
         self.t = t_start

@@ -35,7 +35,8 @@ class GuidedMissile(Movable):
                  pos: np.array, aero_env,
                  speed=GuidedMissile_SPEED,
                  life_time=GuidedMissile_LifeTime,
-                 expl_radius=GuidedMissile_ExplRadius) -> None:
+                 expl_radius=GuidedMissile_ExplRadius,
+                 rad=2.0) -> None:
         """
         :param dispatcher: диспетчер, для синхронизации с другими модулями
         :param ID: ID этой ракеты
@@ -43,8 +44,9 @@ class GuidedMissile(Movable):
         :param speed:
         :param life_time: возможное время жизни ракеты
         :param expl_radius: радиус взрыва ракеты
+        :param rad: характерный рамзер ракеты
         """
-        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None)
+        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None, rad)
         self.aero_env = aero_env
         self.speed = speed
         self.pos_target = None

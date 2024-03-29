@@ -44,8 +44,8 @@ class RadarRound(Simulated):
                 # FIXME: считать относительно себя
                 x, y, z = obj.pos
                 # FIXME: проверить обзор видимый по формулам геометрии, а не из интернета
-                tilt = np.rad2deg(np.arcsin(z / (r + eps)))
-                pan = np.rad2deg(np.arcsin(y / ((r * np.cos(tilt)) + eps)))
+                tilt = np.arcsin(z / (r + eps))
+                pan = np.arcsin(y / ((r * np.cos(tilt)) + eps))
                 logger.radar(f"Pan and tilt of aim: {pan, tilt}")
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     pos = obj.pos + np.random.randint(-int(0.001 * r) - 1, int(0.001 * r) + 1, size=3)
