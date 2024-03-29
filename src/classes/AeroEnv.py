@@ -1,6 +1,7 @@
 from src.classes.Simulated import Simulated
 from src.classes.Movable import Movable
 from src.classes.GuidedMissile import GuidedMissile
+from src.utils.logger import logger
 
 import numpy as np
 import copy
@@ -24,8 +25,11 @@ class AeroEnv(Simulated):
                     entity.runSimulationStep(t)
                     alive_entities.append(entity)
             else:
+                #logger.aero_env(f"AeroEnv добавила ЗУР ID {entity._ID}")
                 alive_entities.append(entity)
+                entity.runSimulationStep(t) # TODO: тут не было запуска шага симуляции, почему?!(
         self.entities = alive_entities
+        logger.aero_env(f"AeroEnv имеет {len(self.entities)}")
 
     def addEntity(self, entity) -> None:
         self.unpacked_entities.append(entity)
@@ -67,7 +71,7 @@ class Airplane(Movable):
 
     def runSimulationStep(self, t: float = 1.0) -> None:
         # print(self.pos, self.vel)
-        self.pos = self.pos + self.vel * t
+        self.pos = self.pos + self.vel * self._simulating_tick  # t:TODO: Было неправильное время (ты умножал на t)
         self.t += self._simulating_tick
         self.trajectory.append((self.pos, self.t))
 
@@ -82,7 +86,7 @@ class Helicopter(Airplane):
 
 
 if __name__ == "__main__":
-    import random
+    import random #TODO: импорты наверх
     n = random.randint(3, 10)
     targets = [
                 Airplane(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), rad=5, vel=np.array([1, 1, 1]),
