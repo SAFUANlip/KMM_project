@@ -56,14 +56,19 @@ class MainWindow(QMainWindow):
 
         action1 = QAction("ConfigureView", self)
         action2 = QAction("TrajView", self)
-        action3 = QAction("Button 3", self)
+        action3 = QAction("Настройки моделирования", self)
+        action4 = QAction("Начать моделирование", self)
 
         action1.triggered.connect(self.changeViewConf)
+        action1.triggered.connect(lambda : action3.setVisible(True))
+        action1.triggered.connect(lambda : action4.setVisible(True))
         action2.triggered.connect(self.changeViewTraj)
-
+        action2.triggered.connect(lambda : action3.setVisible(False))
+        action2.triggered.connect(lambda : action4.setVisible(False))
         tool_bar.addAction(action1)
         tool_bar.addAction(action2)
         tool_bar.addAction(action3)
+        tool_bar.addAction(action4)
 
 
         self.traj_view = False
@@ -71,6 +76,7 @@ class MainWindow(QMainWindow):
 
         self.left_conf_widget = ConfiguratingViewport(self.pixmaps, QApplication.startDragDistance(), parent=self)
         self.sigItemAddRequested.connect(self.left_conf_widget.addItem)
+        action3.triggered.connect(self.left_conf_widget.openModelingSettingsWindow)
         self.layout.addWidget(self.left_conf_widget)
 
         self.left_traj_widget = TrajectoryViews()

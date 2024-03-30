@@ -21,7 +21,7 @@ class ConfiguratingViewport(QGraphicsView):
         self.translator = CoordinatesTranslator(768 // 2, 768 // 2,
                                                 world_max_coord, world_max_coord)
         self.mvp_creator = MVPCreator()
-        self.models = list()
+        self.models = [DispatcherSource()]
         self.presenters = list()
         self.pixmaps = pixmaps
         self.id_counter = 1
@@ -36,11 +36,15 @@ class ConfiguratingViewport(QGraphicsView):
         self.view.show()
 
         self.config_windows = [ControlPointWindow(self), RadarWindow(self),
-                              StartDeviceWindow(self), AeroTargetWindow(self)]
+                              StartDeviceWindow(self), AeroTargetWindow(self),
+                              DispatcherConfigWindow(self)]
         self.dialog_presenters = [PosConfigPresenter(self.config_windows[0]),
                                  RadarConfigPresenter(self.config_windows[1]),
                                  PosConfigPresenter(self.config_windows[2]),
-                                 AeroTargetConfigPresenter(self.config_windows[3])]
+                                 AeroTargetConfigPresenter(self.config_windows[3]),
+                                 DispatcherConfigPresenter(self.config_windows[-1], self.models[0])]
+
+
 
 
     def resizeEvent(self, event):
@@ -68,6 +72,10 @@ class ConfiguratingViewport(QGraphicsView):
     @pyqtSlot(QObject)
     def openConfigurationWindow(self, presenter):
         self.dialog_presenters[presenter.model.model_type // 1000 - 1].configurate(presenter.model)
+
+    @pyqtSlot()
+    def openModelingSettingsWindow(self):
+        self.dialog_presenters[-1].configurate()
 
     @pyqtSlot(QObject)
     def deleteItem(self, presenter):

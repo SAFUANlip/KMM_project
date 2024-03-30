@@ -1,6 +1,16 @@
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal
 
+class DispatcherSource:
+    def __init__(self):
+        self.time = 250
+
+    def setTime(self, time):
+        self.time = time
+
+    def getTime(self):
+        return self.time
+
 class BaseSource(QObject):
 
     dataChanged = pyqtSignal()

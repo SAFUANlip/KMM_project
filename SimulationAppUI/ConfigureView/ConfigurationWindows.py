@@ -4,6 +4,23 @@ from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QSpinBox, QDouble
 h_max_abs_coord = 300000
 v_max_abs_coord = 20000
 
+class DispatcherConfigWindow(QDialog):
+    def __init__(self, parent=None):
+        super(DispatcherConfigWindow, self).__init__(parent)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowTitle("Настройки моделирования")
+        self.fields = {}
+        base_layout = QVBoxLayout()
+        form_layout = QFormLayout()
+        spinbox = QDoubleSpinBox()
+        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox.setRange(5, 3600*4)
+        form_layout.addRow("Время моделирования", spinbox)
+        self.fields['sim_time'] = spinbox
+        base_layout.addLayout(form_layout)
+        self.setLayout(base_layout)
+
+
 class PosConfigWindow(QDialog):
     def __init__(self, parent=None):
         super(PosConfigWindow, self).__init__(parent)

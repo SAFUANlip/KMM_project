@@ -1,5 +1,20 @@
 from PyQt5.QtCore import QObject, pyqtSlot
 
+class DispatcherConfigPresenter(QObject):
+    def __init__(self, widget, dispatcher, parent=None):
+        super(DispatcherConfigPresenter, self).__init__(parent)
+        self.dispatcher = dispatcher
+        self.widget = widget
+        self.widget.fields['sim_time'].editingFinished.connect(self.updateModelData)
+        self.widget.fields['sim_time'].setValue(self.dispatcher.getTime())
+
+    def updateModelData(self):
+        self.dispatcher.setTime(self.widget.fields['sim_time'].value())
+
+    def configurate(self):
+        self.widget.exec_()
+
+
 class PosConfigPresenter(QObject):
     def __init__(self, widget, parent=None):
         super(PosConfigPresenter, self).__init__(parent)
