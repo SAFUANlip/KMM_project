@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.classes.ModelDispatcher import ModelDispatcher, Simulated
+from src.modules_classes.ModelDispatcher import ModelDispatcher, Simulated
 
 
 class Movable(Simulated):

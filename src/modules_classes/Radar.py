@@ -1,7 +1,9 @@
 import numpy as np
-from src.messages.Messages import Radar2CombatControlMsg
-from src.classes.Simulated import Simulated
-from src.classes.AeroEnv import AeroEnv
+
+from config.constants import MSG_CCP2RADAR_type
+from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg
+from src.modules_classes.Simulated import Simulated
+from src.modules_classes.AeroEnv import AeroEnv
 from src.utils.logger import logger
 
 
@@ -76,6 +78,16 @@ class RadarRound(Simulated):
     #     self.move_to_next_sector()
 
     def runSimulationStep(self, time: float):
+        msgs_from_ccp = self._checkAvailableMessagesByType(MSG_CCP2RADAR_type)
+        for msg_from_cpp in msgs_from_ccp:
+            missile_id = msg_from_cpp.missile_id
+            target_coord = msg_from_cpp.new_target_coord
+
+            msg2gm = Radar2MissileMsg(time, self._ID, missile_id, target_coord)
+            self._sendMessage(msg2gm)
+        logger.radar(f"Radar с id {self._ID} получил {len(msgs_from_ccp)} сообщений от CombatControlPoint ")
+
+
         visible_objects = self.findObjects()
         msg = Radar2CombatControlMsg(time, self._ID, self.cp_ID, visible_objects)
         logger.radar(f"Radar с id {self._ID} отправил сообщение CombatControlPoint с id {self.cp_ID} с видимыми объектами")

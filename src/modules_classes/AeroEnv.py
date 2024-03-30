@@ -1,6 +1,6 @@
-from src.classes.Simulated import Simulated
-from src.classes.Movable import Movable
-from src.classes.GuidedMissile import GuidedMissile
+from src.modules_classes.Simulated import Simulated
+from src.modules_classes.Movable import Movable
+from src.modules_classes.GuidedMissile import GuidedMissile
 from src.utils.logger import logger
 
 import numpy as np
