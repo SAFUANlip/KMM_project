@@ -52,7 +52,7 @@ class GraphicRadarPresenter(GraphicComponentPresenter):
         self.component.radiusx = int(self.model.view_distance * self.translator.getC2WWidthRatio())
         self.component.radiusy = int(self.model.view_distance * self.translator.getC2WHeightRatio())
         self.component.arc_len = self.model.pan_per_sec
-        self.component.direction = -self.model.pan_start + self.model.pan_per_sec
+        self.component.direction = -self.model.pan_start + 90 - self.model.pan_per_sec // 2
         self.component.is_round = self.model.overview_mode == 0
 
     @pyqtSlot()
@@ -60,7 +60,7 @@ class GraphicRadarPresenter(GraphicComponentPresenter):
         super().updateUI()
         self.component.radiusx = int(self.model.view_distance * self.translator.getC2WWidthRatio())
         self.component.radiusy = int(self.model.view_distance * self.translator.getC2WHeightRatio())
-        self.component.direction = -self.model.pan_start + self.model.pan_per_sec
+        self.component.direction = -self.model.pan_start + 90 - self.model.pan_per_sec // 2
         self.component.is_round = self.model.overview_mode == 0
 
 

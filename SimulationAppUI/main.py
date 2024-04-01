@@ -8,9 +8,10 @@ from PyQt5.QtWidgets import QPushButton, QListWidgetItem
 from PyQt5.QtGui import QIcon, QPixmap
 
 from ConfigureView.ConfiguratingViewport import ConfiguratingViewport
+from SimulationModule import SimulationModule
 from TrajectoryViews import TrajectoryViews
 #from ObjectsList import ObjectsList
-from PyQt5.QtCore import (Qt, pyqtSignal)
+from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
 
 
 class MainWindow(QMainWindow):
@@ -74,8 +75,11 @@ class MainWindow(QMainWindow):
         self.traj_view = False
         self.configure_view = False
 
+        self.simulation_module = SimulationModule(self)
+        action4.triggered.connect(self.onSimulationStartRequested)
         self.left_conf_widget = ConfiguratingViewport(self.pixmaps, QApplication.startDragDistance(), parent=self)
         self.sigItemAddRequested.connect(self.left_conf_widget.addItem)
+        self.simulation_module.simulationEnded.connect(self.onSimulationEnded)
         action3.triggered.connect(self.left_conf_widget.openModelingSettingsWindow)
         self.layout.addWidget(self.left_conf_widget)
 
@@ -226,6 +230,14 @@ class MainWindow(QMainWindow):
     def sigAirplaneHandler(self, arg):
         print("Handler:", arg)
 
+    @pyqtSlot()
+    def onSimulationStartRequested(self):
+        self.simulation_module.startSimulation(self.left_conf_widget.getModelSources())
+
+
+    @pyqtSlot(object)
+    def onSimulationEnded(self, result):
+        print('Simulation ended, maybe there should be some code here.')
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -1,5 +1,6 @@
 import sys
 import pathlib
+from copy import deepcopy
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog
@@ -51,6 +52,11 @@ class ConfiguratingViewport(QGraphicsView):
         new_size = event.size()
         self.translator.setNewWidgetSize(new_size.width() // 2, new_size.height() // 2)
         super().resizeEvent(event)
+    
+    def getModelSources(self):
+        return self.models
+
+    #### slots
 
     @pyqtSlot(int)
     def addItem(self, model_type, x=None, y=None):
@@ -66,8 +72,6 @@ class ConfiguratingViewport(QGraphicsView):
         presenter.deleteRequested.connect(self.deleteItem)
         self.presenters.append(presenter)
         self.id_counter += 1
-
-    #### slots
 
     @pyqtSlot(QObject)
     def openConfigurationWindow(self, presenter):
@@ -85,7 +89,3 @@ class ConfiguratingViewport(QGraphicsView):
         presenter.configurateRequested.disconnect(self.openConfigurationWindow)
         presenter.deleteRequested.disconnect(self.deleteItem)
         presenter.delSelf()
-
-    @pyqtSlot()
-    def test(self):
-        print("editingFinished()")
