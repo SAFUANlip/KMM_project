@@ -1,6 +1,6 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type
+from config.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.AeroEnv import AeroEnv
@@ -43,13 +43,11 @@ class RadarRound(Simulated):
             r = np.linalg.norm(obj.pos - self.pos)
             eps = 0.0001
             if r < self.view_distance:
-                # FIXME: считать относительно себя
-                x, y, z = obj.pos
-                # FIXME: проверить обзор видимый по формулам геометрии, а не из интернета
-                tilt = np.arcsin(z / (r + eps))
-                pan = np.arcsin(y / ((r * np.cos(tilt)) + eps))
-                logger.radar(f"Pan and tilt of aim: {pan, tilt}")
+                x, y, z = (obj.pos - self.pos)
+                tilt = np.rad2deg(np.arcsin(z / (r + eps)))
+                pan = np.rad2deg(np.arctan2(y, (x + eps)))
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
+                    logger.radar(f"Radar с id {self._ID} видит объект с сферическими координатами (dist, pan, tilt): {r, pan, tilt}")
                     pos = obj.pos + np.random.randint(-int(0.001 * r) - 1, int(0.001 * r) + 1, size=3)
 
                     speed = np.linalg.norm(obj.vel)
@@ -58,24 +56,16 @@ class RadarRound(Simulated):
                     speed_from_radar = np.linalg.norm(velocity_from_radar)
                     visible_objects.append([pos, velocity_from_radar, speed_from_radar])
 
-        logger.radar(f"Radar с id {self._ID} видит {len(visible_objects)} объектов, координата первого: {visible_objects[0][0]}")
+        logger.radar(f"Radar с id {self._ID} видит {len(visible_objects)} объектов")
         return visible_objects
 
     def moveToNextSector(self):
         # винтовой обзор
-        # FIXME: писать текущие углы обзора от того то до того то
-        logger.radar(f"Radar ID {self._ID} pan_cur = {self.pan_cur} pan_per_sec = {self.pan_per_sec}")
-        logger.radar(f"Radar ID {self._ID} tilt_cur = {self.tilt_cur} tilt_per_sec = {self.tilt_per_sec}")
+        logger.radar(f"Radar ID {self._ID} видит от {self.pan_cur} до {self.pan_cur + self.pan_per_sec} по углу поворота")
+        logger.radar(f"Radar ID {self._ID} видит от {self.tilt_cur} до {self.tilt_cur + self.tilt_per_sec} по углу наклона")
         self.pan_cur = (self.pan_cur + self.pan_per_sec) % 360
         if self.pan_cur == self.pan_start:
             self.tilt_cur = (self.tilt_cur + self.tilt_per_sec) % 180
-
-
-    # def runSimulationStep(self, time: int):
-    #     visible_objects = self.find_objects()
-    #     msg = Radar2CombatControlMsg(time, self._ID, self.cp_ID, visible_objects)
-    #     self._sendMessage(msg)
-    #     self.move_to_next_sector()
 
     def runSimulationStep(self, time: float):
         msgs_from_ccp = self._checkAvailableMessagesByType(MSG_CCP2RADAR_type)
@@ -94,15 +84,18 @@ class RadarRound(Simulated):
         self._sendMessage(msg)
 
         pos_objects = [visible_objects[i][0] for i in range(len(visible_objects))]
-        msg2draw = Radar2DrawerMsg(time, self._ID, MSG_RADAR2DRAWER_type, pos_objects)
-        logger.radar(f"Radad с id {self._ID} отправил сообщение Drawer с id {MSG_RADAR2DRAWER_type} с положениями видимых объектов")
+        msg2draw = Radar2DrawerMsg(time, self._ID, TARGET_TYPE_DRAWER, pos_objects)
+        logger.radar(f"Radad с id {self._ID} отправил сообщение Drawer с id {TARGET_TYPE_DRAWER} с положениями видимых объектов")
         self._sendMessage(msg2draw)
+
+        self.moveToNextSector()
 
     def changeSectorPerSec(self, new_pan_sec: float, new_tilt_sec: float):
         self.pan_per_sec = new_pan_sec
         self.tilt_per_sec = new_tilt_sec
 
 
+# FIXME: починить, чтоб работало
 class RadarSector(RadarRound):
     def __init__(self, dispatcher, ID: int, cp_ID: int, aero_env: AeroEnv,
                  pos, pan_start, tilt_start, dist, pan_angle, tilt_angle, pan_sec, tilt_sec, type_of_view):
