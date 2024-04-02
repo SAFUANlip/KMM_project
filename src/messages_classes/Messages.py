@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 
 from config.constants import MSG_CCP2GM_type, MSG_CCP2DRAWER_type, MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
-    MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type
+    MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type
 from src.messages_classes.BaseMessage import BaseMessage
 
 
@@ -16,6 +16,14 @@ class Radar2CombatControlMsg(BaseMessage):
         super().__init__(MSG_RADAR2CCP_type, 1, time, sender_ID, receiver_ID)
         self.visible_objects = visible_objects
 
+class Radar2DrawerMsg(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, pos_objects: list):
+        '''
+        :param visible_objects: список видимых объектов из списков типа
+                                [положение объекта, направление скорости объекта, модуль скорости объекта]
+        '''
+        super().__init__(MSG_RADAR2DRAWER_type, 1, time, sender_ID, receiver_ID)
+        self.pos_objects = pos_objects
 
 class CombatControl2StartingDeviceMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, order: int,

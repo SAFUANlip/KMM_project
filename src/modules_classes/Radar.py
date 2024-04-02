@@ -1,7 +1,7 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type
-from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg
+from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type
+from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.AeroEnv import AeroEnv
 from src.utils.logger import logger
@@ -92,6 +92,11 @@ class RadarRound(Simulated):
         msg = Radar2CombatControlMsg(time, self._ID, self.cp_ID, visible_objects)
         logger.radar(f"Radar с id {self._ID} отправил сообщение CombatControlPoint с id {self.cp_ID} с видимыми объектами")
         self._sendMessage(msg)
+
+        pos_objects = [visible_objects[i][0] for i in range(len(visible_objects))]
+        msg2draw = Radar2DrawerMsg(time, self._ID, MSG_RADAR2DRAWER_type, pos_objects)
+        logger.radar(f"Radad с id {self._ID} отправил сообщение Drawer с id {MSG_RADAR2DRAWER_type} с положениями видимых объектов")
+        self._sendMessage(msg2draw)
 
     def changeSectorPerSec(self, new_pan_sec: float, new_tilt_sec: float):
         self.pan_per_sec = new_pan_sec
