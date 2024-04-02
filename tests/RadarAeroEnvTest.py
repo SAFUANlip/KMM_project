@@ -1,6 +1,6 @@
-from src.classes.AeroEnv import AeroEnv, Airplane
-from src.classes.Radar import RadarRound
-from src.classes.ModelDispatcher import ModelDispatcher
+from src.modules_classes.AeroEnv import AeroEnv, Airplane
+from src.modules_classes.Radar import RadarRound
+from src.modules_classes.ModelDispatcher import ModelDispatcher
 from random import randint
 import numpy as np
 

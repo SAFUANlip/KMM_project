@@ -3,11 +3,11 @@ from typing import List, Tuple
 import numpy as np
 
 from config.constants import NUMBER_OF_MISSILES
-from src.classes.AeroEnv import AeroEnv
-from src.classes.GuidedMissile import GuidedMissile
-from src.classes.ModelDispatcher import ModelDispatcher
-from src.classes.Simulated import Simulated
-from src.messages.Messages import NoMissiles, MissileStarted
+from src.modules_classes.AeroEnv import AeroEnv
+from src.modules_classes.GuidedMissile import GuidedMissile
+from src.modules_classes.ModelDispatcher import ModelDispatcher
+from src.modules_classes.Simulated import Simulated
+from src.messages_classes.Messages import NoMissiles, MissileStarted
 from src.utils.logger import logger
 
 

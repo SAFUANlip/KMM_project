@@ -1,7 +1,7 @@
 from math import floor
 from typing import List
-from src.messages.BaseMessage import BaseMessage
-from src.classes.Simulated import Simulated
+from src.messages_classes.BaseMessage import BaseMessage
+from src.modules_classes.Simulated import Simulated
 from copy import deepcopy
 
 from src.utils.logger import logger
