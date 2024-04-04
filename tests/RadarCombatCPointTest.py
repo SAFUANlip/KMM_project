@@ -1,8 +1,8 @@
-from src.classes.AeroEnv import AeroEnv, Airplane
-from src.classes.CombatControPoint import CombatControlPoint
-from src.classes.Radar import RadarRound
-from src.classes.StartingDevice import StartingDevice
-from src.classes.ModelDispatcher import ModelDispatcher
+from src.modules_classes.AeroEnv import AeroEnv, Airplane
+from src.modules_classes.CombatControPoint import CombatControlPoint
+from src.modules_classes.Radar import RadarRound
+from src.modules_classes.StartingDevice import StartingDevice
+from src.modules_classes.ModelDispatcher import ModelDispatcher
 from random import randint
 import numpy as np
 
@@ -11,15 +11,18 @@ if __name__ == '__main__':
     dispatcher.setSimulatingRate(1)
     dispatcher.setSimulationTime(25)
 
-    n = 2
-    targets = [Airplane(dispatcher=dispatcher, ID=1000+i,
-                       pos=np.array([randint(-100000, 100000)]*3), # np.array([6000, 5000, 7000]
-                       vel=np.array([randint(-300, 300)]*3)) for i in range(n)]
+    n = 1
+    targets = [Airplane(dispatcher=dispatcher, ID=1, pos=np.array([10000, 10000, 10000]), rad=5, vel=np.array([100, 100, 100]),
+                        t_start=0, t_end=100),
+               Airplane(dispatcher=dispatcher, ID=2, pos=np.array([-10000, 10000, 10000]), rad=5,
+                        vel=np.array([100, 100, 100]),
+                        t_start=0, t_end=100)
+               ]
     env = AeroEnv(dispatcher, len(targets))
     for el in targets:
         env.addEntity(el)
 
-    radar = RadarRound(dispatcher, 1, 3000, env, (0, 0, 0), 0, 0, 500000, 360 * np.pi / 180, 180 * np.pi / 180)
+    radar = RadarRound(dispatcher, 1, 3000, env, (10, 10, 0), 0, 0, 500000, 120, 90)
     start_devices = [StartingDevice(dispatcher, 2000, np.array([0, 0, 0]), env)]
     starting_devices_coords = {}
     for sd in start_devices:
@@ -29,10 +32,9 @@ if __name__ == '__main__':
     dispatcher.configurate([env, radar, combat, *start_devices])
     dispatcher.run()
 
-    # rate, messages = dispatcher.getMessageHistory()
-    # for i in range(len(messages)):
+    # rate, messages_classes = dispatcher.getMessageHistory()
+    # for i in range(len(messages_classes)):
     #     print(f"time: {i/rate}")
     #
-    #     for message in messages[i]:
+    #     for message in messages_classes[i]:
     #         print(f"time: {i/rate} ", vars(message))
-
