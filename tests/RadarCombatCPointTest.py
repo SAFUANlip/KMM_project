@@ -1,10 +1,10 @@
+import numpy as np
+
 from src.classes.AeroEnv import AeroEnv, Airplane
 from src.classes.CombatControPoint import CombatControlPoint
+from src.classes.ModelDispatcher import ModelDispatcher
 from src.classes.Radar import RadarRound
 from src.classes.StartingDevice import StartingDevice
-from src.classes.ModelDispatcher import ModelDispatcher
-from random import randint
-import numpy as np
 
 if __name__ == '__main__':
     dispatcher = ModelDispatcher()
@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     n = 1
     targets = [Airplane(dispatcher=dispatcher, ID=i, pos=np.array([10000, 10000, 10000]), rad=5, vel=np.array([100, 100, 100]),
-                        t_start=0, t_end=100) for i in range(n)]
+                        t_start=0, t_end=25) for i in range(n)]
     env = AeroEnv(dispatcher, len(targets))
     for el in targets:
         env.addEntity(el)
