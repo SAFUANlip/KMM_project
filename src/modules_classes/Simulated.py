@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from typing import List
-from src.messages.BaseMessage import BaseMessage
+from src.messages_classes.BaseMessage import BaseMessage
 
 # Затычка против зацикливания импорта
 # Импорт модуля диспетчера должен быть в конце

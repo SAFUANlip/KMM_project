@@ -1,10 +1,11 @@
 import numpy as np
 
-from src.classes.ModelDispatcher import ModelDispatcher
-from src.classes.Movable import Movable
-from src.messages.BaseMessage import BaseMessage
+from src.modules_classes.ModelDispatcher import ModelDispatcher
+from src.modules_classes.Movable import Movable
+from src.messages_classes.BaseMessage import BaseMessage
 from config.constants import (MSG_CCP2GM_type, GuidedMissile_SPEED,
-                              GuidedMissile_LifeTime, GuidedMissile_ExplRadius, GuidedMissile_MaxRotAngle)
+                              GuidedMissile_LifeTime, GuidedMissile_ExplRadius, GuidedMissile_MaxRotAngle,
+                              MSG_RADAR2GM_type)
 from src.utils.logger import logger
 
 
@@ -120,16 +121,16 @@ class GuidedMissile(Movable):
         :param time: текущее время в симуляции
         """
         #logger.guided_missile(f"жду сообщения типа {MSG_CCP2GM_type}")
-        messages = self._checkAvailableMessagesByType(msg_type=MSG_CCP2GM_type)
+        messages = self._checkAvailableMessagesByType(msg_type=MSG_RADAR2GM_type)
         messages.sort(key=lambda x: x.priority, reverse=True)
 
         pos_target = self.pos_target
 
-        #logger.guided_missile(f"ЗУР ID: {self._ID}, получила сообщение от ПБУ, столько сообщение: {len(messages)}")
+        #logger.guided_missile(f"ЗУР ID: {self._ID}, получила сообщение от ПБУ, столько сообщение: {len(messages_classes)}")
 
         if len(messages) != 0:
             pos_target = messages[0].new_target_coord
-            logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от ПБУ, новые координаты цели: {pos_target}")
+            logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара, новые координаты цели: {pos_target}")
 
         if self.__status == 1:
             self.updateTarget(pos_target)
