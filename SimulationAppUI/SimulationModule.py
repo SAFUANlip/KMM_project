@@ -6,11 +6,11 @@ from PyQt5.QtCore import Qt, QThread, QObject, pyqtSlot, pyqtSignal, QTimer
 import numpy as np
 from math import floor
 
-from src.classes.AeroEnv import *
-from src.classes.CombatControPoint import *
-from src.classes.Radar import *
-from src.classes.StartingDevice import *
-from src.classes.ModelDispatcher import *
+from src.modules_classes.AeroEnv import *
+from src.modules_classes.CombatControPoint import *
+from src.modules_classes.Radar import *
+from src.modules_classes.StartingDevice import *
+from src.modules_classes.ModelDispatcher import *
 
 class CustomThread(QThread):
     def __init__(self, target=None):
@@ -70,8 +70,8 @@ class SimulationModule(QObject):
             if r_s.overview_mode != 0:
                 radar_class = RadarSector
             configuration.append(radar_class(dispatcher, r_s.id, cp_source.id, env, np.array([r_s.x, r_s.y, r_s.z]), 
-                                             r_s.pan_start * np.pi/180, r_s.tilt_start * np.pi/180, r_s.view_distance,
-                                             r_s.pan_per_sec * np.pi/180, r_s.tilt_per_sec * np.pi/180))
+                                             r_s.pan_start, r_s.tilt_start, r_s.view_distance,
+                                             r_s.pan_per_sec, r_s.tilt_per_sec))
 
         # CP
         configuration.append(CombatControlPoint(dispatcher, cp_source.id, sd_info))
