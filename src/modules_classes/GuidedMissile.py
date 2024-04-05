@@ -54,6 +54,7 @@ class GuidedMissile(Movable):
         self.life_time = life_time
         self.expl_radius = expl_radius
         self.pos_target = None
+        self.delay_time = 2
         self.status = 0
         self.launch_time = None
         self.target_vel = np.array([0., 0., 0.])
@@ -74,8 +75,9 @@ class GuidedMissile(Movable):
         Обновление координат цели
         :param pos_target: np.array of [x,y,z]
         """
-        self.pos_target = pos_target
+
         self.target_vel = target_vel
+        self.pos_target = pos_target + self.target_vel*self._simulating_tick
 
     def updateCoordinate(self) -> None:
         """
@@ -83,15 +85,17 @@ class GuidedMissile(Movable):
         :param time: сколько времени ракета летела с прошлого обновления координат
         """
         vel_old = self.vel.copy()
-        self.vel = ((self.pos_target + self.target_vel*self._simulating_tick - self.pos)
-                    / np.linalg.norm(self.pos_target + self.target_vel*self._simulating_tick - self.pos) * self.speed)
+        self.vel = ((self.pos_target - self.pos)
+                    / np.linalg.norm(self.pos_target - self.pos) * self.speed)
 
         if angle_between(self.vel, vel_old) > GuidedMissile_MaxRotAngle:
             logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos},"
                                   f" корректировка большого угла поворота {round(np.rad2deg(angle_between(self.vel, vel_old)),2)}°")
             self.vel = (self.vel + vel_old) / np.linalg.norm(self.vel + vel_old) * self.speed
 
-        dist2target = np.linalg.norm(self.pos_target - self.pos)
+
+        # добавить задержку от передачи смс от ПБУ к РАДАРУ к ЗУР, чтобы расстояние до цели считалось верно
+        dist2target = np.linalg.norm(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos)
         if dist2target < np.linalg.norm(self.vel*self._simulating_tick):
             self.pos = self.pos + self.vel * (dist2target)/np.linalg.norm(self.vel)
         else:
@@ -101,9 +105,12 @@ class GuidedMissile(Movable):
         """
         Проверка поражена ли цель
         """
-        if (((self.pos - self.pos_target) ** 2).sum())**0.5 < self.expl_radius:
+        if (((self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos) ** 2).sum())**0.5 < self.expl_radius:
             self.status = 2
-        logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}")
+        logger.guided_missile(
+                f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}, расстояние до цели и нтерполированное {(((self.pos_target + self.target_vel * self._simulating_tick * self.delay_time - self.pos) ** 2).sum()) ** 0.5}")
+
+        logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}, расстояние до цели и нтерполированное {(((self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos) ** 2).sum())**0.5}")
 
     def getStatus(self):
         """
@@ -127,6 +134,7 @@ class GuidedMissile(Movable):
         messages.sort(key=lambda x: x.priority, reverse=True)
 
         pos_target = self.pos_target
+        target_vel = self.target_vel
 
         #logger.guided_missile(f"ЗУР ID: {self._ID}, получила сообщение от ПБУ, столько сообщение: {len(messages_classes)}")
 
