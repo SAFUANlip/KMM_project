@@ -55,6 +55,7 @@ class GuidedMissile(Movable):
         self.expl_radius = expl_radius
         self.pos_target = None
         self.delay_time = 2
+        self.time2exploit = False
         self.status = 0
         self.launch_time = None
         self.target_vel = np.array([0., 0., 0.])
@@ -97,7 +98,8 @@ class GuidedMissile(Movable):
         # добавить задержку от передачи смс от ПБУ к РАДАРУ к ЗУР, чтобы расстояние до цели считалось верно
         dist2target = np.linalg.norm(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos)
         if dist2target < np.linalg.norm(self.vel*self._simulating_tick):
-            self.pos = self.pos + self.vel * (dist2target)/np.linalg.norm(self.vel)
+            self.pos = self.pos_target+self.target_vel*self._simulating_tick*self.delay_time
+
         else:
             self.pos = self.pos + self.vel*self._simulating_tick
 
@@ -105,10 +107,10 @@ class GuidedMissile(Movable):
         """
         Проверка поражена ли цель
         """
-        if (((self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos) ** 2).sum())**0.5 < self.expl_radius:
+        if (((self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos ) ** 2).sum())**0.5 < self.expl_radius:
             self.status = 2
         logger.guided_missile(
-                f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}, расстояние до цели и нтерполированное {(((self.pos_target + self.target_vel * self._simulating_tick * self.delay_time - self.pos) ** 2).sum()) ** 0.5}")
+                f"ЗУР ID: {self._ID}, pos_target {self.pos_target}, target_vel {self.target_vel},  pos {self.pos}")
 
         logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}, расстояние до цели и нтерполированное {(((self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos) ** 2).sum())**0.5}")
 

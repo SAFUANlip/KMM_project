@@ -10,8 +10,8 @@ import numpy as np
 
 if __name__ == '__main__':
     dispatcher = ModelDispatcher()
-    dispatcher.setSimulatingRate(1)
-    dispatcher.setSimulationTime(30)
+    dispatcher.setSimulatingRate(2)
+    dispatcher.setSimulationTime(50)
 
     n = 1
     targets = [Airplane(dispatcher=dispatcher, ID=1, pos=np.array([10000, 10000, 10000]), size=5, vel=np.array([180, -180, 0]),
