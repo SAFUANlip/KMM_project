@@ -37,7 +37,7 @@ class GuidedMissile(Movable):
                  speed=GuidedMissile_SPEED,
                  life_time=GuidedMissile_LifeTime,
                  expl_radius=GuidedMissile_ExplRadius,
-                 rad=2.0) -> None:
+                 size=2.0) -> None:
         """
         :param dispatcher: диспетчер, для синхронизации с другими модулями
         :param ID: ID этой ракеты
@@ -45,29 +45,27 @@ class GuidedMissile(Movable):
         :param speed:
         :param life_time: возможное время жизни ракеты
         :param expl_radius: радиус взрыва ракеты
-        :param rad: характерный рамзер ракеты
+        :param size: характерный рамзер ракеты
         """
-        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None, rad)
+        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None, size)
         self.aero_env = aero_env
         self.speed = speed
         self.pos_target = None
         self.life_time = life_time
         self.expl_radius = expl_radius
         self.pos_target = None
-        self.__status = 0
+        self.status = 0
         self.launch_time = None
-        self.__previous_time = None
 
     def launch(self, pos_target: np.array, launch_time: float) -> None:
         """
-        :param pos_target: np array of coordinates (x, y, z)
+        :param pos_target: np array of pos_objects (x, y, z)
         :param launch_time: время запуска
         """
         self.pos_target = pos_target
         self.vel = (self.pos_target - self.pos) / (np.linalg.norm(self.pos_target - self.pos) + 0.0000001) * self.speed
         self.launch_time = launch_time
-        self.__previous_time = launch_time
-        self.__status = 1
+        self.status = 1
         logger.guided_missile(f"Запуск. ЗУР ID: {self._ID}, начальная позиция: {self.pos}, начальная позиция цели: {self.pos_target}")
         
     def updateTarget(self, pos_target: np.array) -> None:
@@ -100,7 +98,7 @@ class GuidedMissile(Movable):
         Проверка поражена ли цель
         """
         if (((self.pos - self.pos_target) ** 2).sum())**0.5 < self.expl_radius:
-            self.__status = 2
+            self.status = 2
         logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}")
 
     def getStatus(self):
@@ -112,7 +110,7 @@ class GuidedMissile(Movable):
         3 - пропустила цель, закончилось топливо
         :return:
         """
-        return self.__status
+        return self.status
 
     def runSimulationStep(self, time):
         """
@@ -132,23 +130,23 @@ class GuidedMissile(Movable):
             pos_target = messages[0].new_target_coord
             logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара, новые координаты цели: {pos_target}")
 
-        if self.__status == 1:
+        if self.status == 1:
             self.updateTarget(pos_target)
             self.updateCoordinate()
             self.checkIsHit()
-            if self.__status == 2:
+            if self.status == 2:
                 logger.guided_missile(
                     f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, поразила цель с координатами: {self.pos_target}")
                 self.aero_env.explosion(self.pos, self.expl_radius)
             elif time - self.launch_time > self.life_time:
-                self.__status = 3
+                self.status = 3
                 self.aero_env.explosion(self.pos, self.expl_radius)
                 logger.guided_missile(
                     f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, пропустила цель с координатами: {self.pos_target}"
                     f"Кончилось топливо")
 
-        if self.__status > 1:
+        if self.status > 1:
             logger.guided_missile(
-                f"ЗУР ID: {self._ID} прекратила существоавние из-за {'поражения цели' if self.__status == 2 else 'нехватки топлива'}")
+                f"ЗУР ID: {self._ID} прекратила существоавние из-за {'поражения цели' if self.status == 2 else 'нехватки топлива'}")
 
-        self.__previous_time = time
+        self.previous_time = time

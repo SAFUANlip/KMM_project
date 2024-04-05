@@ -102,7 +102,7 @@ class AeroTargetWindow(PosConfigWindow):
         spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
         spinbox.setRange(0, 3600)
         form_layout.addRow('Время начала:', spinbox)
-        self.fields['t_start'] = spinbox
+        self.fields['start_time'] = spinbox
 
         layout.addLayout(form_layout)
 

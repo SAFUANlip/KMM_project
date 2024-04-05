@@ -6,9 +6,13 @@ GuidedMissile_MaxRotAngle = 0.79  # максимальный угол, на ко
 
 NUMBER_OF_MISSILES = 50
 
+DRAWER_ID = -1000
+
+
 MISSILE_TYPE_DRAWER = 0
 TARGET_TYPE_DRAWER = 1
 # messages_classes
+
 MSG_RADAR2CCP_type = 2001
 MSG_RADAR2GM_type = 2002
 

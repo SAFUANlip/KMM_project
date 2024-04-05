@@ -3,7 +3,7 @@ import typing
 import numpy as np
 
 from config.constants import GuidedMissile_SPEED, TARGET_TYPE_DRAWER, MISSILE_TYPE_DRAWER, MSG_CCP2DRAWER_type, \
-    MSG_RADAR2CCP_type, MSG_SD2CCP_MS_type
+    MSG_RADAR2CCP_type, MSG_SD2CCP_MS_type, DRAWER_ID
 from src.messages_classes.Messages import CombatControl2StartingDeviceMsg,CombatControl2DrawerMsg, CombatControl2RadarMsg
 from src.modules_classes.Simulated import Simulated, ModelDispatcher
 
@@ -249,5 +249,10 @@ class CombatControlPoint(Simulated):
                         self.missile_list[idx].updСoord(obj_coord, time)
                         self.missile_list[idx].updSpeedMod(obj_speed_mod, time)
 
-        msg2drawer = CombatControl2DrawerMsg(time, self._ID, MSG_CCP2DRAWER_type, list_for_drawer)
+        msg2drawer = CombatControl2DrawerMsg(
+            time=time,
+            sender_ID=self._ID,
+            receiver_ID=DRAWER_ID,
+            coordinates=list_for_drawer,
+        )
         self._sendMessage(msg2drawer)
