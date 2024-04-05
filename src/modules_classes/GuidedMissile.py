@@ -56,6 +56,7 @@ class GuidedMissile(Movable):
         self.pos_target = None
         self.status = 0
         self.launch_time = None
+        self.target_vel = np.array([0., 0., 0.])
 
     def launch(self, pos_target: np.array, launch_time: float) -> None:
         """
@@ -68,12 +69,13 @@ class GuidedMissile(Movable):
         self.status = 1
         logger.guided_missile(f"Запуск. ЗУР ID: {self._ID}, начальная позиция: {self.pos}, начальная позиция цели: {self.pos_target}")
         
-    def updateTarget(self, pos_target: np.array) -> None:
+    def updateTarget(self, pos_target: np.array([float, float, float]), target_vel: np.array([float, float, float])) -> None:
         """
         Обновление координат цели
         :param pos_target: np.array of [x,y,z]
         """
         self.pos_target = pos_target
+        self.target_vel = target_vel
 
     def updateCoordinate(self) -> None:
         """
@@ -81,7 +83,9 @@ class GuidedMissile(Movable):
         :param time: сколько времени ракета летела с прошлого обновления координат
         """
         vel_old = self.vel.copy()
-        self.vel = (self.pos_target - self.pos) / np.linalg.norm(self.pos_target - self.pos) * self.speed
+        self.vel = ((self.pos_target + self.target_vel*self._simulating_tick - self.pos)
+                    / np.linalg.norm(self.pos_target + self.target_vel*self._simulating_tick - self.pos) * self.speed)
+
         if angle_between(self.vel, vel_old) > GuidedMissile_MaxRotAngle:
             logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos},"
                                   f" корректировка большого угла поворота {round(np.rad2deg(angle_between(self.vel, vel_old)),2)}°")
@@ -128,10 +132,11 @@ class GuidedMissile(Movable):
 
         if len(messages) != 0:
             pos_target = messages[0].new_target_coord
-            logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара, новые координаты цели: {pos_target}")
+            target_vel = messages[0].target_vel
+            logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара, новые координаты цели: {pos_target}, ее вектор скорости: {target_vel}")
 
         if self.status == 1:
-            self.updateTarget(pos_target)
+            self.updateTarget(pos_target, target_vel)
             self.updateCoordinate()
             self.checkIsHit()
             if self.status == 2:

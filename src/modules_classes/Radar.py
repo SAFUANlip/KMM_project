@@ -42,10 +42,17 @@ class RadarRound(Simulated):
         for obj in all_objects:
             r = np.linalg.norm(obj.pos - self.pos)
             eps = 0.0001
+            # logger.radar(f"радар чекает объект с координатами {obj.pos}, дальность {r}")
+
             if r < self.view_distance:
                 x, y, z = (obj.pos - self.pos)
                 tilt = np.rad2deg(np.arcsin(z / (r + eps)))
                 pan = np.rad2deg(np.arctan2(y, (x + eps)))
+
+
+                pan = 360 + pan if pan < 0 else pan
+                # logger.radar(f"радар чекает объект с pan {pan}, с tilt {tilt}, pan_cur {self.pan_cur}, pan per sec {self.pan_per_sec}, tilt cur {self.tilt_cur}, tilt per sec {self.tilt_per_sec}")
+
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     logger.radar(f"Radar с id {self._ID} видит объект с сферическими координатами (dist, pan, tilt): {r, pan, tilt}")
                     pos = obj.pos + np.random.randint(-int(0.001 * r) - 1, int(0.001 * r) + 1, size=3)
@@ -72,8 +79,9 @@ class RadarRound(Simulated):
         for msg_from_cpp in msgs_from_ccp:
             missile_id = msg_from_cpp.missile_id
             target_coord = msg_from_cpp.new_target_coord
+            target_vel = msg_from_cpp.target_vel
 
-            msg2gm = Radar2MissileMsg(time, self._ID, missile_id, target_coord)
+            msg2gm = Radar2MissileMsg(time, self._ID, missile_id, target_coord, target_vel)
             self._sendMessage(msg2gm)
         logger.radar(f"Radar с id {self._ID} получил {len(msgs_from_ccp)} сообщений от CombatControlPoint ")
 

@@ -53,7 +53,7 @@ class NoMissiles(BaseMessage):
 
 class CombatControl2RadarMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int,
-                 new_target_coord: np.array([float, float, float]), missile_id:int) -> None:
+                 new_target_coord: np.array([float, float, float]), target_vel: np.array([float, float, float]), missile_id:int) -> None:
         """
         :param time:
         :param sender_ID:
@@ -62,12 +62,13 @@ class CombatControl2RadarMsg(BaseMessage):
         """
         super(CombatControl2RadarMsg, self).__init__(MSG_CCP2RADAR_type, 10, time, sender_ID, receiver_ID)
         self.new_target_coord = new_target_coord
+        self.target_vel = target_vel
         self.missile_id = missile_id
 
 
 class Radar2MissileMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int,
-                 new_target_coord: np.array([float, float, float])) -> None:
+                 new_target_coord: np.array([float, float, float]), target_vel: np.array([float, float, float])) -> None:
         """
         :param time:
         :param sender_ID:
@@ -76,6 +77,7 @@ class Radar2MissileMsg(BaseMessage):
         """
         super(Radar2MissileMsg, self).__init__(MSG_RADAR2GM_type, 10, time, sender_ID, receiver_ID)
         self.new_target_coord = new_target_coord
+        self.target_vel = target_vel
 
 
 class CombatControl2DrawerMsg(BaseMessage):

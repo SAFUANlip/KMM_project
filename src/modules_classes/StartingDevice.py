@@ -38,6 +38,7 @@ class StartingDevice(Simulated):
         free_missiles, killed_missiles = self.checkMissiles()
         # проверяем почту на наличие сообщений от пбу и запускаем ракеты
         new_messages = self._checkAvailableMessagesByType(msg_type = 3001)
+        logger.starting_device(f"ПУ с ID {self._ID} получла {len(new_messages)} сообщений от ПБУ")
         for msg in new_messages:
             # проверка наличия свободных зур
             if len(free_missiles) == 0:
@@ -47,6 +48,9 @@ class StartingDevice(Simulated):
                 # если есть - запускаем
                 free_missiles[0].launch(msg.coord, time)
                 #пишу пбу
+
+                logger.starting_device(f"ПУ с ID {self._ID} запустила зур с ID {free_missiles[0]._ID} и отправила сообщения ПБУ с ID {msg.sender_ID}")
+
                 self._sendMessage(MissileStarted(time, self._ID, msg.sender_ID, free_missiles[0]._ID, msg.order))
 
                 # обновляем во

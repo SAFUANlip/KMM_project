@@ -24,7 +24,6 @@ class AeroEnv(Simulated):
                 if entity.start_time <= time < entity.end_time:
                     entity.runSimulationStep(time)
             else:
-                logger.aero_env(f"AeroEnv добавила ЗУР ID {entity._ID}")
                 entity.runSimulationStep(time)
         logger.aero_env(f"AeroEnv имеет {len(self.entities)}")
 
@@ -34,11 +33,13 @@ class AeroEnv(Simulated):
     def explosion(self, pos: np.array, expl_rad: float) -> None:
         chain_explosion = []
         for el in self.entities:
+            logger.aero_env(
+                f"AeroEnv расстояние между ЗУР и объектом {self.dist(pos, el.pos)}, размер объекта {el.size}, радиус взрыва {expl_rad}")
             if self.dist(pos, el.pos) - el.size < expl_rad:
-                if isinstance(el, GuidedMissile):
+                if isinstance(el, GuidedMissile) and (el.pos != pos).all():
                     chain_explosion.append((el.pos, el.expl_radius))
                 self.entities.remove(el)
-                logger.aero_env(f"AeroEnv взрыв ЗУР с ID: {el._ID}, координаты: {el.pos}, Уничтожила цель с ")
+                logger.aero_env(f"AeroEnv взрыв ЗУР с координатами: {pos}, Уничтожила цель с ID: {el._ID} и координатами {el.pos}")
 
         # chain reaction
         for pos, expl_rad in chain_explosion:
