@@ -24,32 +24,30 @@ class AeroEnv(Simulated):
                 if entity.start_time <= time < entity.end_time:
                     entity.runSimulationStep(time)
             else:
-                #logger.aero_env(f"AeroEnv добавила ЗУР ID {entity._ID}")
-                entity.runSimulationStep(time) # TODO: тут не было запуска шага симуляции, почему?!(
+                logger.aero_env(f"AeroEnv добавила ЗУР ID {entity._ID}")
+                entity.runSimulationStep(time)
         logger.aero_env(f"AeroEnv имеет {len(self.entities)}")
 
     def addEntity(self, entity) -> None:
         self.entities.append(entity)
 
     def explosion(self, pos: np.array, expl_rad: float) -> None:
-        updated_entities = []
         chain_explosion = []
         for el in self.entities:
-            if not (self._dist(pos, el.pos) - el.size < expl_rad):
-                updated_entities.append(el)
-            else:
-                # chain reaction
+            if self.dist(pos, el.pos) - el.size < expl_rad:
                 if isinstance(el, GuidedMissile):
                     chain_explosion.append((el.pos, el.expl_radius))
+                self.entities.remove(el)
+                logger.aero_env(f"AeroEnv взрыв ЗУР с ID: {el._ID}, координаты: {el.pos}, Уничтожила цель с ")
 
-        self.entities = updated_entities
+        # chain reaction
         for pos, expl_rad in chain_explosion:
             self.explosion(pos, expl_rad)
 
-    def _dist(self, pos1: np.array, pos2: np.array) -> float:
+    def dist(self, pos1: np.array, pos2: np.array) -> float:
         return np.linalg.norm(pos1 - pos2)
 
-    def all_trajectories(self):
+    def allTrajectories(self):
         trajectories = []
         for el in self.entities:
             if isinstance(el, Airplane) or isinstance(el, Helicopter):

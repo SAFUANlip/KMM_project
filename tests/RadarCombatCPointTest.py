@@ -14,7 +14,7 @@ if __name__ == '__main__':
     dispatcher.setSimulationTime(25)
 
     n = 1
-    targets = [Airplane(dispatcher=dispatcher, ID=1, pos=np.array([10000, 10000, 10000]), size=5, vel=np.array([500, 500, 500]),
+    targets = [Airplane(dispatcher=dispatcher, ID=1, pos=np.array([10000, 10000, 10000]), size=5, vel=np.array([0, 0, 0]),
                         start_time=0, end_time=100),
                Airplane(dispatcher=dispatcher, ID=2, pos=np.array([-10000, -10000, -10000]), size=5,
                         vel=np.array([-500, -500, -500]),

@@ -69,14 +69,14 @@ class AeroTargetConfigPresenter(PosConfigPresenter):
     def __init__(self, widget, parent=None):
         super(AeroTargetConfigPresenter, self).__init__(widget, parent)
         self.widget.fields['V'].editingFinished.connect(self.updateModelData)
-        self.widget.fields['start_time'].editingFinished.connect(self.updateModelData)
+        self.widget.fields['t_start'].editingFinished.connect(self.updateModelData)
         self.widget.fields['direction'].editingFinished.connect(self.updateModelData)
         self.widget.fields['t_finish'].editingFinished.connect(self.updateModelData)
 
     def updateUIFields(self):
         super().updateUIFields()
         self.widget.fields['V'].setValue(self.model.getSpeed())
-        self.widget.fields['start_time'].setValue(self.model.getTimeStart())
+        self.widget.fields['t_start'].setValue(self.model.getTimeStart())
         self.widget.fields['direction'].setValue(self.model.getDirection())
         self.widget.fields['t_finish'].setValue(self.model.getTimeFinish())
 
@@ -85,6 +85,6 @@ class AeroTargetConfigPresenter(PosConfigPresenter):
         super().updateModelData()
         if self.model:
             self.model.setSpeed(self.widget.fields['V'].value())
-            self.model.setTimeStart(self.widget.fields['start_time'].value())
+            self.model.setTimeStart(self.widget.fields['t_start'].value())
             self.model.setDirection(self.widget.fields['direction'].value())
             self.model.setTimeFinish(self.widget.fields['t_finish'].value())

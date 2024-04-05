@@ -29,15 +29,14 @@ class Graphics(Simulated):
             # el.yaxis.set_minor_locator(AutoMinorLocator(4))
             el.grid()
 
-        MFR_list = self._checkAvailableMessagesByType(MSG_RADAR2DRAWER_type)  #.pos_objects\
+        MFR_list = self._checkAvailableMessagesByType(MSG_RADAR2DRAWER_type)
 
-        print(len(MFR_list), "Я ГРАФИКА")
         if len(MFR_list) > 0:
             MFR_msg = MFR_list[0].pos_objects
             for i in range(len(MFR_msg)):
                 ax[0].scatter(MFR_msg[i][0], MFR_msg[i][1], marker='o', color='b')
 
-        CCP_list = self._checkAvailableMessagesByType(MSG_CCP2DRAWER_type)  #.pos_objects
+        CCP_list = self._checkAvailableMessagesByType(MSG_CCP2DRAWER_type)
         if len(CCP_list) > 0:
             CCP_msg = CCP_list[0].pos_objects
             # 0 - зур, 1 - цель
