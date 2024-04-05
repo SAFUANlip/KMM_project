@@ -1,6 +1,6 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER
+from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type, TARGET_TYPE_DRAWER, DRAWER_ID
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.AeroEnv import AeroEnv
@@ -84,7 +84,13 @@ class RadarRound(Simulated):
         self._sendMessage(msg)
 
         pos_objects = [visible_objects[i][0] for i in range(len(visible_objects))]
-        msg2draw = Radar2DrawerMsg(time, self._ID, TARGET_TYPE_DRAWER, pos_objects)
+        msg2draw = Radar2DrawerMsg(
+            time=time,
+            sender_ID=self._ID,
+            receiver_ID=DRAWER_ID,
+            pos_objects=pos_objects,
+        )
+
         logger.radar(f"Radad с id {self._ID} отправил сообщение Drawer с id {TARGET_TYPE_DRAWER} с положениями видимых объектов")
         self._sendMessage(msg2draw)
 

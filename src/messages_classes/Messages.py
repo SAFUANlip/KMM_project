@@ -16,6 +16,7 @@ class Radar2CombatControlMsg(BaseMessage):
         super().__init__(MSG_RADAR2CCP_type, 1, time, sender_ID, receiver_ID)
         self.visible_objects = visible_objects
 
+
 class Radar2DrawerMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, pos_objects: list):
         '''
@@ -24,6 +25,7 @@ class Radar2DrawerMsg(BaseMessage):
         '''
         super().__init__(MSG_RADAR2DRAWER_type, 1, time, sender_ID, receiver_ID)
         self.pos_objects = pos_objects
+
 
 class CombatControl2StartingDeviceMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, order: int,
@@ -77,6 +79,6 @@ class Radar2MissileMsg(BaseMessage):
 
 
 class CombatControl2DrawerMsg(BaseMessage):
-    def __init__(self, time: int, sender_ID: int, receiver_ID: int, coordinates) -> None:
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, coordinates) -> None:
         super(CombatControl2DrawerMsg, self).__init__(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
-        self.coordinates = coordinates
+        self.pos_objects = coordinates

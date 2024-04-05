@@ -4,6 +4,7 @@ from src.modules_classes.GuidedMissile import GuidedMissile
 from src.utils.logger import logger
 
 import numpy as np
+import random
 import copy
 
 
@@ -12,19 +13,19 @@ class AeroEnv(Simulated):
         super().__init__(dispatcher, ID, None)
         # self.unpacked_entities = []
         self.entities = []
-        self.t = 0 # ( ? )
+        self.cur_time = 0  # ( ? )
     
     def getEntities(self) -> list:
         return self.entities
 
-    def runSimulationStep(self, t: float = 1) -> None:
+    def runSimulationStep(self, time: float = 1) -> None:
         for entity in self.entities:
             if isinstance(entity, Airplane) or isinstance(entity, Helicopter):
-                if entity.t_start <= t < entity.t_end:
-                    entity.runSimulationStep(t)
+                if entity.start_time <= time < entity.end_time:
+                    entity.runSimulationStep(time)
             else:
                 #logger.aero_env(f"AeroEnv добавила ЗУР ID {entity._ID}")
-                entity.runSimulationStep(t) # TODO: тут не было запуска шага симуляции, почему?!(
+                entity.runSimulationStep(time) # TODO: тут не было запуска шага симуляции, почему?!(
         logger.aero_env(f"AeroEnv имеет {len(self.entities)}")
 
     def addEntity(self, entity) -> None:
@@ -34,7 +35,7 @@ class AeroEnv(Simulated):
         updated_entities = []
         chain_explosion = []
         for el in self.entities:
-            if not (self._dist(pos, el.pos) - el.rad < expl_rad):
+            if not (self._dist(pos, el.pos) - el.size < expl_rad):
                 updated_entities.append(el)
             else:
                 # chain reaction
@@ -57,43 +58,42 @@ class AeroEnv(Simulated):
 
 
 class Airplane(Movable):
-    def __init__(self, dispatcher, ID: int, pos: np.array, rad: float, vel: np.array,
-                 t_start: float = 0.0, t_end: float = np.inf) -> None:
-        super().__init__(dispatcher, ID, pos, vel, rad)
+    def __init__(self, dispatcher, ID: int, pos: np.array, size: float, vel: np.array,
+                 start_time: float = 0.0, end_time: float = np.inf) -> None:
+        super().__init__(dispatcher, ID, pos, vel, size)
         self.vel = vel
         self.type_id = 1
         self.trajectory = [pos]
-        self.t_start = t_start
-        self.t_end = t_end
-        self.t = t_start
+        self.start_time = start_time
+        self.end_time = end_time
+        self.cur_time = start_time
 
-    def runSimulationStep(self, t: float = 1.0) -> None:
+    def runSimulationStep(self, time: float = 1.0) -> None:
         # print(self.pos, self.vel)
-        self.pos = self.pos + self.vel * self._simulating_tick  # t:TODO: Было неправильное время (ты умножал на t)
-        self.t += self._simulating_tick
-        self.trajectory.append((self.pos, self.t))
+        self.pos = self.pos + self.vel * self._simulating_tick  # cur_time:TODO: Было неправильное время (ты умножал на cur_time)
+        self.cur_time += self._simulating_tick
+        self.trajectory.append((self.pos, self.cur_time))
 
     # def pos_copy(self) -> np.array:
     #     return copy.deepcopy(self.pos)
 
 
 class Helicopter(Airplane):
-    def __init__(self, dispatcher, ID: int, pos, rad, vel, t_start, t_end) -> None:
-        super().__init__(dispatcher, ID, pos, rad, vel, t_start, t_end)
+    def __init__(self, dispatcher, ID: int, pos, size, vel, start_time, end_time) -> None:
+        super().__init__(dispatcher, ID, pos, size, vel, start_time, end_time)
         self.type_id = 2
 
 
 if __name__ == "__main__":
-    import random #TODO: импорты наверх
     n = random.randint(3, 10)
     targets = [
-                Airplane(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), rad=5, vel=np.array([1, 1, 1]),
-                          t_start=0, t_end=10)
+                Airplane(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), size=5, vel=np.array([1, 1, 1]),
+                         start_time=0, end_time=10)
 
                 if random.randint(1, 100) % 3 else
 
-                Helicopter(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), rad=5,
-                          vel=np.array([1, 1, 1]),  t_start=0, t_end=10)
+                Helicopter(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), size=5,
+                           vel=np.array([1, 1, 1]), start_time=0, end_time=10)
 
                 for i in range(n)
     ]

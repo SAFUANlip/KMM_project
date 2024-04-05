@@ -11,8 +11,8 @@ if __name__ == '__main__':
 
     n = 3
     targets = [Airplane(dispatcher=dispatcher, ID=1000+i,
-                       pos=np.array([randint(-20000, 20000), randint(-20000, 20000), randint(400, 7000)]), 
-                       vel=np.array([randint(-2, 2)]*3), rad=5) for i in range(n)]
+                        pos=np.array([randint(-20000, 20000), randint(-20000, 20000), randint(400, 7000)]),
+                        vel=np.array([randint(-2, 2)]*3), size=5) for i in range(n)]
     env = AeroEnv(dispatcher, len(targets))
     for el in targets:
         env.addEntity(el)

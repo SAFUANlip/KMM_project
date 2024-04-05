@@ -6,11 +6,11 @@ from PyQt5.QtCore import Qt, QThread, QObject, pyqtSlot, pyqtSignal, QTimer
 import numpy as np
 from math import floor
 
-from src.classes.AeroEnv import *
-from src.classes.CombatControPoint import *
-from src.classes.Radar import *
-from src.classes.StartingDevice import *
-from src.classes.ModelDispatcher import *
+from src.modules_classes.AeroEnv import *
+from src.modules_classes.CombatControPoint import *
+from src.modules_classes.Radar import *
+from src.modules_classes.StartingDevice import *
+from src.modules_classes.ModelDispatcher import *
 
 class CustomThread(QThread):
     def __init__(self, target=None):
@@ -47,7 +47,7 @@ class SimulationModule(QObject):
         for t_s in [model_source for model_source in model_sources[1:] if model_source.model_type // 1000 == 4]:
             vel = [t_s.speed * np.cos(t_s.direction * np.pi/180), t_s.speed * np.sin(t_s.direction * np.pi/180), 0]
             targets.append(Airplane(dispatcher, t_s.id, np.array([t_s.x, t_s.y, t_s.z]), 5, np.array(vel),
-                                    t_s.time_start, t_s.time_finish))
+                                    t_s.start_time, t_s.time_finish))
 
         env = AeroEnv(dispatcher, -2)
         for target in targets:
