@@ -1,4 +1,4 @@
-from config.constants import TARGET_TYPE_DRAWER
+from config.constants import TARGET_TYPE_DRAWER, DRAWER_ID
 from src.modules_classes.AeroEnv import AeroEnv, Airplane
 from src.modules_classes.CombatControPoint import CombatControlPoint
 from src.modules_classes.Radar import RadarRound
@@ -11,29 +11,34 @@ import numpy as np
 if __name__ == '__main__':
     dispatcher = ModelDispatcher()
     dispatcher.setSimulatingRate(1)
-    dispatcher.setSimulationTime(25)
+    dispatcher.setSimulationTime(60)
 
     n = 1
-    targets = [Airplane(dispatcher=dispatcher, ID=1, pos=np.array([10000, 10000, 10000]), size=5, vel=np.array([0, 0, 0]),
+    targets = [Airplane(dispatcher=dispatcher, ID=3, pos=np.array([10000, 10000, 10000]), size=5, vel=np.array([180, -180, 0]),
                         start_time=0, end_time=100),
-               Airplane(dispatcher=dispatcher, ID=2, pos=np.array([-10000, -10000, -10000]), size=5,
-                        vel=np.array([-500, -500, -500]),
+               Airplane(dispatcher=dispatcher, ID=4, pos=np.array([-10000, -10000, 10000]), size=5,
+                        vel=np.array([-500, -500, 0]),
+                        start_time=0, end_time=100),
+               Airplane(dispatcher=dispatcher, ID=5, pos=np.array([-1000, -1000, 10000]), size=5,
+                        vel=np.array([500, -500, 0]),
                         start_time=0, end_time=100)
                ]
     env = AeroEnv(dispatcher, len(targets))
     for el in targets:
         env.addEntity(el)
 
-    radar = RadarRound(dispatcher, 1, 3000, env, (10, 10, 0), 0, 0, 50000, 120, 90)
+    radar = RadarRound(dispatcher, 1, 3000, env, (10, 10, 0), 0, 0, 50000, 360, 180)
+    radar2 = RadarRound(dispatcher, 2, 3000, env, (-100, -100, 0), 0, 0, 50000, 360, 180)
+
     start_devices = [StartingDevice(dispatcher, 2000, np.array([0, 0, 0]), env)]
     starting_devices_coords = {}
     for sd in start_devices:
         starting_devices_coords[sd._ID] = sd.pos
     combat = CombatControlPoint(dispatcher, 3000, starting_devices_coords)
 
-    graphics = Graphics(dispatcher=dispatcher, ID=TARGET_TYPE_DRAWER, aero_env=env)
+    graphics = Graphics(dispatcher=dispatcher, ID=DRAWER_ID, aero_env=env)
 
-    dispatcher.configurate([env, radar, combat, *start_devices, graphics])
+    dispatcher.configurate([env, radar, radar2, combat, *start_devices, graphics])
     dispatcher.run()
 
     # rate, messages_classes = dispatcher.getMessageHistory()

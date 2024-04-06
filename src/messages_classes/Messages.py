@@ -3,7 +3,8 @@ from typing import List
 import numpy as np
 
 from config.constants import MSG_CCP2GM_type, MSG_CCP2DRAWER_type, MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
-    MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type
+    MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
+    MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type
 from src.messages_classes.BaseMessage import BaseMessage
 
 
@@ -34,6 +35,11 @@ class CombatControl2StartingDeviceMsg(BaseMessage):
         self.order = order
         self.coord = coord
 
+class MissileCapacityMsg(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, missile_number: int = 0) -> None:
+        super(MissileCapacityMsg, self).__init__(MSG_CCP_MISSILE_CAPACITY_type, 1, time, sender_ID, receiver_ID)
+        self.missile_number = missile_number
+
 
 # ответное сообщение для пбу
 class MissileStarted(BaseMessage):
@@ -53,7 +59,7 @@ class NoMissiles(BaseMessage):
 
 class CombatControl2RadarMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int,
-                 new_target_coord: np.array([float, float, float]), missile_id:int) -> None:
+                 new_target_coord: np.array([float, float, float]), target_vel: np.array([float, float, float]), missile_id:int) -> None:
         """
         :param time:
         :param sender_ID:
@@ -62,12 +68,13 @@ class CombatControl2RadarMsg(BaseMessage):
         """
         super(CombatControl2RadarMsg, self).__init__(MSG_CCP2RADAR_type, 10, time, sender_ID, receiver_ID)
         self.new_target_coord = new_target_coord
+        self.target_vel = target_vel
         self.missile_id = missile_id
 
 
 class Radar2MissileMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int,
-                 new_target_coord: np.array([float, float, float])) -> None:
+                 new_target_coord: np.array([float, float, float]), target_vel: np.array([float, float, float])) -> None:
         """
         :param time:
         :param sender_ID:
@@ -76,9 +83,20 @@ class Radar2MissileMsg(BaseMessage):
         """
         super(Radar2MissileMsg, self).__init__(MSG_RADAR2GM_type, 10, time, sender_ID, receiver_ID)
         self.new_target_coord = new_target_coord
+        self.target_vel = target_vel
 
 
 class CombatControl2DrawerMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, coordinates) -> None:
         super(CombatControl2DrawerMsg, self).__init__(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
         self.pos_objects = coordinates
+
+
+class GuidedMissileHit2RadarMsg(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
+        super(GuidedMissileHit2RadarMsg, self).__init__(MSG_GM2RADAR_type, 0, time, sender_ID, receiver_ID)
+
+class GuidedMissileHit2CCPMsg(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, guided_missile_id:int) -> None:
+        super(GuidedMissileHit2CCPMsg, self).__init__(MSG_RADAR2CCP_GM_HIT_type, 0, time, sender_ID, receiver_ID)
+        self.guided_missile_id = guided_missile_id

@@ -239,6 +239,7 @@ class MainWindow(QMainWindow):
     def onSimulationEnded(self, result):
         print('Simulation ended, maybe there should be some code here.')
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
