@@ -83,7 +83,8 @@ class CombatControlPoint(Simulated):
         self.target_list = []
         self.missile_list = []
         self.starting_devices_coords = starting_devices_coords
-        logger.combat_control(f"simulating tick = {self._simulating_tick}")
+        logger.combat_control(f"Создан ПБУ с ID {ID}")
+
 
     def findMostSimilarObject(self, visible_object: list, cur_time: float) -> typing.Tuple[
         int, typing.Union[CCMissile, CCTarget]]:
@@ -111,11 +112,11 @@ class CombatControlPoint(Simulated):
             coord_dif = (np.sum((target_coord - obj_coord) ** 2)) ** 0.5
 
             time_went = cur_time - last_target_time
-            logger.combat_control(
-                f"ПБУ увидела объект с текущими координатами {obj_coord}, координаты старой цели {target_coord}, время текущее {cur_time}, "
-                f"последний раз видела цель в {last_target_time}, разница ккординат {coord_dif}, скорость цели {target_speed_mod} ")
-            logger.combat_control(
-                f"{max(0, target_speed_mod * (time_went - tick))}, {coord_dif}, {max(0, target_speed_mod * (time_went + tick))}")
+            # logger.combat_control(
+            #     f"ПБУ увидела объект с текущими координатами {obj_coord}, координаты старой цели {target_coord}, время текущее {cur_time}, "
+            #     f"последний раз видела цель в {last_target_time}, разница ккординат {coord_dif}, скорость цели {target_speed_mod} ")
+            # logger.combat_control(
+            #     f"{max(0, target_speed_mod * (time_went - tick))}, {coord_dif}, {max(0, target_speed_mod * (time_went + tick))}")
             if (coord_dif < min_diff and max(0, target_speed_mod *
                                                 (time_went - tick)) <= coord_dif
                     <= max(0, target_speed_mod * (time_went + tick))):
@@ -131,9 +132,9 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_missile_time
 
-            logger.combat_control(f"ПБУ увидела объект с текущими координатами {obj_coord}, координаты старой ракеты {missile_coord}, время текущее {cur_time}, "
-                                  f"последний раз видела ракету в {last_missile_time}, разница ккординат {coord_dif}, скорость ракеты {missile_speed_mod} ")
-            logger.combat_control(f"{max(0, missile_speed_mod * (time_went - tick))}, {coord_dif}, {max(0,missile_speed_mod * (time_went + tick))}" )
+            # logger.combat_control(f"ПБУ увидела объект с текущими координатами {obj_coord}, координаты старой ракеты {missile_coord}, время текущее {cur_time}, "
+            #                       f"последний раз видела ракету в {last_missile_time}, разница ккординат {coord_dif}, скорость ракеты {missile_speed_mod} ")
+            # logger.combat_control(f"{max(0, missile_speed_mod * (time_went - tick))}, {coord_dif}, {max(0,missile_speed_mod * (time_went + tick))}" )
             if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - tick))
                     <= coord_dif <= max(0,
                                         missile_speed_mod * (
@@ -141,7 +142,7 @@ class CombatControlPoint(Simulated):
                 min_diff = coord_dif
                 obj_type = 2
                 sim_obj = missile
-        logger.combat_control(f"ПБУ решила что объект с координатами {obj_coord} это {obj_type}, ЗУР - 2, Цель старая - 1")
+        logger.combat_control(f"ПБУ решила что объект с координатами {obj_coord} это {obj_type}, ЗУР - 2, Цель старая - 1, Цель новая - 0")
         return obj_type, sim_obj
 
     def runSimulationStep(self, time: float) -> None:
@@ -153,7 +154,6 @@ class CombatControlPoint(Simulated):
         list_for_drawer = []
 
         msgsFromStartingDevice = self._checkAvailableMessagesByType(MSG_SD2CCP_MS_type)
-
         logger.combat_control(f"ПБУ получил от ПУ {len(msgsFromStartingDevice)} сообщений")
         if len(msgsFromStartingDevice) > 0:
             if not isinstance(msgsFromStartingDevice, list):
@@ -179,91 +179,68 @@ class CombatControlPoint(Simulated):
             return
 
         radar_id = msgFromRadar[0].sender_ID
-        logger.combat_control(f"ПБУ получил от МФР {len(msgFromRadar[0].visible_objects)} объектов")
+        logger.combat_control(f"ПБУ получил сообщения от {len(msgFromRadar)} МФР")
 
-        if len(self.target_list) == 0:  # начало программы, когда на поле только цели
-            logger.combat_control(f"ПБУ увидел свои первые объекты")
+        # отделить новые цели от всего что было раньше
+        for msg in msgFromRadar:
+            logger.combat_control(f"ПБУ получил {len(msg.visible_objects)} сообщений от МФР с id {msg.sender_ID}")
 
-            for msg in msgFromRadar:
-                visible_objects = msg.visible_objects
-                for visible_object in visible_objects:
-                    coord = visible_object[0]
-                    speed_direct = visible_object[1]
-                    speed_mod = visible_object[2]
+            visible_objects = msg.visible_objects
+            for visible_object in visible_objects:
+                obj_coord = visible_object[0]
+                obj_speed_direct = visible_object[1]
+                obj_speed_mod = visible_object[2]
 
-                    self.target_list.append(CCTarget(coord, speed_direct, speed_mod, time))
+                obj_type, sim_obj = self.findMostSimilarObject(visible_object, time)
+                if obj_type == 0:
+                    self.target_list.append(CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time))
                     # положить в память новые цели
                     # FIXME id of ПУ is not 2000
                     msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
                                                                          self._ID, 2000, len(self.target_list) - 1,
-                                                                         coord)
-                    list_for_drawer.append([TARGET_TYPE_DRAWER, coord])
+                                                                         obj_coord)
 
-                    logger.combat_control(f"ПБУ отправил ПУ координаты новой цели: {coord}")
+                    logger.combat_control(f"ПБУ отправил ПУ координаты новой цели: {obj_coord}")
                     self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
+                    list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
+
                     # ЗУР по координатам coord
-        else:
 
-            # получить id  ЗУР, которые ПУ отправила
+                elif obj_type == 1:  # старая цель, надо обновить данные о ней в листах
+                    # target list и missiles list и после этого ЗУР, которая летит за ней,
+                    # перенаправить
+                    idx = self.target_list.index(sim_obj)
+                    list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
 
-            # отделить новые цели от всего что было раньше
-            for msg in msgFromRadar:
-                visible_objects = msg.visible_objects
-                for visible_object in visible_objects:
-                    obj_coord = visible_object[0]
-                    obj_speed_direct = visible_object[1]
-                    obj_speed_mod = visible_object[2]
+                    old_target_coord = self.target_list[idx].coord
 
-                    obj_type, sim_obj = self.findMostSimilarObject(visible_object, time)
-                    if obj_type == 0:
-                        self.target_list.append(CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time))
-                        # положить в память новые цели
-                        # FIXME id of ПУ is not 2000
-                        msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
-                                                                             self._ID, 2000, len(self.target_list) - 1,
-                                                                             obj_coord)
+                    self.target_list[idx].updСoord(obj_coord, time)
+                    self.target_list[idx].updSpeedMod(obj_speed_mod, time)
 
-                        logger.combat_control(f"ПБУ отправил ПУ координаты новой цели: {obj_coord}")
-                        self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
-                        list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
+                    for i in range(len(self.missile_list)):
+                        missile = self.missile_list[i]
 
-                        # ЗУР по координатам coord
+                        if (missile.target_coord == old_target_coord).all():
+                            self.missile_list[i].updTargetCoord(obj_coord)
 
-                    elif obj_type == 1:  # старая цель, надо обновить данные о ней в листах
-                        # target list и missiles list и после этого ЗУР, которая летит за ней,
-                        # перенаправить
-                        idx = self.target_list.index(sim_obj)
-                        list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
+                            missile_id = self.missile_list[i].id
+                            target_vel = self.missile_list[i].target_vel
+                            msg2radar = CombatControl2RadarMsg(time, self._ID, radar_id, obj_coord, target_vel,  missile_id)
+                            self._sendMessage(msg2radar)
 
-                        old_target_coord = self.target_list[idx].coord
+                            logger.combat_control(
+                                f"ПБУ отправил сообщение Радару, что у ЗУР с id:{missile_id}, новые координаты ее цели:{obj_coord}")
+                            break
 
-                        self.target_list[idx].updСoord(obj_coord, time)
-                        self.target_list[idx].updSpeedMod(obj_speed_mod, time)
+                elif obj_type == 2:  # старая ЗУР, нужно обновить поля в листе ЗУР
+                    list_for_drawer.append([MISSILE_TYPE_DRAWER, obj_coord])
 
-                        for i in range(len(self.missile_list)):
-                            missile = self.missile_list[i]
+                    idx = self.missile_list.index(sim_obj)
+                    logger.combat_control(
+                        f"ПБУ увидел старую ЗУР с id:{self.missile_list[idx].id}, новые координаты:{obj_coord}")
 
-                            if (missile.target_coord == old_target_coord).all():
-                                self.missile_list[i].updTargetCoord(obj_coord)
-
-                                missile_id = self.missile_list[i].id
-                                target_vel = self.missile_list[i].target_vel
-                                msg2radar = CombatControl2RadarMsg(time, self._ID, radar_id, obj_coord, target_vel,  missile_id)
-                                self._sendMessage(msg2radar)
-
-                                logger.combat_control(
-                                    f"ПБУ отправил сообщение Радару, что у ЗУР с id:{missile_id}, новые координаты ее цели:{obj_coord}")
-                                break
-
-                    elif obj_type == 2:  # старая ЗУР, нужно обновить поля в листе ЗУР
-                        list_for_drawer.append([MISSILE_TYPE_DRAWER, obj_coord])
-
-                        idx = self.missile_list.index(sim_obj)
-                        logger.combat_control(
-                            f"ПБУ увидел старую ЗУР с id:{self.missile_list[idx].id}, новые координаты:{obj_coord}")
-
-                        self.missile_list[idx].updСoord(obj_coord, time)
-                        self.missile_list[idx].updSpeedMod(obj_speed_mod, time)
+                    self.missile_list[idx].updСoord(obj_coord, time)
+                    self.missile_list[idx].updSpeedMod(obj_speed_mod, time)
 
         msg2drawer = CombatControl2DrawerMsg(
             time=time,
@@ -272,3 +249,4 @@ class CombatControlPoint(Simulated):
             coordinates=list_for_drawer,
         )
         self._sendMessage(msg2drawer)
+        logger.combat_control(f"ПБУ отправил {len(list_for_drawer)} смс Рисовальщику")
