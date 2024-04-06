@@ -3,7 +3,8 @@ from typing import List
 import numpy as np
 
 from config.constants import MSG_CCP2GM_type, MSG_CCP2DRAWER_type, MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
-    MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type
+    MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
+    MSG_CCP_MISSILE_CAPACITY_type
 from src.messages_classes.BaseMessage import BaseMessage
 
 
@@ -33,6 +34,11 @@ class CombatControl2StartingDeviceMsg(BaseMessage):
         super(CombatControl2StartingDeviceMsg, self).__init__(MSG_CCP2SD_type, 1, time, sender_ID, receiver_ID)
         self.order = order
         self.coord = coord
+
+class MissileCapacityMsg(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, missile_number: int = 0) -> None:
+        super(MissileCapacityMsg, self).__init__(MSG_CCP_MISSILE_CAPACITY_type, 1, time, sender_ID, receiver_ID)
+        self.missile_number = missile_number
 
 
 # ответное сообщение для пбу

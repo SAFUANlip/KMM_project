@@ -48,13 +48,11 @@ class Graphics(Simulated):
             # 0 - зур, 1 - цель
             line1, line2 = None, None
             for i in range(len(CCP_msg)):
-                print(CCP_msg[i])
                 if CCP_msg[i][0] == MISSILE_TYPE_DRAWER:
                     line1 = ax[1].scatter(CCP_msg[i][1][0], CCP_msg[i][1][1], marker='^', color='g', label="GuidedMissile")
                 else:
                     line2 = ax[1].scatter(CCP_msg[i][1][0], CCP_msg[i][1][1], marker='o', color='r', label="Target")
             ax[1].legend((line1, line2), ['GuidedMissile', 'Target'])
-
 
         aims = self.aero_env.getEntities()
         if len(aims) > 0:
