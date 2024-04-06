@@ -153,7 +153,7 @@ class CombatControlPoint(Simulated):
     def get_missile_capacities(self, time: float) -> None:
         for key in self.starting_devices_coords.keys():
             self.starting_devices_launched[key] = 0
-            self.starting_devices_capacity[key] = 5
+            self.starting_devices_capacity[key] = 0
 
             msg2starting_device = MissileCapacityMsg(time, self._ID, key)
             self._sendMessage(msg2starting_device)  # спрашиваю ПУ, сколько у них ЗУР в запасе
@@ -218,7 +218,6 @@ class CombatControlPoint(Simulated):
 
                 obj_type, sim_obj = self.findMostSimilarObject(visible_object, time)
                 if obj_type == 0:
-                    self.target_list.append(CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time))
                     # положить в память новые цели
                     min_dist = 10e10
                     sd_id = None
@@ -231,6 +230,8 @@ class CombatControlPoint(Simulated):
                                 min_dist = dist
 
                     if sd_id is not None:
+                        self.target_list.append(CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time))
+
                         msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
                                                                              self._ID, sd_id, len(self.target_list) - 1,
                                                                              obj_coord)
