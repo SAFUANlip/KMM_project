@@ -35,11 +35,13 @@ class Graphics(Simulated):
         MFR_list = self._checkAvailableMessagesByType(MSG_RADAR2DRAWER_type)
 
         if len(MFR_list) > 0:
+            line1 = None
             MFR_msg = MFR_list[0].pos_objects
             for i in range(len(MFR_msg)):
                 line1 = ax[0].scatter(MFR_msg[i][0], MFR_msg[i][1], marker='o', color='b')
 
             ax[0].legend([line1], ["object"])
+        ax[0].set_title('Радар')
 
         CCP_list = self._checkAvailableMessagesByType(MSG_CCP2DRAWER_type)
         logger.info(f"Рисовальщик получил {len(CCP_list)} сообщений от ПБУ")
@@ -53,6 +55,7 @@ class Graphics(Simulated):
                 else:
                     line2 = ax[1].scatter(CCP_msg[i][1][0], CCP_msg[i][1][1], marker='o', color='r', label="Target")
             ax[1].legend((line1, line2), ['GuidedMissile', 'Target'])
+        ax[1].set_title('Пункт боевого управления')
 
         aims = self.aero_env.getEntities()
         if len(aims) > 0:
@@ -68,7 +71,7 @@ class Graphics(Simulated):
                     line3 = ax[2].scatter(aim.pos[0], aim.pos[1], marker='^', color='g', label='GuidedMissile')
 
             ax[2].legend((line1, line2, line3), ['Plane', 'Helicopter', 'GuidedMissile'])
-
+        ax[2].set_title('Воздушная обстановка')
         fig.canvas.draw()
         fig.canvas.flush_events()
 
