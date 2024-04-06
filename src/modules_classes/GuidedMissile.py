@@ -1,5 +1,6 @@
 import numpy as np
 
+from src.messages_classes.Messages import GuidedMissileHit2RadarMsg
 from src.modules_classes.ModelDispatcher import ModelDispatcher
 from src.modules_classes.Movable import Movable
 from src.messages_classes.BaseMessage import BaseMessage
@@ -143,6 +144,7 @@ class GuidedMissile(Movable):
         if len(messages) != 0:
             pos_target = messages[0].new_target_coord
             target_vel = messages[0].target_vel
+            self.radar_id  = messages[0].sender_ID
             logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара, новые координаты цели: {pos_target}, ее вектор скорости: {target_vel}")
 
         if self.status == 1:
@@ -152,6 +154,14 @@ class GuidedMissile(Movable):
             if self.status == 2:
                 logger.guided_missile(
                     f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, поразила цель с координатами: {self.pos_target}")
+
+                # отправляет смс радару чтобы радар передал ПБУ и ПБУ забыла про это ЗУР и ее цель
+                logger.guided_missile(
+                    f"ЗУР ID: {self._ID}, отправила сообщение Радару {self.radar_id} о том, что она перестала существовать")
+
+                msg2radar_hit = GuidedMissileHit2RadarMsg(time, self._ID, self.radar_id)
+                self._sendMessage(msg2radar_hit)
+
                 self.aero_env.explosion(self.pos, self.expl_radius)
             elif time - self.launch_time > self.life_time:
                 self.status = 3
