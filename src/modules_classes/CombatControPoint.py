@@ -3,7 +3,8 @@ import typing
 import numpy as np
 
 from config.constants import GuidedMissile_SPEED, TARGET_TYPE_DRAWER, MISSILE_TYPE_DRAWER, MSG_RADAR2CCP_type, \
-    MSG_SD2CCP_MS_type, DRAWER_ID, MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2CCP_GM_HIT_type
+    MSG_SD2CCP_MS_type, DRAWER_ID, MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2CCP_GM_HIT_type, NEW_TARGET, OLD_TARGET, \
+    OLD_GM
 from src.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2DrawerMsg, \
     CombatControl2RadarMsg, MissileCapacityMsg
 from src.modules_classes.Simulated import Simulated, ModelDispatcher
@@ -96,16 +97,14 @@ class CombatControlPoint(Simulated):
         """
 
         :param visible_object:
-        :return: 0 if it is a new target, else
-        1 - old target
-        2 - old missile
+        :return: object type
 
         """
         obj_coord = visible_object[0]
 
         min_diff = 10e10
         sim_obj = None
-        obj_type = 0
+        obj_type = NEW_TARGET
 
         tick = self._simulating_tick
 
@@ -121,7 +120,7 @@ class CombatControlPoint(Simulated):
                                                 (time_went - tick)) <= coord_dif
                     <= max(0, target_speed_mod * (time_went + tick))):
                 min_diff = coord_dif
-                obj_type = 1
+                obj_type = OLD_TARGET
                 sim_obj = target
 
         for missile in self.missile_list:
@@ -137,7 +136,7 @@ class CombatControlPoint(Simulated):
                                         missile_speed_mod * (
                                                 time_went + tick))):
                 min_diff = coord_dif
-                obj_type = 2
+                obj_type = OLD_GM
                 sim_obj = missile
         logger.combat_control(
             f"ПБУ решила что объект с координатами {obj_coord} это {obj_type}, ЗУР - 2, Цель старая - 1, Цель новая - 0")
@@ -268,7 +267,7 @@ class CombatControlPoint(Simulated):
                 obj_speed_mod = visible_object[2]
 
                 obj_type, sim_obj = self.findMostSimilarObject(visible_object, time)
-                if obj_type == 0:
+                if obj_type == NEW_TARGET:
                     # положить в память новые цели
                     min_dist = 10e10
                     sd_id = None
@@ -295,7 +294,7 @@ class CombatControlPoint(Simulated):
 
                     # ЗУР по координатам coord
 
-                elif obj_type == 1:  # старая цель, надо обновить данные о ней в листах
+                elif obj_type == OLD_TARGET:  # старая цель, надо обновить данные о ней в листах
                     # target list и missiles list и после этого ЗУР, которая летит за ней,
                     # перенаправить
                     idx = self.target_list.index(sim_obj)
@@ -321,7 +320,7 @@ class CombatControlPoint(Simulated):
                                 f"ПБУ отправил сообщение Радару, что у ЗУР с id:{missile_id}, новые координаты ее цели:{obj_coord}")
                             break
 
-                elif obj_type == 2:  # старая ЗУР, нужно обновить поля в листе ЗУР
+                elif obj_type == OLD_GM:  # старая ЗУР, нужно обновить поля в листе ЗУР
                     idx = self.missile_list.index(sim_obj)
                     logger.combat_control(
                         f"ПБУ увидел старую ЗУР с id:{self.missile_list[idx].id}, новые координаты:{obj_coord}")
