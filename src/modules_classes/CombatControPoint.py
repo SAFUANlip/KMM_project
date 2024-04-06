@@ -239,9 +239,9 @@ class CombatControlPoint(Simulated):
                         logger.combat_control(f"ПБУ отправил ПУ id {sd_id} координаты новой цели: {obj_coord}")
                         self.starting_devices_launched[key] = self.starting_devices_launched[key]+1
                         self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
-                        list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
                     else:
                         logger.warning(f"Не осталось свободных ЗУР!!!")
+                    list_for_drawer.append([TARGET_TYPE_DRAWER, obj_coord])
 
                      # ЗУР по координатам coord
 
