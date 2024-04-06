@@ -90,7 +90,6 @@ class RadarRound(Simulated):
             self._sendMessage(msg2gm)
 
     def sendCcpHitMissile(self, time: float):
-        self.changeMissileCoords()
         msgs_from_gm = self._checkAvailableMessagesByType(MSG_GM2RADAR_type)
         if len(msgs_from_gm) != 0:
             logger.radar(
