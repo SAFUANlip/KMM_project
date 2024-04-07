@@ -1,8 +1,14 @@
 # GuideMissile constants
-GuidedMissile_SPEED = 1200  # скорость ЗУР, в м/с
+GuidedMissile_SPEED = 1200  # скорость ЗУР, в м/с 1200
 GuidedMissile_LifeTime = 36000  # максмальное время жизни ЗУР, в секундах
 GuidedMissile_ExplRadius = 100  # поражающих осколков ЗУР, в метрах
 GuidedMissile_MaxRotAngle = 0.79  # максимальный угол, на который может повернуть ракета при каждом шаге, в радианах
+
+Airplane_SPEED = 555  # скорость самолета в м/c 555
+Airplane_MaxRotAngle = 0.79  # максимальный угол, на который может повернуть самолет при каждом шаге, в радианах
+Airplane_SIZE = 20  # характерный размер самолета
+Airplane_DistUpdate = 100  # расстояние до контрольной точки, при которой она считается достигнутой
+EPS = 1e-7  # слагаемое, чтобы избежать деление на 0
 
 NUMBER_OF_MISSILES = 10
 
