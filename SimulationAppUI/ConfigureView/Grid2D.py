@@ -4,9 +4,6 @@ from PyQt5.QtGui import QTransform, QFont, QPen, QPixmap, QColor
 
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QApplication
 import sys
-import pathlib
-
-from GraphicComponents import SimpleGraphicComponent
 
 class GraphicsPlotNocksTube(QGraphicsItem):
 
@@ -73,7 +70,8 @@ class Graphics2DPlotGrid(QGraphicsItem):
         self.m_rect = QRectF()
 
         self.m_mainPen.setCosmetic(True)
-        self.m_secondaryPen = self.m_mainPen
+        self.m_secondaryPen.setCosmetic(True)
+        self.m_mainPen.setColor(QColor(50, 137, 48))
         self.m_secondaryPen.setColor(QColor(50, 137, 48))
 
         self.abscissMainLines = GridAxisGuideLines()
@@ -309,11 +307,11 @@ class GraphicsPlotItem(QGraphicsItem):
     def autoGridSetValue(self, guidesMain, guidesSecondary, min, max):
         if self.isAutoGrid:
             guidesMain.baseValue = min
-            guidesMain.step = (max-min)/5.0
+            guidesMain.step = (max-min)/10.0
 
         if self.isAutoSecondaryGrid or self.isAutoGrid:
             guidesSecondary.baseValue = guidesMain.baseValue
-            guidesSecondary.step = guidesMain.step/5.0
+            guidesSecondary.step = guidesMain.step/2.0
 
     def setAxisRange(self, axisNumber, min, max):
         if min >= max:
@@ -402,10 +400,9 @@ if __name__ == "__main__":
     plot.setAxisText(1, "y, м")
     plot.setAbscissaRange(-100000, 100000)
     plot.setOrdinateRange(-200000, 200000)
-    plot.setRect(plot.boundingRect())
     scene.setSceneRect(plot.boundingRect())
-    pixmap = QPixmap(str(pathlib.Path().resolve() / 'SimulationAppUI/images/radar_icon.png')).scaledToHeight(50)
-    item = SimpleGraphicComponent(pixmap, QApplication.startDragDistance())
+    item = QGraphicsRectItem(-20, -20, 40, 40)
     scene.addItem(item)
     item.setPos(plot.gridItem.mapToScene(QPointF(60000, 40000)))
+    print(plot.gridItem.mapFromScene(item.scenePos()))
     sys.exit(app.exec_())

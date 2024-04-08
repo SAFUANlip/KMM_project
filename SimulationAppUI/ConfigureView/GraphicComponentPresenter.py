@@ -28,14 +28,14 @@ class GraphicComponentPresenter(QObject):
     #### slots
     @pyqtSlot()
     def updateUI(self):
-        x, y = self.translator.translateWorld2Screen(self.model.getX(), self.model.getY())
-        self.component.setPos(x, y)
+        point = self.translator.translateFromModel(self.model.getX(), self.model.getY())
+        self.component.setPos(point.x(), point.y())
 
     @pyqtSlot()
     def onComponentDragged(self):
-        x, y = self.translator.translateScreen2World(self.component.x(), self.component.y())
-        self.model.setX(x)
-        self.model.setY(y)
+        point = self.translator.translateToModel(self.component.x(), self.component.y())
+        self.model.setX(point.x())
+        self.model.setY(point.y())
 
     @pyqtSlot()
     def onConfigurateClicked(self):
@@ -49,19 +49,29 @@ class GraphicComponentPresenter(QObject):
 class GraphicRadarPresenter(GraphicComponentPresenter):
     def __init__(self, model, component, translator):
         super(GraphicRadarPresenter, self).__init__(model, component, translator)
-        self.component.radiusx = int(self.model.view_distance * self.translator.getC2WWidthRatio())
-        self.component.radiusy = int(self.model.view_distance * self.translator.getC2WHeightRatio())
-        self.component.arc_len = self.model.pan_per_sec
-        self.component.direction = -self.model.pan_start + 90 - self.model.pan_per_sec // 2
-        self.component.is_round = self.model.overview_mode == 0
+
+        coord = (self.translator.translateFromModel(self.model.view_distance, self.model.view_distance) - 
+                self.translator.translateFromModel(0, 0)).x()
+        self.component.round.setRect(-coord, -coord, 2 * coord, 2 * coord)
+        self.component.round.setParentItem(self.component)
+        self.component.sector.setRect(-coord, -coord, 2 * coord, 2 * coord)
+        self.component.sector.setParentItem(self.component)
+        
+        self.setSectorView()
 
     @pyqtSlot()
     def updateUI(self):
         super().updateUI()
-        self.component.radiusx = int(self.model.view_distance * self.translator.getC2WWidthRatio())
-        self.component.radiusy = int(self.model.view_distance * self.translator.getC2WHeightRatio())
-        self.component.direction = -self.model.pan_start + 90 - self.model.pan_per_sec // 2
-        self.component.is_round = self.model.overview_mode == 0
+        self.setSectorView()
+
+    def setSectorView(self):
+        span = self.model.pan_per_sec
+        start_angle = -self.model.pan_start + 90 - self.model.pan_per_sec // 2
+        self.component.setSector(start_angle, span)
+        if self.model.overview_mode == 0:
+            self.component.round.show()
+        else:
+            self.component.round.hide()
 
 
 class GraphicAeroTargetPresenter(GraphicComponentPresenter):
