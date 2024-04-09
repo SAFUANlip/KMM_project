@@ -21,13 +21,25 @@ if __name__ == '__main__':
                         start_time=0, end_time=100),
                Airplane(dispatcher=dispatcher, ID=4,
                         trajectory_planned=[np.array([-10000, -10000, 10000])], size=5,
-                        start_time=0, end_time=120),
-               Airplane(dispatcher=dispatcher, ID=5,
-                        trajectory_planned=[np.array([-1000, -1000, 10000]),
-                                            np.array([-1100, -1000, 10000]),
-                                            np.array([-1200, -1100, 10000]),
-                                            np.array([-1300, -1200, 10000])], size=5,
-                        start_time=0, end_time=140)
+                        start_time=10, end_time=120),
+               Airplane(
+                   # dispatcher=dispatcher, ID=5,
+                   # trajectory_planned=[np.array([-1000, -1000, 10000]),
+                   #                     np.array([-1100, -1000, 10000]),
+                   #                     np.array([-1200, -1100, 10000]),
+                   #                     np.array([-1300, -1200, 10000])],
+                   # size=5,
+                   # start_time=0,
+                   # end_time=140
+                   dispatcher=dispatcher, ID=5,
+                   trajectory_planned=[np.array([-20000, 10000, 10000]),
+                                       np.array([-22000, 15000, 7000]),
+                                       np.array([-24000, 20000, 5000]),
+                                       np.array([-26000, 25000, 5000])],
+                   size=5,
+                   start_time=0,
+                   end_time=140
+               )
                ]
     env = AeroEnv(dispatcher, len(targets), targets=targets)
 
