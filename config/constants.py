@@ -12,6 +12,7 @@ EPS = 1e-7  # слагаемое, чтобы избежать деление н�
 
 NUMBER_OF_MISSILES = 10
 
+DISPATCHER_ID = 0
 DRAWER_ID = -1000
 
 
@@ -38,6 +39,9 @@ MSG_SD2CCP_NS_type = 6002
 
 MSG_RADAR2DRAWER_type = -1
 MSG_CCP2DRAWER_type = -2
+
+MSG_AEROENV2DISPATCHER_type = 7001
+MSG_AEROENV2DISPATCHER_VIEW_type = 7002
 
 
 

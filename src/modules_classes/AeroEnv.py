@@ -2,7 +2,8 @@ from src.modules_classes.Simulated import Simulated
 from src.modules_classes.Movable import Movable, angle_between, dist
 from src.modules_classes.GuidedMissile import GuidedMissile
 from src.utils.logger import logger
-from config.constants import Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZE, Airplane_DistUpdate, EPS
+from config.constants import Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZE, Airplane_DistUpdate, EPS, DISPATCHER_ID
+from src.messages_classes.Messages import AeroEnv_InitMessage, AeroEnv_ViewMessage
 
 import numpy as np
 import random
@@ -16,11 +17,21 @@ class AeroEnv(Simulated):
         self.entities = []
         self.cur_time = 0  # ( ? )
         self.targets = targets
+        self.start = True
     
     def getEntities(self) -> list:
         return self.entities
 
     def runSimulationStep(self, time: float = 1) -> None:
+        if self.start:
+            init_msg = AeroEnv_InitMessage(
+                time=time,
+                sender_ID=self._ID,
+                receiver_ID=DISPATCHER_ID
+            )
+            self._sendMessage(init_msg)
+            self.start = False
+
         not_launched_targets = []
         for target in self.targets:
             if target.start_time <= time:
@@ -36,6 +47,30 @@ class AeroEnv(Simulated):
             else:
                 entity.runSimulationStep(time)
         logger.aero_env(f"AeroEnv имеет {len(self.entities)}")
+        self.send_vis_objects2gui(time)
+
+    def send_vis_objects2gui(self, time):
+        missile_list = []
+        target_list = []
+        view_dict = {}
+
+        for entity in self.entities:
+            if isinstance(entity, Airplane) or isinstance(entity, Helicopter):
+                target_list.append((entity._ID, entity.pos))
+            else:
+                missile_list.append((entity._ID, entity.pos))
+
+        view_dict["missiles"] = missile_list
+        view_dict["targets"] = target_list
+
+        msg2drawer = AeroEnv_ViewMessage(
+            time=time,
+            sender_ID=self._ID,
+            receiver_ID=DISPATCHER_ID,
+            view_dict=view_dict,
+        )
+        self._sendMessage(msg2drawer)
+        logger.aero_env(f"ВО отправил GUI: {len(missile_list)} ЗУР и {len(target_list)} ЦЕЛЕЙ")
 
     def addEntity(self, entity) -> None:
         self.entities.append(entity)
