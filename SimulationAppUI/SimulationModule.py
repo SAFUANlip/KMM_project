@@ -57,8 +57,6 @@ class SimulationModule(QObject):
             )
 
         env = AeroEnv(dispatcher, -2, targets=targets)
-        for target in targets:
-            env.addEntity(target)
 
         configuration = [env]
 
