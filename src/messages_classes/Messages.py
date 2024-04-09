@@ -29,10 +29,11 @@ class Radar2DrawerMsg(BaseMessage):
 
 class CombatControl2StartingDeviceMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, order: int,
-                 coord: np.array([float, float, float])) -> None:
+                 coord: np.array([float, float, float]), radar_id) -> None:
         super(CombatControl2StartingDeviceMsg, self).__init__(MSG_CCP2SD_type, 1, time, sender_ID, receiver_ID)
         self.order = order
         self.coord = coord
+        self.radar_id = radar_id
 
 class MissileCapacityMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, missile_number: int = 0) -> None:
