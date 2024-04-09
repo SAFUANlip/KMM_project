@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSlot
 
+
 class DispatcherConfigPresenter(QObject):
     def __init__(self, widget, dispatcher, parent=None):
         super(DispatcherConfigPresenter, self).__init__(parent)
