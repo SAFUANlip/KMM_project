@@ -92,6 +92,7 @@ class CombatControlPoint(Simulated):
         logger.combat_control(f"starting_devices_coords {starting_devices_coords}")
         logger.combat_control(f"Создан ПБУ с ID {ID}")
 
+
     def findMostSimilarObject(self, visible_object: list, cur_time: float) -> typing.Tuple[
         int, typing.Union[CCMissile, CCTarget]]:
         """

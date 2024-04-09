@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 
 class DispatcherSource:
     def __init__(self):
-        self.time = 250
+        self.time = 5
 
     def setTime(self, time):
         self.time = time
