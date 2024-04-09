@@ -131,7 +131,7 @@ class RadarRound(Simulated):
 # FIXME: починить, чтоб работало
 class RadarSector(RadarRound):
     def __init__(self, dispatcher, ID: int, cp_ID: int, aero_env: AeroEnv,
-                 pos, pan_start, tilt_start, dist, pan_angle, tilt_angle, pan_sec, tilt_sec, type_of_view):
+                 pos, pan_start, tilt_start, dist, pan_angle, tilt_angle, pan_sec, tilt_sec, type_of_view = "horizontal"):
         """ Класс, описывающий работу РЛС секторного обзора, является дочерним классом от РЛС кругового обзора:
          :param pan_angle: максимальный угол раскрыва по азимуту
          :param tilt_angle: максимальный угол раскрыва по углу наклона
