@@ -9,9 +9,11 @@ from PyQt5.QtGui import QIcon, QPixmap
 
 from ConfigureView.ConfiguratingViewport import ConfiguratingViewport
 from SimulationModule import SimulationModule
-from TrajectoryViews import TrajectoryViews
-#from ObjectsList import ObjectsList
+from TrajectoryViews import TrajectoryViews, СhooseViewWidget, CustomCheckBox
+
 from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
+
+from MessagesParser import parse_messages
 
 
 class MainWindow(QMainWindow):
@@ -26,12 +28,19 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.pixmaps = {1 : QPixmap(('./images/control_station_icon.png')).scaledToHeight(50),
-                2 : QPixmap(('./images/radar_icon.png')).scaledToHeight(50),
-                3 : QPixmap(('./images/missile_launcher_icon.png')).scaledToHeight(50),
-                4 : QPixmap(('./images/aircraft_icon.png')).scaledToHeight(25)}
+        # self.pixmaps = {1 : QPixmap(('./images/control_station_icon.png')).scaledToHeight(50),
+        #         2 : QPixmap(('./images/radar_icon.png')).scaledToHeight(50),
+        #         3 : QPixmap(('./images/missile_launcher_icon.png')).scaledToHeight(50),
+        #         4 : QPixmap(('./images/aircraft_icon.png')).scaledToHeight(25)}
+
+        self.pixmaps = {1 : QPixmap(('SimulationAppUI/images/control_station_icon.png')).scaledToHeight(50),
+                2 : QPixmap(('SimulationAppUI/images/radar_icon.png')).scaledToHeight(50),
+                3 : QPixmap(('SimulationAppUI/images/missile_launcher_icon.png')).scaledToHeight(50),
+                4 : QPixmap(('SimulationAppUI/images/aircraft_icon.png')).scaledToHeight(25)}
+
 
         # потом перепишем)
+
         self.sigRadar.connect(self.sigItemAddRequested)
         self.sigMissileLauncher.connect(self.sigItemAddRequested) 
         self.sigControlStation.connect(self.sigItemAddRequested)
@@ -153,25 +162,39 @@ class MainWindow(QMainWindow):
         self.right_widget.addItem(item)
         self.right_widget.setItemWidget(item, button)
         # --------------------------------------------------------------------------
-
-
-
         self.layout.addWidget(self.right_widget)
+
+
+        self.choose_views_list = QListWidget()
+        self.choose_views_list.hide()
+        self.layout.addWidget(self.choose_views_list)
 
         self.layout.setStretchFactor(self.left_conf_widget, 3)
         self.layout.setStretchFactor(self.left_traj_widget, 3)
         self.layout.setStretchFactor(self.right_widget, 1)
+        self.layout.setStretchFactor(self.choose_views_list, 1)
 
         self.setGeometry(100, 100, 1280, 960)
+
+    def handleCheckboxStateChanged(self, state):
+        if state == 2:  # Qt.Checked
+            print(f"Checkbox '{self.checkbox.text()}' is checked")
+        else:
+            print(f"Checkbox '{self.checkbox.text()}' is unchecked")
 
     def changeViewTraj(self):
         action = self.sender()
         if action:
             print("ToolBarButton clicked:", action.text())
         print("Swapping widgets")
-        self.left_conf_widget.hide()
-        self.right_widget.hide()
-        self.left_traj_widget.show()
+
+        # TODO: for debug ONLY -> remove
+        # -----------------------------------------------------------------
+        objs, trajs = parse_messages([])
+        self.configure_choosing_view_widgets(objs, trajs)
+        # -----------------------------------------------------------------
+
+        self.setViewTraj()
 
     def changeViewConf(self):
         action = self.sender()
@@ -179,8 +202,16 @@ class MainWindow(QMainWindow):
             print("ToolBarButton clicked:", action.text())
         print("Swapping widgets")
         self.left_traj_widget.hide()
+        self.choose_views_list.hide()
         self.left_conf_widget.show()
         self.right_widget.show()
+
+
+    def setViewTraj(self):
+        self.left_conf_widget.hide()
+        self.right_widget.hide()
+        self.left_traj_widget.show()
+        self.choose_views_list.show()
 
     def onListRadarClicked(self):
         button = self.sender()
@@ -236,8 +267,77 @@ class MainWindow(QMainWindow):
 
 
     @pyqtSlot(object)
-    def onSimulationEnded(self, result):
-        print('Simulation ended, maybe there should be some code here.')
+    def onSimulationEnded(self, all_messages):
+        print('Simulation ended, got messages to parse.')
+
+        # parse messages
+        objs, trajs = parse_messages(all_messages)
+
+        self.configure_choosing_view_widgets(objs, trajs)
+        self.setViewTraj()
+
+    def configure_choosing_view_widgets(self, obj_viewing: dict[str, list[int]], obj_trajs): #: dict[str, dict(int, dict(int,list[np.array])):
+        self.choose_views_list.clear()
+        self.left_traj_widget.setTrajectories(obj_trajs)
+
+        item_height = 45
+
+        item = QListWidgetItem()
+        widget = СhooseViewWidget(f"BO", 0, "vo")
+        widget.setFixedHeight(item_height)
+        # widget.setIcon(QIcon(self.pixmaps[2]))
+        # widget.setIconSize(widget.size())
+        # widget.widgetClicked.connect(self.onChooseViewItemClicked)
+        widget.bindFunctionToCheckboxClicked(self.onChooseViewItemClicked)
+        item.setSizeHint(widget.sizeHint())
+        self.choose_views_list.addItem(item)
+        self.choose_views_list.setItemWidget(item, widget)
+
+        for radar_id in obj_viewing["radars"]:
+            item = QListWidgetItem()
+            widget = СhooseViewWidget(f"МФР {radar_id}", radar_id, "radar")
+            widget.bindFunctionToCheckboxClicked(self.onChooseViewItemClicked)
+            widget.setFixedHeight(item_height)
+            widget.setIcon(QIcon(self.pixmaps[2]))
+            # widget.setIconSize(widget.size())
+            # widget.checkbox.setText(f"МФР {radar_id}")
+            item.setSizeHint(widget.sizeHint())
+            self.choose_views_list.addItem(item)
+            self.choose_views_list.setItemWidget(item, widget)
+
+        for control_id in obj_viewing["controls"]:
+            item = QListWidgetItem()
+            widget = СhooseViewWidget(f"ПБУ {control_id}", control_id, "control")
+            widget.bindFunctionToCheckboxClicked(self.onChooseViewItemClicked)
+            widget.setFixedHeight(item_height)
+            widget.setIcon(QIcon(self.pixmaps[1]))
+            # widget.setIconSize(widget.size())
+            item.setSizeHint(widget.sizeHint())
+            self.choose_views_list.addItem(item)
+            self.choose_views_list.setItemWidget(item, widget)
+
+    def onChooseViewItemClicked(self):
+        item = self.sender()
+        if item:
+            print("Choose item clicked:", item.text())
+
+        if not isinstance(item, CustomCheckBox):
+            return
+
+        print(item)
+        print(item.obj_type)
+        print(item.isChecked(), item.simulated_object_id)
+
+        if item.obj_type == "radar":
+            self.left_traj_widget.menuRadarClicked(item.simulated_object_id, item.isChecked())
+        elif item.obj_type == "control":
+            self.left_traj_widget.menuControlClicked(item.simulated_object_id, item.isChecked())
+        elif item.obj_type == "vo":
+            self.left_traj_widget.menuVOClicked(item.isChecked())
+
+
+
+
 
 
 if __name__ == "__main__":
