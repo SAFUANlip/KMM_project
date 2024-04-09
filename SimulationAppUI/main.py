@@ -23,17 +23,10 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-<<<<<<< Updated upstream
         self.pixmaps = {1 : QPixmap(('./images/control_station_icon.png')).scaledToHeight(50),
                 2 : QPixmap(('./images/radar_icon.png')).scaledToHeight(50),
                 3 : QPixmap(('./images/missile_launcher_icon.png')).scaledToHeight(50),
                 4 : QPixmap(('./images/aircraft_icon.png')).scaledToHeight(25)}
-=======
-        self.pixmaps = {1: QPixmap('./images/control_station_icon.png').scaledToHeight(50),
-                        2: QPixmap('./images/radar_icon.png').scaledToHeight(50),
-                        3: QPixmap('./images/missile_launcher_icon.png').scaledToHeight(50),
-                        4: QPixmap('./images/aircraft_icon.png').scaledToHeight(25)}
->>>>>>> Stashed changes
 
         # потом перепишем)
         self.sigRadar.connect(self.sigItemAddRequested)
