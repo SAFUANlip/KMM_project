@@ -70,8 +70,8 @@ class SimulationModule(QObject):
             if r_s.overview_mode != 0:
                 radar_class = RadarSector
             configuration.append(radar_class(dispatcher, r_s.id, cp_source.id, env, np.array([r_s.x, r_s.y, r_s.z]), 
-                                             r_s.pan_start * np.pi/180, r_s.tilt_start * np.pi/180, r_s.view_distance,
-                                             r_s.pan_per_sec * np.pi/180, r_s.tilt_per_sec * np.pi/180))
+                                             r_s.pan_start, r_s.tilt_start, r_s.view_distance,
+                                             r_s.pan_per_sec, r_s.tilt_per_sec))
 
         # CP
         configuration.append(CombatControlPoint(dispatcher, cp_source.id, sd_info))
