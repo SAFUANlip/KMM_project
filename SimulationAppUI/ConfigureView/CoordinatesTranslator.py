@@ -4,30 +4,12 @@ class CoordinatesTranslator(QObject):
 
     scaleChanged = pyqtSignal()
 
-    def __init__(self, widget_hw, widget_hh, world_hw, world_hh):
+    def __init__(self, grid):
         super(CoordinatesTranslator, self).__init__()
-        self.widget_hw = widget_hw
-        self.widget_hh = widget_hh
-        self.world_hw = world_hw
-        self.world_hh = world_hh
+        self.grid = grid
 
-    def translateScreen2World(self, x, y):
-        w_x = (x  - self.widget_hw) * self.world_hw / self.widget_hw
-        w_y = -(y - self.widget_hh) * self.world_hh/ self.widget_hh
-        return w_x, w_y
+    def translateToModel(self, x, y):
+        return self.grid.mapFromScene(x, y)
 
-    def translateWorld2Screen(self, x, y):
-        s_x = int(x * self.widget_hw / self.world_hw + self.widget_hw)
-        s_y = int(-y * self.widget_hh/ self.world_hh + self.widget_hh)
-        return s_x, s_y
-
-    def getC2WWidthRatio(self):
-        return self.widget_hw / self.world_hw
-
-    def getC2WHeightRatio(self):
-        return self.widget_hh / self.world_hh
-    
-    def setNewWidgetSize(self, new_widget_hw, new_widget_hh):
-        self.widget_hw = new_widget_hw
-        self.widget_hh = new_widget_hh
-        self.scaleChanged.emit()
+    def translateFromModel(self, x, y):
+        return self.grid.mapToScene(x, y)

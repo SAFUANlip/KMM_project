@@ -24,6 +24,7 @@
 
 [Ссылка на YouTrack, где распределены все задачи по ходу проекта](https://km-pgithubroject.youtrack.cloud/agiles/160-2/current)
 
+[Ссылка на UML-диаграмму](https://drive.google.com/file/d/1ucT0xLzZWOYp1hiXnceom4LKOXFYfxBC/view?usp=sharing)
 ## РЛС
 В РЛС кругового типа обзор происходит по винтовой траектории:
 ![RadarRound](docs/img_RadarRound.png)
