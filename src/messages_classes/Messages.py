@@ -3,7 +3,7 @@ import numpy as np
 from config.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
     MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
     MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
-    MSG_AEROENV2DISPATCHER_VIEW_type
+    MSG_AEROENV2DISPATCHER_VIEW_type, MSG_CCP2GUItype, MSG_CCP2DRAWER_type
 from src.messages_classes.BaseMessage import BaseMessage
 
 
@@ -100,6 +100,11 @@ class CombatControlPoint_InitMessage(BaseMessage):
         super(CombatControlPoint_InitMessage, self).__init__(MSG_GM2RADAR_type, 0, time, sender_ID, receiver_ID)
 
 
+
+class CombatControl2DrawerMsg(BaseMessage):
+    def init(self, time: int, sender_ID: int, receiver_ID: int, coordinates) -> None:
+        super(CombatControl2DrawerMsg, self).init(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
+        self.coordinates = coordinates
 
 class GuidedMissileHit2CCPMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, guided_missile_id:int) -> None:
