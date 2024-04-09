@@ -46,7 +46,7 @@ class Graphics(Simulated):
         CCP_list = self._checkAvailableMessagesByType(MSG_CCP2DRAWER_type)
         logger.info(f"Рисовальщик получил {len(CCP_list)} сообщений от ПБУ")
         if len(CCP_list) > 0:
-            CCP_msg = CCP_list[0].pos_objects
+            CCP_msg = CCP_list[0].coordinates
             # 0 - зур, 1 - цель
             line1, line2 = None, None
             for i in range(len(CCP_msg)):

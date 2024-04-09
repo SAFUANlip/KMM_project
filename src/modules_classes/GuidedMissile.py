@@ -38,7 +38,7 @@ class GuidedMissile(Movable):
         self.launch_time = None
         self.target_vel = np.array([0., 0., 0.])
 
-    def launch(self, pos_target: np.array, launch_time: float) -> None:
+    def launch(self, pos_target: np.array, radar_id:int, launch_time: float) -> None:
         """
         :param pos_target: np array of pos_objects (x, y, z)
         :param launch_time: время запуска
@@ -47,6 +47,7 @@ class GuidedMissile(Movable):
         self.vel = (self.pos_target - self.pos + EPS) / (np.linalg.norm(self.pos_target - self.pos) + EPS) * self.speed
         self.launch_time = launch_time
         self.status = 1
+        self.radar_id = radar_id
         logger.guided_missile(f"Запуск. ЗУР ID: {self._ID}, начальная позиция: {self.pos}, начальная позиция цели: {self.pos_target}")
         
     def updateTarget(self, pos_target: np.array([float, float, float]), target_vel: np.array([float, float, float])) -> None:

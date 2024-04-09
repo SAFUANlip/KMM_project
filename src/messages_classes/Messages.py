@@ -97,11 +97,6 @@ class CombatControlPoint_InitMessage(BaseMessage):
         super(CombatControlPoint_InitMessage, self).__init__(MSG_CCP2DISPATCHER_INIT_type, 0, time, sender_ID, receiver_ID)
 
 
-class CombatControl2DrawerMsg(BaseMessage):
-    def __init__(self, time: float, sender_ID: int, receiver_ID: int, coordinates) -> None:
-        super(CombatControl2DrawerMsg, self).__init__(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
-        self.pos_objects = coordinates
-
 
 class GuidedMissileHit2RadarMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
@@ -109,8 +104,8 @@ class GuidedMissileHit2RadarMsg(BaseMessage):
 
 
 class CombatControl2DrawerMsg(BaseMessage):
-    def init(self, time: int, sender_ID: int, receiver_ID: int, coordinates) -> None:
-        super(CombatControl2DrawerMsg, self).init(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
+    def __init__(self, time: int, sender_ID: int, receiver_ID: int, coordinates) -> None:
+        super(CombatControl2DrawerMsg, self).__init__(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
         self.coordinates = coordinates
 
 class GuidedMissileHit2CCPMsg(BaseMessage):

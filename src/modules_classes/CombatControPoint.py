@@ -119,9 +119,10 @@ class CombatControlPoint(Simulated):
             coord_dif = (np.sum((target_coord - obj_coord) ** 2)) ** 0.5
 
             time_went = cur_time - last_target_time
+            logger.combat_control(f"{target_speed_mod*(time_went - tick*1.5)}, {coord_dif}, {target_speed_mod*(time_went + tick*1.5)}")
             if (coord_dif < min_diff and max(0, target_speed_mod *
-                                                (time_went - tick)) <= coord_dif
-                    <= max(0, target_speed_mod * (time_went + tick))):
+                                                (time_went - tick*1.5)) <= coord_dif
+                    <= max(0, target_speed_mod * (time_went + tick*1.5))):
                 min_diff = coord_dif
                 obj_type = OLD_TARGET
                 sim_obj_key = key
@@ -133,11 +134,12 @@ class CombatControlPoint(Simulated):
             coord_dif = (np.sum((missile_coord - obj_coord) ** 2)) ** 0.5
 
             time_went = cur_time - last_missile_time
+            logger.combat_control(f"{missile_speed_mod*(time_went - tick*1.5)}, {coord_dif}, {missile_speed_mod*(time_went + tick*1.5)}")
 
-            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - tick))
+            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - tick*1.5))
                     <= coord_dif <= max(0,
                                         missile_speed_mod * (
-                                                time_went + tick))):
+                                                time_went + tick*1.5))):
                 min_diff = coord_dif
                 obj_type = OLD_GM
                 sim_obj_key = key
@@ -250,11 +252,11 @@ class CombatControlPoint(Simulated):
     def send_vis_objects2drawer(self, time):
         list_for_drawer = []
 
-        for missile in self.missile_list:
+        for key, missile in self.missile_dict.items():
             coord = missile.coord
             list_for_drawer.append([MISSILE_TYPE_DRAWER, coord])
 
-        for target in self.target_list:
+        for key, target in self.target_dict.items():
             coord = target.coord
             list_for_drawer.append([TARGET_TYPE_DRAWER, coord])
 
