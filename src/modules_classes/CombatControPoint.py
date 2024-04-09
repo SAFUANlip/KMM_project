@@ -82,11 +82,13 @@ class CCMissile:
 class CombatControlPoint(Simulated):
     def __init__(self, dispatcher: ModelDispatcher, ID: int, starting_devices_coords: dict):
         super().__init__(dispatcher, ID, None)
-        self.target_list = []
-        self.missile_list = []
+        self.target_dict = {}
+        self.missile_dict = {}
         self.starting_devices_coords = starting_devices_coords
         self.starting_devices_capacity = {}
         self.starting_devices_launched = {}
+        self.target_order = 0
+        self.missile_order = 0
         self.start = True
 
 
@@ -104,12 +106,12 @@ class CombatControlPoint(Simulated):
         obj_coord = visible_object[0]
 
         min_diff = 10e10
-        sim_obj = None
+        sim_obj_key = None
         obj_type = NEW_TARGET
 
         tick = self._simulating_tick
 
-        for target in self.target_list:
+        for key, target in self.target_dict.items():
             target_coord = target.coord
             target_speed_mod = target.speed_mod
             last_target_time = target.upd_time
@@ -122,9 +124,9 @@ class CombatControlPoint(Simulated):
                     <= max(0, target_speed_mod * (time_went + tick))):
                 min_diff = coord_dif
                 obj_type = OLD_TARGET
-                sim_obj = target
+                sim_obj_key = key
 
-        for missile in self.missile_list:
+        for key, missile in self.missile_dict.items():
             missile_coord = missile.coord
             missile_speed_mod = missile.speed_mod
             last_missile_time = missile.upd_time
@@ -138,10 +140,10 @@ class CombatControlPoint(Simulated):
                                                 time_went + tick))):
                 min_diff = coord_dif
                 obj_type = OLD_GM
-                sim_obj = missile
+                sim_obj_key = key
         logger.combat_control(
             f"ПБУ решила что объект с координатами {obj_coord} это {obj_type}, ЗУР - 2, Цель старая - 1, Цель новая - 0")
-        return obj_type, sim_obj
+        return obj_type, sim_obj_key
 
     def request_starting_devices_capacities(self, time: float) -> None:
         for key in self.starting_devices_coords.keys():
@@ -156,23 +158,23 @@ class CombatControlPoint(Simulated):
         to_del = []
         target_coord = None
         # нужно удалить ракету и цель, за которой она следила из обоих списков
-        for missile in self.missile_list:
+        for key, missile in self.missile_dict.items():
             if missile.id == missile_id:
                 target_coord = missile.target_coord
-                to_del.append(missile)
+                to_del.append(key)
                 break
 
-        for el in to_del:
-            self.missile_list.remove(el)
+        for key in to_del:
+            self.missile_dict.pop(key, None)
 
         to_del = []
-        for target in self.target_list:
+        for key, target in self.target_dict.items():
             if (target.coord == target_coord).all():
-                to_del.append(target)
+                to_del.append(key)
                 break
 
-        for el in to_del:
-            self.target_list.remove(el)
+        for key in to_del:
+            self.target_dict.pop(key, None)
 
     def get_starting_devices_capacity(self):
         missile_capacity_msg = self._checkAvailableMessagesByType(MSG_CCP_MISSILE_CAPACITY_type)
@@ -205,13 +207,16 @@ class CombatControlPoint(Simulated):
                 startingDevice_id = msgFromStartingDevice.sender_ID
                 missile_coord = self.starting_devices_coords[startingDevice_id]
 
-                target_num_list = msgFromStartingDevice.order
+                target_num_dict = msgFromStartingDevice.order
+                logger.combat_control(f"{target_num_dict}, {len(self.target_dict.items())}")
 
-                target_coord = self.target_list[target_num_list].coord
-                target_speed = self.target_list[target_num_list].speed_mod
-                target_vel = self.target_list[target_num_list].speed_dir
-                self.missile_list.append(CCMissile(missile_coord, missile_id,
-                                                   target_coord, target_vel, target_speed, time))
+                target_coord = self.target_dict[target_num_dict].coord
+                target_speed = self.target_dict[target_num_dict].speed_mod
+                target_vel = self.target_dict[target_num_dict].speed_dir
+
+                self.missile_order = self.missile_order + 1
+                self.missile_dict[self.missile_order] = CCMissile(missile_coord, missile_id,
+                                                   target_coord, target_vel, target_speed, time)
                 logger.combat_control(
                     f"ПБУ получил от ПУ id ЗУР:{missile_id}, начальные координаты ЗУР:{missile_coord}")
                 # коорд зур, коорд ее цели, id зур, скорость зур
@@ -221,12 +226,12 @@ class CombatControlPoint(Simulated):
         target_list = []
         view_dict = {}
 
-        for missile in self.missile_list:
+        for key, missile in self.missile_dict.items():
             coord = missile.coord
             id = missile.id
             missile_list.append([time, id, coord])
 
-        for target in self.target_list:
+        for key, target in self.target_dict.items():
             coord = target.coord
             target_list.append([time, coord])
 
@@ -298,7 +303,7 @@ class CombatControlPoint(Simulated):
                 obj_speed_direct = visible_object[1]
                 obj_speed_mod = visible_object[2]
 
-                obj_type, sim_obj = self.findMostSimilarObject(visible_object, time)
+                obj_type, sim_obj_key = self.findMostSimilarObject(visible_object, time)
                 if obj_type == NEW_TARGET:
                     # положить в память новые цели
                     min_dist = 10e10
@@ -312,10 +317,11 @@ class CombatControlPoint(Simulated):
                                 min_dist = dist
 
                     if sd_id is not None:
-                        self.target_list.append(CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time))
+                        self.target_order = self.target_order + 1
+                        self.target_dict[self.target_order] = CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time)
 
                         msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
-                                                                             self._ID, sd_id, len(self.target_list) - 1,
+                                                                             self._ID, sd_id, self.target_order,
                                                                              obj_coord)
 
                         logger.combat_control(f"ПБУ отправил ПУ id {sd_id} координаты новой цели: {obj_coord}")
@@ -329,21 +335,20 @@ class CombatControlPoint(Simulated):
                 elif obj_type == OLD_TARGET:  # старая цель, надо обновить данные о ней в листах
                     # target list и missiles list и после этого ЗУР, которая летит за ней,
                     # перенаправить
-                    idx = self.target_list.index(sim_obj)
 
-                    old_target_coord = self.target_list[idx].coord
+                    old_target_coord = self.target_dict[sim_obj_key].coord
 
-                    self.target_list[idx].updСoord(obj_coord, time)
-                    self.target_list[idx].updSpeedMod(obj_speed_mod, time)
+                    self.target_dict[sim_obj_key].updСoord(obj_coord, time)
+                    self.target_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
 
-                    for i in range(len(self.missile_list)):
-                        missile = self.missile_list[i]
+                    for key in self.missile_dict.keys():
+                        missile = self.missile_dict[key]
 
                         if (missile.target_coord == old_target_coord).all():
-                            self.missile_list[i].updTargetCoord(obj_coord)
+                            self.missile_dict[key].updTargetCoord(obj_coord)
 
-                            missile_id = self.missile_list[i].id
-                            target_vel = self.missile_list[i].target_vel
+                            missile_id = self.missile_dict[key].id
+                            target_vel = self.missile_dict[key].target_vel
                             msg2radar = CombatControl2RadarMsg(time, self._ID, radar_id, obj_coord, target_vel,
                                                                missile_id)
                             self._sendMessage(msg2radar)
@@ -353,12 +358,11 @@ class CombatControlPoint(Simulated):
                             break
 
                 elif obj_type == OLD_GM:  # старая ЗУР, нужно обновить поля в листе ЗУР
-                    idx = self.missile_list.index(sim_obj)
                     logger.combat_control(
-                        f"ПБУ увидел старую ЗУР с id:{self.missile_list[idx].id}, новые координаты:{obj_coord}")
+                        f"ПБУ увидел старую ЗУР с id:{self.missile_dict[sim_obj_key].id}, новые координаты:{obj_coord}")
 
-                    self.missile_list[idx].updСoord(obj_coord, time)
-                    self.missile_list[idx].updSpeedMod(obj_speed_mod, time)
+                    self.missile_dict[sim_obj_key].updСoord(obj_coord, time)
+                    self.missile_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
 
         self.send_vis_objects2gui(time)
         self.send_vis_objects2drawer(time)
