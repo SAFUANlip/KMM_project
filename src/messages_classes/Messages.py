@@ -3,7 +3,7 @@ import numpy as np
 from config.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
     MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
     MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
-    MSG_AEROENV2DISPATCHER_VIEW_type
+    MSG_AEROENV2DISPATCHER_VIEW_type, MSG_CCP2GUItype
 from src.messages_classes.BaseMessage import BaseMessage
 
 
