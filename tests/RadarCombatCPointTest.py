@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     graphics = Graphics(dispatcher=dispatcher, ID=DRAWER_ID, aero_env=env)
 
-    dispatcher.configurate([env, radar, radar2, combat, *start_devices])
+    dispatcher.configurate([env, radar, radar2, combat, *start_devices, graphics])
     dispatcher.run()
 
     # rate, messages_classes = dispatcher.getMessageHistory()

@@ -4,9 +4,9 @@ import numpy as np
 
 from config.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
     MSG_SD2CCP_MS_type, MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2CCP_GM_HIT_type, NEW_TARGET, OLD_TARGET, \
-    OLD_GM, DISPATCHER_ID
+    OLD_GM, DISPATCHER_ID, MISSILE_TYPE_DRAWER, TARGET_TYPE_DRAWER, DRAWER_ID
 from src.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2RadarMsg, MissileCapacityMsg, \
-    CombatControlPoint_ViewMessage, CombatControlPoint_InitMessage
+    CombatControlPoint_ViewMessage, CombatControlPoint_InitMessage, CombatControl2DrawerMsg
 from src.modules_classes.Simulated import Simulated, ModelDispatcher
 from src.utils.logger import logger
 
@@ -242,6 +242,26 @@ class CombatControlPoint(Simulated):
         self._sendMessage(msg2drawer)
         logger.combat_control(f"ПБУ отправил {len(target_list) + len(missile_list)} смс GUI")
 
+    def send_vis_objects2drawer(self, time):
+        list_for_drawer = []
+
+        for missile in self.missile_list:
+            coord = missile.coord
+            list_for_drawer.append([MISSILE_TYPE_DRAWER, coord])
+
+        for target in self.target_list:
+            coord = target.coord
+            list_for_drawer.append([TARGET_TYPE_DRAWER, coord])
+
+        msg2drawer = CombatControl2DrawerMsg(
+            time=time,
+            sender_ID=self._ID,
+            receiver_ID=DRAWER_ID,
+            coordinates=list_for_drawer,
+        )
+        self._sendMessage(msg2drawer)
+        logger.combat_control(f"ПБУ отправил {len(list_for_drawer)} смс Рисовальщику")
+
     def runSimulationStep(self, time: float) -> None:
         """
         :param time: текущее время
@@ -341,3 +361,4 @@ class CombatControlPoint(Simulated):
                     self.missile_list[idx].updSpeedMod(obj_speed_mod, time)
 
         self.send_vis_objects2gui(time)
+        self.send_vis_objects2drawer(time)
