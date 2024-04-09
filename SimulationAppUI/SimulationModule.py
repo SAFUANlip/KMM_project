@@ -45,13 +45,19 @@ class SimulationModule(QObject):
         targets = list()
 
         for t_s in [model_source for model_source in model_sources[1:] if model_source.model_type // 1000 == 4]:
-            vel = [t_s.speed * np.cos(t_s.direction * np.pi/180), t_s.speed * np.sin(t_s.direction * np.pi/180), 0]
-            targets.append(Airplane(dispatcher, t_s.id, np.array([t_s.x, t_s.y, t_s.z]), 5, np.array(vel),
-                                    t_s.time_start, t_s.time_finish))
+            targets.append(
+                Airplane(
+                    dispatcher,
+                    t_s.id,
+                    trajectory_planned=[np.array([t_s.x, t_s.y, t_s.z])],
+                    size=5,
+                    start_time=t_s.time_start,
+                    end_time=t_s.time_finish,
+                    vel=np.array([t_s.speed * np.cos(t_s.direction * np.pi/180), t_s.speed * np.sin(t_s.direction * np.pi/180), 0])
+                )
+            )
 
-        env = AeroEnv(dispatcher, -2)
-        for target in targets:
-            env.addEntity(target)
+        env = AeroEnv(dispatcher, -2, targets=targets)
 
         configuration = [env]
 

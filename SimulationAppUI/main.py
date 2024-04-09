@@ -1,19 +1,19 @@
 import sys
-import pathlib
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QHBoxLayout, QToolBar, QListWidget, QTextEdit,
-                             QAction)
 
-from PyQt5.QtWidgets import QPushButton, QListWidgetItem
+# from ObjectsList import ObjectsList
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
 from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QToolBar, QListWidget, QAction)
+from PyQt5.QtWidgets import QPushButton, QListWidgetItem
 
 from ConfigureView.ConfiguratingViewport import ConfiguratingViewport
 from SimulationModule import SimulationModule
 from TrajectoryViews import TrajectoryViews, СhooseViewWidget, CustomCheckBox
 
 from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
+from TrajectoryViews import TrajectoryViews
 
-from MessagesParser import parse_messages
+from MessagesParser import parse_messages, fake_parse_messages
 
 
 class MainWindow(QMainWindow):
@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         # потом перепишем)
 
         self.sigRadar.connect(self.sigItemAddRequested)
-        self.sigMissileLauncher.connect(self.sigItemAddRequested) 
+        self.sigMissileLauncher.connect(self.sigItemAddRequested)
         self.sigControlStation.connect(self.sigItemAddRequested)
         self.sigAHelicopter.connect(self.sigItemAddRequested)
         self.sigAirplane.connect(self.sigItemAddRequested)
@@ -54,7 +54,6 @@ class MainWindow(QMainWindow):
         self.sigMissileLauncher.connect(self.sigAirplaneHandler)
         self.sigControlStation.connect(self.sigAirplaneHandler)
         self.sigAirplane.connect(self.sigAirplaneHandler)
-
 
         self.setWindowTitle("SimulationApp")
         main_widget = QWidget()
@@ -70,16 +69,15 @@ class MainWindow(QMainWindow):
         action4 = QAction("Начать моделирование", self)
 
         action1.triggered.connect(self.changeViewConf)
-        action1.triggered.connect(lambda : action3.setVisible(True))
-        action1.triggered.connect(lambda : action4.setVisible(True))
+        action1.triggered.connect(lambda: action3.setVisible(True))
+        action1.triggered.connect(lambda: action4.setVisible(True))
         action2.triggered.connect(self.changeViewTraj)
-        action2.triggered.connect(lambda : action3.setVisible(False))
-        action2.triggered.connect(lambda : action4.setVisible(False))
+        action2.triggered.connect(lambda: action3.setVisible(False))
+        action2.triggered.connect(lambda: action4.setVisible(False))
         tool_bar.addAction(action1)
         tool_bar.addAction(action2)
         tool_bar.addAction(action3)
         tool_bar.addAction(action4)
-
 
         self.traj_view = False
         self.configure_view = False
@@ -129,7 +127,6 @@ class MainWindow(QMainWindow):
         self.right_widget.addItem(item)
         self.right_widget.setItemWidget(item, button)
         # --------------------------------------------------------------------------
-
 
         # ------ Missile Launcher button --------------------------------------------------
         item = QListWidgetItem()
@@ -190,8 +187,8 @@ class MainWindow(QMainWindow):
 
         # TODO: for debug ONLY -> remove
         # -----------------------------------------------------------------
-        objs, trajs = parse_messages([])
-        self.configure_choosing_view_widgets(objs, trajs)
+        # objs, trajs = fake_parse_messages([])
+        # self.configure_choosing_view_widgets(objs, trajs)
         # -----------------------------------------------------------------
 
         self.setViewTraj()
@@ -265,7 +262,6 @@ class MainWindow(QMainWindow):
     def onSimulationStartRequested(self):
         self.simulation_module.startSimulation(self.left_conf_widget.getModelSources())
 
-
     @pyqtSlot(object)
     def onSimulationEnded(self, all_messages):
         print('Simulation ended, got messages to parse.')
@@ -324,9 +320,9 @@ class MainWindow(QMainWindow):
         if not isinstance(item, CustomCheckBox):
             return
 
-        print(item)
-        print(item.obj_type)
-        print(item.isChecked(), item.simulated_object_id)
+        # print(item)
+        # print(item.obj_type)
+        # print(item.isChecked(), item.simulated_object_id)
 
         if item.obj_type == "radar":
             self.left_traj_widget.menuRadarClicked(item.simulated_object_id, item.isChecked())

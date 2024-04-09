@@ -1,10 +1,9 @@
-from typing import List
-
 import numpy as np
 
-from config.constants import MSG_CCP2GM_type, MSG_CCP2DRAWER_type, MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
+from config.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
     MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
-    MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type
+    MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
+    MSG_AEROENV2DISPATCHER_VIEW_type, MSG_CCP2GUItype
 from src.messages_classes.BaseMessage import BaseMessage
 
 
@@ -30,10 +29,11 @@ class Radar2DrawerMsg(BaseMessage):
 
 class CombatControl2StartingDeviceMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, order: int,
-                 coord: np.array([float, float, float])) -> None:
+                 coord: np.array([float, float, float]), radar_id) -> None:
         super(CombatControl2StartingDeviceMsg, self).__init__(MSG_CCP2SD_type, 1, time, sender_ID, receiver_ID)
         self.order = order
         self.coord = coord
+        self.radar_id = radar_id
 
 class MissileCapacityMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, missile_number: int = 0) -> None:
@@ -86,17 +86,33 @@ class Radar2MissileMsg(BaseMessage):
         self.target_vel = target_vel
 
 
-class CombatControl2DrawerMsg(BaseMessage):
-    def __init__(self, time: float, sender_ID: int, receiver_ID: int, coordinates) -> None:
-        super(CombatControl2DrawerMsg, self).__init__(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
-        self.pos_objects = coordinates
+class CombatControlPoint_ViewMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, view_dict) -> None:
+        super(CombatControlPoint_ViewMessage, self).__init__(MSG_CCP2GUItype, 0, time, sender_ID, receiver_ID)
+        self.view_dict = view_dict
 
 
 class GuidedMissileHit2RadarMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
         super(GuidedMissileHit2RadarMsg, self).__init__(MSG_GM2RADAR_type, 0, time, sender_ID, receiver_ID)
 
+class CombatControlPoint_InitMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
+        super(CombatControlPoint_InitMessage, self).__init__(MSG_GM2RADAR_type, 0, time, sender_ID, receiver_ID)
+
+
+
 class GuidedMissileHit2CCPMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, guided_missile_id:int) -> None:
         super(GuidedMissileHit2CCPMsg, self).__init__(MSG_RADAR2CCP_GM_HIT_type, 0, time, sender_ID, receiver_ID)
         self.guided_missile_id = guided_missile_id
+
+
+class AeroEnv_InitMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
+        super(AeroEnv_InitMessage, self).__init__(MSG_AEROENV2DISPATCHER_type, 0, time, sender_ID, receiver_ID)
+
+class AeroEnv_ViewMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, view_dict) -> None:
+        super(AeroEnv_ViewMessage, self).__init__(MSG_AEROENV2DISPATCHER_VIEW_type, 0, time, sender_ID, receiver_ID)
+        self.view_dict = view_dict

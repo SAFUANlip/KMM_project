@@ -1,4 +1,5 @@
 import sys
+import traceback
 
 import numpy as np
 
@@ -16,8 +17,6 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem
 from PyQt5.QtCore import Qt, QPointF, QRectF
 
-from src.modules_classes.AeroEnv import AeroEnv, Airplane, Helicopter
-from config.constants import MSG_RADAR2DRAWER_type, MSG_CCP2DRAWER_type
 
 class CustomCheckBox(QCheckBox):
     def __init__(self, text, object_id, obj_type):
@@ -53,7 +52,7 @@ class СhooseViewWidget(QWidget):
             return False
 
 
-class TrajectorySection(QGraphicsItem):
+class TargetTrajectorySection(QGraphicsItem):
     def __init__(self, point_start, point_end, info):
         super().__init__()
         self.point_start = point_start
@@ -67,7 +66,20 @@ class TrajectorySection(QGraphicsItem):
 
     def paint(self, painter, option, widget):
         pen = QPen(Qt.blue)
-        pen.setWidth(4)
+        pen.setWidth(6)
+        painter.setPen(pen)
+        painter.drawLine(self.point_start[0], self.point_start[1], self.point_end[0], self.point_end[1])
+
+    def mousePressEvent(self, event):
+        print(f"Traj info: {self.traj_info}")
+
+class MissileTrajectorySection(TargetTrajectorySection):
+    def __init__(self, point_start, point_end, info):
+        super().__init__(point_start, point_end, info)
+
+    def paint(self, painter, option, widget):
+        pen = QPen(Qt.black)
+        pen.setWidth(2)
         painter.setPen(pen)
         painter.drawLine(self.point_start[0], self.point_start[1], self.point_end[0], self.point_end[1])
 
@@ -87,25 +99,22 @@ class TrajGraphicsScene(QGraphicsScene):
         self.setSceneRect(-100, -100, 200, 200)  # Устанавливаем размер сцены
         self.trajectories = None
         self.setLinesData(lines_data)
-        self.kx_compression = 50
-        self.ky_compression = -50
-        self.y_max = 30000
-        self.x_max = 30000
+        self.kx_compression = 500
+        self.ky_compression = -500
+        self.y_max = 300000
+        self.x_max = 300000
         self.add_grid()
         self.add_axis()
 
     def setLinesData(self, data):
-        if not isinstance(data, dict):
-            #return
-            pass
-
+        # if not isinstance(data, dict):
+        #     return
         self.trajectories = data
 
-        for i in range(10):
-            line = TrajectorySection([i * 10, i * 10], [i * 20, i * 20], f"point {i}")
-            self.addItem(line)
-
     def updateLinesData(self, clicked_radars, clicked_controls, clicked_vo):
+        if not isinstance(self.trajectories, dict):
+            return
+
         print("in update lines data")
         # print(clicked_controls)
         # print(clicked_vo)
@@ -114,46 +123,64 @@ class TrajGraphicsScene(QGraphicsScene):
         self.add_grid()
         self.add_axis()
 
-        for rad_id in clicked_radars:
-            obj_trajs = self.trajectories["radars"][rad_id]
-            for key, value in obj_trajs.items():
-                obj_id = key
-                obj_traj = value
-                # print("kv", key, value)
-                self.addTraj(obj_traj)
+        try:
+            for rad_id in clicked_radars:
+                obj_trajs = self.trajectories["radars"][rad_id]
+                for key, value in obj_trajs.items():
+                    obj_id = key
+                    obj_traj = value
+                    # print("kv", key, value)
+                    self.addTraj(obj_traj)
 
-        for control_id in clicked_controls:
-            obj_trajs = self.trajectories["controls"][control_id]
-            for key, value in obj_trajs.items():
-                obj_id = key
-                obj_traj = value
-                print("kv", key, value)
-                self.addTraj(obj_traj)
+            for control_id in clicked_controls:
+                obj_trajs = self.trajectories["controls"][control_id]
+                for key, value in obj_trajs.items():
+                    obj_id = key
+                    obj_traj = value
+                    # print("kv", key, value)
+                    self.addTraj(obj_traj)
 
-        if clicked_vo:
-            obj_trajs = self.trajectories["vo"]
-            for key, value in obj_trajs.items():
-                obj_id = key
-                obj_traj = value
-                # print("kv", key, value)
-                self.addTraj(obj_traj)
+            if clicked_vo:
+                #for key in ["targets", "missiles"]:
+                obj_trajs = self.trajectories["vo"]["targets"]
+                for key, value in obj_trajs.items():
+                    obj_id = key
+                    obj_traj = value
+                    # print("kv for vo", key, len(value))
+                    self.addTargetTraj(obj_traj)
+                obj_trajs = self.trajectories["vo"]["missiles"]
+                for key, value in obj_trajs.items():
+                    obj_id = key
+                    obj_traj = value
+                    # print("kv for vo", key, len(value))
+                    self.addMissileTraj(obj_traj)
+        except:
+            traceback.print_exc()
 
         self.update()
 
-    def addTraj(self, obj_traj):
-        print(f"adding traj ={obj_traj}")
-
+    def addMissileTraj(self, obj_traj):
+        # print(f"Adding missele traj len ={len(obj_traj)}")
         #print(self.coordinates_center)
         traj = obj_traj
         for i in range(1, len(traj)):
-            print(i, len(traj))
+            # print(i, len(traj))
             #print(self.coordinates_center, traj[i - 1])
             #point = self.coordinates_center + traj[i]
             #prev_point = self.coordinates_center + traj[i - 1]
             point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
             prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
             # print(point, prev_point)
-            line = TrajectorySection(point, prev_point, f"section {i}")
+            line = MissileTrajectorySection(point, prev_point, f"section {i}")
+            self.addItem(line)
+
+    def addTargetTraj(self, obj_traj):
+        # print(f"Adding target traj len ={len(obj_traj)}")
+        traj = obj_traj
+        for i in range(1, len(traj)):
+            point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
+            prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
+            line = TargetTrajectorySection(point, prev_point, f"section {i}")
             self.addItem(line)
 
 
@@ -162,7 +189,7 @@ class TrajGraphicsScene(QGraphicsScene):
         x_axis.setPen(Qt.black)
         self.addItem(x_axis)
 
-        step_x = 3000
+        step_x = 30000
         for x in range(-self.x_max, self.x_max + 1, step_x):
             text_item = QGraphicsTextItem(str(x))
             text_item.setPos(x / self.kx_compression, -5)
@@ -172,8 +199,10 @@ class TrajGraphicsScene(QGraphicsScene):
         y_axis.setPen(Qt.black)
         self.addItem(y_axis)
 
-        step_y = 3000
+        step_y = 30000
         for y in range(-self.y_max, self.y_max, step_y):
+            if abs(y) < step_y/4:
+                continue
             text_item = QGraphicsTextItem(str(y))
             text_item.setPos(1, y / self.ky_compression)
             self.addItem(text_item)
@@ -181,14 +210,14 @@ class TrajGraphicsScene(QGraphicsScene):
     def add_grid(self):
         grid_group = QGraphicsItemGroup()
 
-        step_x = 3000
+        step_x = 30000
         for x in range(-self.x_max, self.x_max + 1, step_x):
             line = QGraphicsLineItem(x / self.kx_compression, -self.y_max / self.ky_compression,
                                      x / self.kx_compression, self.y_max / self.ky_compression)
             line.setPen(Qt.lightGray)
             grid_group.addToGroup(line)
 
-        step_y = 3000
+        step_y = 30000
         for y in range(-self.y_max, self.y_max, step_y):
             line = QGraphicsLineItem(-self.x_max / self.kx_compression, y / self.ky_compression,
                                      self.x_max / self.kx_compression, y / self.ky_compression)

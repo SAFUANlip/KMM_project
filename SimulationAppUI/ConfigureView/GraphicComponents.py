@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsObject, QAction, QMenu
+from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsObject, QGraphicsEllipseItem, QAction, QMenu
 from PyQt5.QtCore import  Qt, QLineF, QPointF, QRectF, QObject, pyqtSignal
 from PyQt5.QtGui import QColor
 
@@ -6,15 +6,17 @@ class SimpleGraphicComponent(QGraphicsObject):
 
     posChanged = pyqtSignal()
 
-    def __init__(self, pixmap, start_drag_distance, parent = None):
+    def __init__(self, pixmap, start_drag_distance, grid, parent = None):
         super(SimpleGraphicComponent, self).__init__(parent)
         self.pixmap = pixmap
         self.start_drag_distance = start_drag_distance
+        self.grid = grid
         self.__create_actions()
         self.setAcceptedMouseButtons(Qt.LeftButton)
         self.setFlags(self.flags() | QGraphicsPixmapItem.ItemIsMovable |
                       QGraphicsPixmapItem.ItemIsSelectable | 
-                      QGraphicsPixmapItem.ItemSendsGeometryChanges)
+                      QGraphicsPixmapItem.ItemSendsGeometryChanges | 
+                      QGraphicsPixmapItem.ItemSendsScenePositionChanges)
 
     def __create_actions(self):
         self.configurate_action = QAction('Изменить')
@@ -26,6 +28,15 @@ class SimpleGraphicComponent(QGraphicsObject):
         context_menu.addAction(self.configurate_action)
         context_menu.addAction(self.del_action)
         selectedAction = context_menu.exec(event.screenPos())
+
+    def itemChange(self, change, value):
+        if change == QGraphicsPixmapItem.ItemPositionChange and self.grid:
+            newPos = self.grid.mapFromScene(value)
+            if not self.grid.boundingRect().contains(newPos):
+                newPos.setX(min(self.grid.boundingRect().right(), max(newPos.x(), self.grid.boundingRect().left())))
+                newPos.setY(min(self.grid.boundingRect().bottom(), max(newPos.y(), self.grid.boundingRect().top())))
+                return self.grid.mapToScene(newPos)
+        return super().itemChange(change, value)
 
     def mouseMoveEvent(self, event):
         if QLineF(event.screenPos(), event.buttonDownScreenPos(Qt.LeftButton)).length() < self.start_drag_distance: 
@@ -45,21 +56,15 @@ class SimpleGraphicComponent(QGraphicsObject):
 
 
 class RadarGraphicComponent(SimpleGraphicComponent):
-    def __init__(self, pixmap, start_drag_distance, parent = None):
-        super(RadarGraphicComponent, self).__init__(pixmap, start_drag_distance, parent)
-        self.radiusx = 0
-        self.radiusy = 0
-        self.arc_len = 0
-        self.direction = 0
-        self.is_round = True
+    def __init__(self, pixmap, start_drag_distance, grid, parent = None):
+        super(RadarGraphicComponent, self).__init__(pixmap, start_drag_distance, grid, parent)
+        self.round = QGraphicsEllipseItem()
+        self.round.setBrush(QColor(0,0,255,10))
+        self.sector = QGraphicsEllipseItem()
+        self.sector.setPen(Qt.red)
+        self.sector.setStartAngle(0)
+        self.sector.setSpanAngle(0)
 
-    def paint(self, painter, option, widget):
-        if self.is_round:
-            painter.setBrush(QColor(0,0,255,10))
-            painter.drawEllipse(QPointF(0, 0), self.radiusx, self.radiusy)
-            painter.setBrush(Qt.NoBrush)
-        painter.setPen(Qt.red)
-        painter.drawPie(-self.radiusx, -self.radiusy, 2*self.radiusx, 2*self.radiusy,
-                        self.direction*16, self.arc_len*16)
-        painter.setPen(Qt.black)
-        super().paint(painter, option, widget)
+    def setSector(self, start_angle, span):
+        self.sector.setStartAngle(16 * start_angle)
+        self.sector.setSpanAngle(16 * span)

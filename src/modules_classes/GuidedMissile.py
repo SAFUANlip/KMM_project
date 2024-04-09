@@ -2,34 +2,12 @@ import numpy as np
 
 from src.messages_classes.Messages import GuidedMissileHit2RadarMsg
 from src.modules_classes.ModelDispatcher import ModelDispatcher
-from src.modules_classes.Movable import Movable
+from src.modules_classes.Movable import Movable, angle_between, dist
 from src.messages_classes.BaseMessage import BaseMessage
-from config.constants import (MSG_CCP2GM_type, GuidedMissile_SPEED,
+from config.constants import (MSG_CCP2GM_type, GuidedMissile_SPEED, EPS,
                               GuidedMissile_LifeTime, GuidedMissile_ExplRadius, GuidedMissile_MaxRotAngle,
                               MSG_RADAR2GM_type)
 from src.utils.logger import logger
-
-
-def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
-
-
-def angle_between(v1, v2):
-    """ Returns the angle in radians between vectors 'v1' and 'v2'::
-
-        angle_between((1, 0, 0), (0, 1, 0))
-        1.5707963267948966
-
-        angle_between((1, 0, 0), (1, 0, 0))
-        0.0
-
-        angle_between((1, 0, 0), (-1, 0, 0))
-        3.141592653589793
-    """
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 
 class GuidedMissile(Movable):
@@ -48,9 +26,8 @@ class GuidedMissile(Movable):
         :param expl_radius: радиус взрыва ракеты
         :param size: характерный рамзер ракеты
         """
-        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None, size)
+        super(GuidedMissile, self).__init__(dispatcher, ID, pos, None, size, speed)
         self.aero_env = aero_env
-        self.speed = speed
         self.pos_target = None
         self.life_time = life_time
         self.expl_radius = expl_radius
@@ -61,13 +38,15 @@ class GuidedMissile(Movable):
         self.launch_time = None
         self.target_vel = np.array([0., 0., 0.])
 
-    def launch(self, pos_target: np.array, launch_time: float) -> None:
+    def launch(self, pos_target: np.array, radar_id:int,  launch_time: float) -> None:
         """
         :param pos_target: np array of pos_objects (x, y, z)
+        :param radar_id: id радара
         :param launch_time: время запуска
         """
         self.pos_target = pos_target
-        self.vel = (self.pos_target - self.pos) / (np.linalg.norm(self.pos_target - self.pos) + 0.0000001) * self.speed
+        self.radar_id = radar_id
+        self.vel = (self.pos_target - self.pos + EPS) / (np.linalg.norm(self.pos_target - self.pos) + EPS) * self.speed
         self.launch_time = launch_time
         self.status = 1
         logger.guided_missile(f"Запуск. ЗУР ID: {self._ID}, начальная позиция: {self.pos}, начальная позиция цели: {self.pos_target}")
@@ -97,7 +76,7 @@ class GuidedMissile(Movable):
 
 
         # добавить задержку от передачи смс от ПБУ к РАДАРУ к ЗУР, чтобы расстояние до цели считалось верно
-        dist2target = np.linalg.norm(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos)
+        dist2target = dist(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time, self.pos)
         if dist2target < np.linalg.norm(self.vel*self._simulating_tick):
             self.pos = self.pos_target+self.target_vel*self._simulating_tick*self.delay_time
 
@@ -108,7 +87,7 @@ class GuidedMissile(Movable):
         """
         Проверка поражена ли цель
         """
-        if (((self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos ) ** 2).sum())**0.5 < self.expl_radius:
+        if dist(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time, self.pos) < self.expl_radius:
             self.status = 2
         logger.guided_missile(
                 f"ЗУР ID: {self._ID}, pos_target {self.pos_target}, target_vel {self.target_vel},  pos {self.pos}")
@@ -144,7 +123,7 @@ class GuidedMissile(Movable):
         if len(messages) != 0:
             pos_target = messages[0].new_target_coord
             target_vel = messages[0].target_vel
-            self.radar_id  = messages[0].sender_ID
+            self.radar_id = messages[0].sender_ID  # TODO зачем ID радара должно быть в полях?
             logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара, новые координаты цели: {pos_target}, ее вектор скорости: {target_vel}")
 
         if self.status == 1:
