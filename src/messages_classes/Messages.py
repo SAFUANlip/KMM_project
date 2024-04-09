@@ -2,7 +2,8 @@ import numpy as np
 
 from config.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
     MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
-    MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type, MSG_CCP2GUItype
+    MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
+    MSG_AEROENV2DISPATCHER_VIEW_type
 from src.messages_classes.BaseMessage import BaseMessage
 
 
@@ -104,3 +105,13 @@ class GuidedMissileHit2CCPMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, guided_missile_id:int) -> None:
         super(GuidedMissileHit2CCPMsg, self).__init__(MSG_RADAR2CCP_GM_HIT_type, 0, time, sender_ID, receiver_ID)
         self.guided_missile_id = guided_missile_id
+
+
+class AeroEnv_InitMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
+        super(AeroEnv_InitMessage, self).__init__(MSG_AEROENV2DISPATCHER_type, 0, time, sender_ID, receiver_ID)
+
+class AeroEnv_ViewMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, view_dict) -> None:
+        super(AeroEnv_ViewMessage, self).__init__(MSG_AEROENV2DISPATCHER_VIEW_type, 0, time, sender_ID, receiver_ID)
+        self.view_dict = view_dict
