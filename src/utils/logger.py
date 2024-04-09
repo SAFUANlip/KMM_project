@@ -20,6 +20,10 @@ class CustomFormatter(logging.Formatter):
     logging.AERO_ENV = 27  # between WARNING and INFO
     logging.addLevelName(logging.AERO_ENV, 'AERO_ENV')
 
+    logging.AIRPLANE = 28  # between WARNING and INFO
+    logging.addLevelName(logging.AIRPLANE, 'AIRPLANE')
+
+    black_back = "\x1b[40;1m"
     cyan = "\x1b[36;1m"
     grey = "\x1b[37;1m"
     yellow = '\x1b[33;1m'
@@ -41,6 +45,7 @@ class CustomFormatter(logging.Formatter):
         logging.DISPATCHER: blue + format + reset,
         logging.RADAR: green + format + reset,
         logging.AERO_ENV: grey + format + reset,
+        logging.AIRPLANE: black_back + format + reset,
     }
 
     def format(self, record):
@@ -62,6 +67,7 @@ setattr(logger, 'guided_missile', lambda message, *args: logger._log(logging.GUI
 setattr(logger, 'dispatcher', lambda message, *args: logger._log(logging.DISPATCHER, message, args))
 setattr(logger, 'radar', lambda message, *args: logger._log(logging.RADAR, message, args))
 setattr(logger, 'aero_env', lambda message, *args: logger._log(logging.AERO_ENV, message, args))
+setattr(logger, 'airplane', lambda message, *args: logger._log(logging.AIRPLANE, message, args))
 
 logger.info('Цвета логов')
 logger.combat_control('combat_control')
@@ -70,3 +76,4 @@ logger.guided_missile('guided_missile')
 logger.dispatcher('dispatcher')
 logger.radar('radar')
 logger.aero_env('aero_env')
+logger.airplane('airplane')

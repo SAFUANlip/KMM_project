@@ -4,7 +4,7 @@ from src.modules_classes.Simulated import Simulated
 from src.modules_classes.GuidedMissile import GuidedMissile
 import matplotlib.pyplot as plt
 from src.modules_classes.AeroEnv import AeroEnv, Airplane, Helicopter
-from config.constants import MSG_RADAR2DRAWER_type, MISSILE_TYPE_DRAWER
+from config.constants import MSG_RADAR2DRAWER_type, MISSILE_TYPE_DRAWER, MSG_CCP2DRAWER_type
 
 import time as time_python
 
@@ -75,5 +75,5 @@ class Graphics(Simulated):
         fig.canvas.draw()
         fig.canvas.flush_events()
 
-        time_python.sleep(0.5)
+        time_python.sleep(0.2)
         plt.close(fig)
