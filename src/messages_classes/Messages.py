@@ -13,7 +13,7 @@ class Radar2CombatControlMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, visible_objects: list):
         '''
         :param visible_objects: список видимых объектов из списков типа
-                                [положение объекта, направление скорости объекта, модуль скорости объекта]
+                                [положение объекта, направление скорости объекта, модуль скорости объекта, ошибка определения дальности]
         '''
         super().__init__(MSG_RADAR2CCP_type, 1, time, sender_ID, receiver_ID)
         self.visible_objects = visible_objects
@@ -22,8 +22,7 @@ class Radar2CombatControlMsg(BaseMessage):
 class Radar2DrawerMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, pos_objects: list):
         '''
-        :param visible_objects: список видимых объектов из списков типа
-                                [положение объекта, направление скорости объекта, модуль скорости объекта]
+        :param visible_objects: список положений видимых объектов
         '''
         super().__init__(MSG_RADAR2DRAWER_type, DRAWER_ID, time, sender_ID, receiver_ID)
         self.pos_objects = pos_objects
@@ -35,8 +34,7 @@ class Radar_InitMessage(BaseMessage):
 class Radar_ViewMessage(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, pos_objects: list):
         '''
-        :param visible_objects: список видимых объектов из списков типа
-                                [положение объекта, направление скорости объекта, модуль скорости объекта]
+        :param visible_objects: список положений видимых объектов
         '''
         super().__init__(MSG_RADAR2DISPATCHER_VIEW_type, DISPATCHER_ID, time, sender_ID, receiver_ID)
         self.pos_objects = pos_objects
