@@ -4,7 +4,7 @@ from config.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
     MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
     MSG_GM2RADAR_type, MSG_CCP2DRAWER_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
     MSG_AEROENV2DISPATCHER_VIEW_type, MSG_CCP2DISPATCHER_INIT_type, MSG_CCP2DISPATCHER_VIEW_type, MSG_CCP2GUItype, \
-    MSG_CCP_MISSILE_CAPACITY_type
+    MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2DISPATCHER_INIT_type, DISPATCHER_ID, DRAWER_ID, MSG_RADAR2DISPATCHER_VIEW_type
 
 from src.messages_classes.BaseMessage import BaseMessage
 
@@ -25,9 +25,21 @@ class Radar2DrawerMsg(BaseMessage):
         :param visible_objects: список видимых объектов из списков типа
                                 [положение объекта, направление скорости объекта, модуль скорости объекта]
         '''
-        super().__init__(MSG_RADAR2DRAWER_type, 1, time, sender_ID, receiver_ID)
+        super().__init__(MSG_RADAR2DRAWER_type, DRAWER_ID, time, sender_ID, receiver_ID)
         self.pos_objects = pos_objects
 
+class Radar_InitMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
+        super().__init__(MSG_RADAR2DISPATCHER_INIT_type, DISPATCHER_ID, time, sender_ID, receiver_ID)
+
+class Radar_ViewMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int, pos_objects: list):
+        '''
+        :param visible_objects: список видимых объектов из списков типа
+                                [положение объекта, направление скорости объекта, модуль скорости объекта]
+        '''
+        super().__init__(MSG_RADAR2DISPATCHER_VIEW_type, DISPATCHER_ID, time, sender_ID, receiver_ID)
+        self.pos_objects = pos_objects
 
 class CombatControl2StartingDeviceMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, order: int,

@@ -1,8 +1,8 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type
+from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg, \
-    GuidedMissileHit2RadarMsg, GuidedMissileHit2CCPMsg
+    GuidedMissileHit2RadarMsg, GuidedMissileHit2CCPMsg, Radar_InitMessage, Radar_ViewMessage
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.AeroEnv import AeroEnv
 from src.utils.logger import logger
@@ -36,6 +36,8 @@ class RadarRound(Simulated):
         self.view_distance = view_distance
         self.pan_per_sec = pan_per_sec
         self.tilt_per_sec = tilt_per_sec
+
+        self.start = True
 
     def findObjects(self):
         all_objects = self.aero_env.getEntities()
@@ -100,6 +102,11 @@ class RadarRound(Simulated):
             self._sendMessage(msg2ccp)
 
     def runSimulationStep(self, time: float):
+        if self.start:
+            init_msg = Radar_InitMessage(time=time, sender_ID=self._ID, receiver_ID=DISPATCHER_ID)
+            self._sendMessage(init_msg)
+            self.start = False
+
         self.changeMissileCoords(time)
         self.sendCcpHitMissile(time)
 
@@ -114,12 +121,20 @@ class RadarRound(Simulated):
             time=time,
             sender_ID=self._ID,
             receiver_ID=DRAWER_ID,
-            pos_objects=pos_objects,
+            pos_objects=pos_objects
         )
 
         logger.radar(
             f"Radad с id {self._ID} отправил сообщение Drawer с id {TARGET_TYPE_DRAWER} с положениями видимых объектов")
         self._sendMessage(msg2draw)
+
+        msg2view = Radar_ViewMessage(time=time,
+                                     sender_ID=self._ID,
+                                     receiver_ID=DISPATCHER_ID,
+                                     pos_objects=pos_objects)
+        logger.radar(
+            f"Radad с id {self._ID} отправил сообщение Dispatcher с id {DISPATCHER_ID} с положениями видимых объектов")
+        self._sendMessage(msg2view)
 
         self.moveToNextSector()
 
