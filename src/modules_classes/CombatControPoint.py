@@ -294,83 +294,81 @@ class CombatControlPoint(Simulated):
         self.get_launched_missiles(time)
 
         msg_from_radar = self._checkAvailableMessagesByType(MSG_RADAR2CCP_type)
-        if len(msg_from_radar) == 0 or len(msg_from_radar[0].visible_objects) == 0:
-            return
-
-        radar_id = msg_from_radar[0].sender_ID
         logger.combat_control(f"ПБУ получил сообщения от {len(msg_from_radar)} МФР")
+        if len(msg_from_radar) != 0:
+            radar_id = msg_from_radar[0].sender_ID
 
-        # отделить новые цели от всего что было раньше
-        for msg in msg_from_radar:
-            logger.combat_control(f"ПБУ получил {len(msg.visible_objects)} сообщений от МФР с id {msg.sender_ID}")
+            # отделить новые цели от всего что было раньше
+            for msg in msg_from_radar:
+                logger.combat_control(f"ПБУ получил {len(msg.visible_objects)} сообщений от МФР с id {msg.sender_ID}")
 
-            visible_objects = msg.visible_objects
-            for visible_object in visible_objects:
-                obj_coord = visible_object[0]
-                obj_speed_direct = visible_object[1]
-                obj_speed_mod = visible_object[2]
+                visible_objects = msg.visible_objects
+                for visible_object in visible_objects:
+                    obj_coord = visible_object[0]
+                    obj_speed_direct = visible_object[1]
+                    obj_speed_mod = visible_object[2]
 
-                obj_type, sim_obj_key = self.findMostSimilarObject(visible_object, time)
-                if obj_type == NEW_TARGET:
-                    # положить в память новые цели
-                    min_dist = 10e10
-                    sd_id = None
-                    for key in self.starting_devices_coords.keys():
-                        if self.starting_devices_launched[key] < self.starting_devices_capacity[key]:
-                            sd_pos = self.starting_devices_coords[key]
-                            dist = (np.sum((sd_pos - obj_coord) ** 2)) ** 0.5
-                            if dist < min_dist:
-                                sd_id = key
-                                min_dist = dist
+                    obj_type, sim_obj_key = self.findMostSimilarObject(visible_object, time)
+                    if obj_type == NEW_TARGET:
+                        # положить в память новые цели
+                        min_dist = 10e10
+                        sd_id = None
+                        for key in self.starting_devices_coords.keys():
+                            if self.starting_devices_launched[key] < self.starting_devices_capacity[key]:
+                                sd_pos = self.starting_devices_coords[key]
+                                dist = (np.sum((sd_pos - obj_coord) ** 2)) ** 0.5
+                                if dist < min_dist:
+                                    sd_id = key
+                                    min_dist = dist
 
-                    if sd_id is not None:
-                        self.target_order = self.target_order + 1
-                        self.target_dict[self.target_order] = CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time)
+                        if sd_id is not None:
+                            self.target_order = self.target_order + 1
+                            self.target_dict[self.target_order] = CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time)
 
-                        msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
-                                                                             self._ID, sd_id, self.target_order,
-                                                                             obj_coord, radar_id)
+                            msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
+                                                                                 self._ID, sd_id, self.target_order,
+                                                                                 obj_coord, radar_id)
 
 
-                        logger.combat_control(f"ПБУ отправил ПУ id {sd_id} координаты новой цели: {obj_coord}")
-                        self.starting_devices_launched[key] = self.starting_devices_launched[key] + 1
-                        self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
-                    else:
-                        logger.warning(f"Не осталось свободных ЗУР!!!")
+                            logger.combat_control(f"ПБУ отправил ПУ id {sd_id} координаты новой цели: {obj_coord}")
+                            self.starting_devices_launched[key] = self.starting_devices_launched[key] + 1
+                            self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
+                        else:
+                            logger.warning(f"Не осталось свободных ЗУР!!!")
 
-                    # ЗУР по координатам coord
+                        # ЗУР по координатам coord
 
-                elif obj_type == OLD_TARGET:  # старая цель, надо обновить данные о ней в листах
-                    # target list и missiles list и после этого ЗУР, которая летит за ней,
-                    # перенаправить
+                    elif obj_type == OLD_TARGET:  # старая цель, надо обновить данные о ней в листах
+                        # target list и missiles list и после этого ЗУР, которая летит за ней,
+                        # перенаправить
 
-                    old_target_coord = self.target_dict[sim_obj_key].coord
+                        old_target_coord = self.target_dict[sim_obj_key].coord
 
-                    self.target_dict[sim_obj_key].updСoord(obj_coord, time)
-                    self.target_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
+                        self.target_dict[sim_obj_key].updСoord(obj_coord, time)
+                        self.target_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
 
-                    for key in self.missile_dict.keys():
-                        missile = self.missile_dict[key]
+                        for key in self.missile_dict.keys():
+                            missile = self.missile_dict[key]
 
-                        if (missile.target_coord == old_target_coord).all():
-                            self.missile_dict[key].updTargetCoord(obj_coord)
+                            if (missile.target_coord == old_target_coord).all():
+                                self.missile_dict[key].updTargetCoord(obj_coord)
 
-                            missile_id = self.missile_dict[key].id
-                            target_vel = self.missile_dict[key].target_vel
-                            msg2radar = CombatControl2RadarMsg(time, self._ID, radar_id, obj_coord, target_vel,
-                                                               missile_id)
-                            self._sendMessage(msg2radar)
+                                missile_id = self.missile_dict[key].id
+                                target_vel = self.missile_dict[key].target_vel
+                                msg2radar = CombatControl2RadarMsg(time, self._ID, radar_id, obj_coord, target_vel,
+                                                                   missile_id)
+                                self._sendMessage(msg2radar)
 
-                            logger.combat_control(
-                                f"ПБУ отправил сообщение Радару, что у ЗУР с id:{missile_id}, новые координаты ее цели:{obj_coord}")
-                            break
+                                logger.combat_control(
+                                    f"ПБУ отправил сообщение Радару, что у ЗУР с id:{missile_id}, новые координаты ее цели:{obj_coord}")
+                                break
 
-                elif obj_type == OLD_GM:  # старая ЗУР, нужно обновить поля в листе ЗУР
-                    logger.combat_control(
-                        f"ПБУ увидел старую ЗУР с id:{self.missile_dict[sim_obj_key].id}, новые координаты:{obj_coord}")
+                    elif obj_type == OLD_GM:  # старая ЗУР, нужно обновить поля в листе ЗУР
+                        logger.combat_control(
+                            f"ПБУ увидел старую ЗУР с id:{self.missile_dict[sim_obj_key].id}, новые координаты:{obj_coord}")
 
-                    self.missile_dict[sim_obj_key].updСoord(obj_coord, time)
-                    self.missile_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
+                        self.missile_dict[sim_obj_key].updСoord(obj_coord, time)
+                        self.missile_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
 
         self.send_vis_objects2gui(time)
         self.send_vis_objects2drawer(time)
