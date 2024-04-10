@@ -1,8 +1,8 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type
+from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg, \
-    GuidedMissileHit2RadarMsg, GuidedMissileHit2CCPMsg
+    GuidedMissileHit2RadarMsg, GuidedMissileHit2CCPMsg, Radar_InitMessage, Radar_ViewMessage
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.AeroEnv import AeroEnv
 from src.utils.logger import logger
@@ -37,6 +37,8 @@ class RadarRound(Simulated):
         self.pan_per_sec = pan_per_sec
         self.tilt_per_sec = tilt_per_sec
 
+        self.start = True
+
     def findObjects(self):
         all_objects = self.aero_env.getEntities()
         visible_objects = []
@@ -56,14 +58,15 @@ class RadarRound(Simulated):
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     logger.radar(
                         f"Radar с id {self._ID} видит объект с сферическими координатами (dist, pan, tilt): {r, pan, tilt}")
-                    pos = obj.pos + np.random.randint(-int(0.001 * r) - 1, int(0.001 * r) + 1, size=3)
+                    error_r = int(0.001 * r) + 1
+                    pos = obj.pos + np.random.randint(-error_r, error_r, size=3)
 
                     speed = np.linalg.norm(obj.vel)
 
                     velocity_from_radar = obj.vel + np.random.randint(-int(0.001 * speed) - 1, int(0.001 * speed) + 1,
                                                                       size=3)
                     speed_from_radar = np.linalg.norm(velocity_from_radar)
-                    visible_objects.append([pos, velocity_from_radar, speed_from_radar])
+                    visible_objects.append([pos, velocity_from_radar, speed_from_radar, error_r])
 
         logger.radar(f"Radar с id {self._ID} видит {len(visible_objects)} объектов")
         return visible_objects
@@ -100,6 +103,11 @@ class RadarRound(Simulated):
             self._sendMessage(msg2ccp)
 
     def runSimulationStep(self, time: float):
+        if self.start:
+            init_msg = Radar_InitMessage(time=time, sender_ID=self._ID, receiver_ID=DISPATCHER_ID)
+            self._sendMessage(init_msg)
+            self.start = False
+
         self.changeMissileCoords(time)
         self.sendCcpHitMissile(time)
 
@@ -114,12 +122,20 @@ class RadarRound(Simulated):
             time=time,
             sender_ID=self._ID,
             receiver_ID=DRAWER_ID,
-            pos_objects=pos_objects,
+            pos_objects=pos_objects
         )
 
         logger.radar(
             f"Radad с id {self._ID} отправил сообщение Drawer с id {TARGET_TYPE_DRAWER} с положениями видимых объектов")
         self._sendMessage(msg2draw)
+
+        msg2view = Radar_ViewMessage(time=time,
+                                     sender_ID=self._ID,
+                                     receiver_ID=DISPATCHER_ID,
+                                     pos_objects=pos_objects)
+        logger.radar(
+            f"Radad с id {self._ID} отправил сообщение Dispatcher с id {DISPATCHER_ID} с положениями видимых объектов")
+        self._sendMessage(msg2view)
 
         self.moveToNextSector()
 
