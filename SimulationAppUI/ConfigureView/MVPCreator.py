@@ -13,6 +13,6 @@ class MVPCreator:
     def create(self, model_type, id, x, y, translator, pixmap, start_drag_distance):
         m_f, v_f, p_f = self.map[model_type // 1000]
         m = m_f(id, model_type, x, y)
-        v = v_f(pixmap, start_drag_distance)
+        v = v_f(pixmap, start_drag_distance, translator.grid)
         p = p_f(m, v, translator)
         return m, v, p

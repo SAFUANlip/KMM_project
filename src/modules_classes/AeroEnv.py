@@ -107,9 +107,10 @@ class AeroEnv(Simulated):
 
 
 class Airplane(Movable):
-    def __init__(self, dispatcher, ID: int, size=Airplane_SIZE, speed=Airplane_SPEED,
+    def __init__(self, dispatcher, ID: int, vel: np.array, size=Airplane_SIZE, speed=Airplane_SPEED,
                  trajectory_planned=[], start_time: float = 0.0, end_time: float = np.inf) -> None:
-        super().__init__(dispatcher, ID, pos=trajectory_planned[0], vel=np.array([speed, 0, 0]), size=size, speed=speed)
+        super().__init__(dispatcher, ID, pos=trajectory_planned[0],
+                         vel=vel if vel is not None else np.array([Airplane_SPEED, 0, 0]), size=size, speed=speed)
         self.type_id = 1
         self.trajectory = [trajectory_planned[0]]
         self.trajectory_planned = trajectory_planned
@@ -160,7 +161,6 @@ class Airplane(Movable):
         self.pos = self.pos + self.vel * self._simulating_tick
         self.cur_time += self._simulating_tick
         self.trajectory.append((self.pos, self.cur_time))
-
 
 
 class Helicopter(Airplane):

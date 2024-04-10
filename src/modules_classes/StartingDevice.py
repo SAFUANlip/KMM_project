@@ -60,7 +60,8 @@ class StartingDevice(Simulated):
                 self._sendMessage(NoMissiles(time, self._ID, msg.sender_ID, msg.order))  # если нет - сигналим
             else:
                 # если есть - запускаем
-                free_missiles[0].launch(msg.coord, radar_id, time)
+                free_missiles[0].launch(msg.coord, msg.radar_id, time)
+
                 # пишу пбу
 
                 logger.starting_device(

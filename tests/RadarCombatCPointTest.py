@@ -43,6 +43,7 @@ if __name__ == '__main__':
                    end_time=140
                )
                ]
+
     env = AeroEnv(dispatcher, len(targets), targets=targets)
 
     radar = RadarRound(dispatcher, 1, 3000, env, (10, 10, 0), 0, 0, 50000, 360, 180)

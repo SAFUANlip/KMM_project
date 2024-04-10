@@ -53,12 +53,11 @@ class SimulationModule(QObject):
                     size=5,
                     start_time=t_s.time_start,
                     end_time=t_s.time_finish,
+                    vel=np.array([t_s.speed * np.cos(t_s.direction * np.pi/180), t_s.speed * np.sin(t_s.direction * np.pi/180), 0])
                 )
             )
 
         env = AeroEnv(dispatcher, -2, targets=targets)
-        for target in targets:
-            env.addEntity(target)
 
         configuration = [env]
 
