@@ -329,7 +329,7 @@ class CombatControlPoint(Simulated):
 
                         msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
                                                                              self._ID, sd_id, self.target_order,
-                                                                             obj_coord)
+                                                                             obj_coord, radar_id)
 
 
                         logger.combat_control(f"ПБУ отправил ПУ id {sd_id} координаты новой цели: {obj_coord}")
