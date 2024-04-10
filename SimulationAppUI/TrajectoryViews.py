@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphi
 from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem
+from PyQt5.QtWidgets import QApplication,  QGraphicsEllipseItem
 from PyQt5.QtCore import Qt, QPointF, QRectF
 
 
@@ -51,6 +52,22 @@ class СhooseViewWidget(QWidget):
         else:
             return False
 
+
+class TargetPoint(QGraphicsItem):
+    def __init__(self, point_pos, radius):
+        super().__init__()
+        self.point_pos = point_pos
+        self.radius = radius
+
+    def paint(self, painter, option, widget):
+        pen = QPen(Qt.blue)
+        pen.setWidth(2)
+        painter.setPen(pen)
+        painter.drawEllipse(self.point_pos[0], self.point_pos[1], self.radius, self.radius)
+
+    def boundingRect(self):
+        return QRectF(self.point_pos[0] - self.radius // 2, self.point_pos[1] - self.radius // 2,
+                      self.point_pos[0] + self.radius // 2, self.point_pos[1] + self.radius // 2)
 
 class TargetTrajectorySection(QGraphicsItem):
     def __init__(self, point_start, point_end, info):
@@ -115,7 +132,7 @@ class TrajGraphicsScene(QGraphicsScene):
         if not isinstance(self.trajectories, dict):
             return
 
-        print("in update lines data")
+        print("updating lines data")
         # print(clicked_controls)
         # print(clicked_vo)
         # print(self.trajectories)
@@ -133,12 +150,14 @@ class TrajGraphicsScene(QGraphicsScene):
                     self.addTraj(obj_traj)
 
             for control_id in clicked_controls:
-                obj_trajs = self.trajectories["controls"][control_id]
+                obj_points = self.trajectories["controls"][control_id]["targets"]
+                self.addTargetPoints(obj_points)
+                obj_trajs = self.trajectories["controls"][control_id]["missiles"]
                 for key, value in obj_trajs.items():
                     obj_id = key
                     obj_traj = value
-                    # print("kv", key, value)
-                    self.addTraj(obj_traj)
+                    # print("kv for vo", key, len(value))
+                    self.addMissileTraj(obj_traj)
 
             if clicked_vo:
                 #for key in ["targets", "missiles"]:
@@ -182,6 +201,15 @@ class TrajGraphicsScene(QGraphicsScene):
             prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
             line = TargetTrajectorySection(point, prev_point, f"section {i}")
             self.addItem(line)
+
+    def addTargetPoints(self, obj_traj):
+        # print(f"Adding target traj len ={len(obj_traj)}")
+        traj = obj_traj
+        for i in range(len(traj)):
+            point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
+            # prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
+            point = TargetPoint(point, 2)
+            self.addItem(point)
 
 
     def add_axis(self):
@@ -230,7 +258,7 @@ class TrajGraphicsScene(QGraphicsScene):
 class TrajectoryViews(QWidget):
     def __init__(self):
         super().__init__()
-        self.vo_clicked = False
+        self.clicked_vo = False
         self.clicked_radars = []
         self.clicked_controls = []
 
@@ -240,7 +268,6 @@ class TrajectoryViews(QWidget):
         self.coordinates_center = np.array([center_x, center_y])
 
         self.initUI()
-
 
     def initUI(self):
         self.view_layout = QVBoxLayout()
@@ -265,8 +292,8 @@ class TrajectoryViews(QWidget):
         else:
             self.clicked_radars.append(radar_id)
 
-        print(f"List updated: {self.clicked_radars}")
-        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.vo_clicked)
+        # print(f"List updated: {self.clicked_radars}")
+        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.clicked_vo)
 
     def menuControlClicked(self, control_id : int, value : bool):
         if not value:
@@ -275,52 +302,12 @@ class TrajectoryViews(QWidget):
         else:
             self.clicked_controls.append(control_id)
 
-        print(f"List updated: {self.clicked_controls}")
-        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.vo_clicked)
+        # print(f"List updated: {self.clicked_controls}")
+        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.clicked_vo)
 
     def setTrajectories(self, trajs):
         self.trajectories = trajs
         self.scene.setLinesData(trajs)
-
-    # def paintEvent(self, event):
-    #     # qp = QPainter()
-    #     #qp.begin(self)
-    #     #self.drawFrame(qp)
-    #     #print(self.trajectories)
-    #     # self.drawAllTrajs(event, qp)
-    #     # qp.end()
-    #
-
-    # def drawFrame(self, qp):
-    #     pen = QPen(self.frameColor)
-    #     pen.setWidth(4)
-    #     qp.setPen(pen)
-    #     qp.drawRect(0, 0, self.width() - 1, self.height() - 1)
-
-    # def drawTraj(self, event, qp, traj, obj_id):
-    #     print(f"drawing for obj, id={obj_id}")
-    #     qp.setPen(QColor(168, 34, 3))
-    #     qp.setFont(QFont('Decorative', 12))
-    #
-    #     print(self.coordinates_center)
-    #     print(traj)
-    #     for i in range(1, len(traj)):
-    #         print(i, len(traj))
-    #         print(self.coordinates_center, traj[i - 1])
-    #         point = self.coordinates_center + traj[i]
-    #         prev_point = self.coordinates_center + traj[i - 1]
-    #         print(point, prev_point)
-    #         qp.drawLine(point[0], point[1], prev_point[0], prev_point[1])
-    #         qp.drawEllipse(point[0], point[1], 5, 5)
-    #         print("drawn")
-    #
-    #     print("cycle")
-    #     qp.setPen(QColor(0, 0, 100))
-    #     qp.drawText(self.coordinates_center[0] + traj[-1][0], self.coordinates_center[1] + traj[-1][1], f'TrajExample id={obj_id}')
-    #     print("func")
-
-
-
 
 
 if __name__ == '__main__':

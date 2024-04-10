@@ -36,6 +36,7 @@ def parse_messages(all_messages):
 
     trajs["vo"] = parse_env_trajectories(env_view_messages)
 
+    print("Parsed VO views")
     # print(env_view_messages)
     # print(len(env_view_messages))
     # print(objs)
@@ -52,6 +53,7 @@ def parse_messages(all_messages):
     for control_id in objs["controls"]:
         trajs["controls"][control_id] = parse_control_trajectories(control_id, cc_view_messages)
 
+    print("Parsed control views")
     # print(cc_view_messages)
     # print(len(cc_view_messages))
     # print(objs)
@@ -75,11 +77,27 @@ def parse_control_trajectories(control_id, messages):
     # print(control_messages)
     # print("cc_s_len=", len(control_messages))
     control_messages.sort(key=lambda c_msg: c_msg.time)
-    objects = {}
-    for msg in control_messages:
-        # print(msg.view_dict)
-        pass
+    objects = {
+        "targets": [],
+        "missiles": {}
+    }
 
+    for msg in control_messages:
+        keys = ["targets", "missiles"]
+        for pair_id_pos in msg.view_dict["missiles"]:
+            obj_id = pair_id_pos[1]
+            obj_pos = pair_id_pos[2]
+            if obj_id in objects["missiles"]:
+                objects["missiles"][obj_id].append(obj_pos)
+            else:
+                objects["missiles"][obj_id] = [obj_pos]
+
+        for pair_time_pos in msg.view_dict["targets"]:
+            obj_time = pair_time_pos[0]
+            obj_pos = pair_time_pos[1]
+            objects["targets"].append(obj_pos)
+
+    # print("res_trajs:", objects["targets"])
     return objects
 
 
