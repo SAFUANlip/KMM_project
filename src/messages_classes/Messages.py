@@ -2,8 +2,10 @@ import numpy as np
 
 from config.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
     MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
-    MSG_CCP_MISSILE_CAPACITY_type, MSG_GM2RADAR_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
-    MSG_AEROENV2DISPATCHER_VIEW_type, MSG_CCP2GUItype
+    MSG_GM2RADAR_type, MSG_CCP2DRAWER_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
+    MSG_AEROENV2DISPATCHER_VIEW_type, MSG_CCP2DISPATCHER_INIT_type, MSG_CCP2DISPATCHER_VIEW_type, MSG_CCP2GUItype, \
+    MSG_CCP_MISSILE_CAPACITY_type
+
 from src.messages_classes.BaseMessage import BaseMessage
 
 
@@ -88,19 +90,24 @@ class Radar2MissileMsg(BaseMessage):
 
 class CombatControlPoint_ViewMessage(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, view_dict) -> None:
-        super(CombatControlPoint_ViewMessage, self).__init__(MSG_CCP2GUItype, 0, time, sender_ID, receiver_ID)
+        super(CombatControlPoint_ViewMessage, self).__init__(MSG_CCP2DISPATCHER_VIEW_type, 0, time, sender_ID, receiver_ID)
         self.view_dict = view_dict
+
+class CombatControlPoint_InitMessage(BaseMessage):
+    def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
+        super(CombatControlPoint_InitMessage, self).__init__(MSG_CCP2DISPATCHER_INIT_type, 0, time, sender_ID, receiver_ID)
+
 
 
 class GuidedMissileHit2RadarMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
         super(GuidedMissileHit2RadarMsg, self).__init__(MSG_GM2RADAR_type, 0, time, sender_ID, receiver_ID)
 
-class CombatControlPoint_InitMessage(BaseMessage):
-    def __init__(self, time: float, sender_ID: int, receiver_ID: int) -> None:
-        super(CombatControlPoint_InitMessage, self).__init__(MSG_GM2RADAR_type, 0, time, sender_ID, receiver_ID)
 
-
+class CombatControl2DrawerMsg(BaseMessage):
+    def __init__(self, time: int, sender_ID: int, receiver_ID: int, coordinates) -> None:
+        super(CombatControl2DrawerMsg, self).__init__(MSG_CCP2DRAWER_type, 0, time, sender_ID, receiver_ID)
+        self.coordinates = coordinates
 
 class GuidedMissileHit2CCPMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, guided_missile_id:int) -> None:

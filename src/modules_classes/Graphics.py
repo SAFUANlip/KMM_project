@@ -4,7 +4,7 @@ from src.modules_classes.Simulated import Simulated
 from src.modules_classes.GuidedMissile import GuidedMissile
 import matplotlib.pyplot as plt
 from src.modules_classes.AeroEnv import AeroEnv, Airplane, Helicopter
-from config.constants import MSG_RADAR2DRAWER_type, MISSILE_TYPE_DRAWER
+from config.constants import MSG_RADAR2DRAWER_type, MISSILE_TYPE_DRAWER, MSG_CCP2DRAWER_type
 
 import time as time_python
 
@@ -46,7 +46,7 @@ class Graphics(Simulated):
         CCP_list = self._checkAvailableMessagesByType(MSG_CCP2DRAWER_type)
         logger.info(f"Рисовальщик получил {len(CCP_list)} сообщений от ПБУ")
         if len(CCP_list) > 0:
-            CCP_msg = CCP_list[0].pos_objects
+            CCP_msg = CCP_list[0].coordinates
             # 0 - зур, 1 - цель
             line1, line2 = None, None
             for i in range(len(CCP_msg)):

@@ -15,43 +15,35 @@ if __name__ == '__main__':
 
     n = 1
     targets = [
-        Airplane(
-            dispatcher=dispatcher, ID=3, size=5,
-            trajectory_planned=[np.array([0, 10000, 10000]),
-                                np.array([10000, 0, 10000]),
-                                np.array([10000, 10000, 11000])],
-            start_time=0,
-            end_time=100,
-            vel=None,
-        ),
-        Airplane(
-           dispatcher=dispatcher, ID=4,
-           trajectory_planned=[np.array([-10000, -10000, 10000])],
-           size=5,
-           start_time=10,
-           end_time=120,
-           vel=None
-        ),
-       Airplane(
-           # dispatcher=dispatcher, ID=5,
-           # trajectory_planned=[np.array([-1000, -1000, 10000]),
-           #                     np.array([-1100, -1000, 10000]),
-           #                     np.array([-1200, -1100, 10000]),
-           #                     np.array([-1300, -1200, 10000])],
-           # size=5,
-           # start_time=0,
-           # end_time=140
-           dispatcher=dispatcher, ID=5,
-           trajectory_planned=[np.array([-20000, 10000, 10000]),
-                               np.array([-22000, 15000, 7000]),
-                               np.array([-24000, 20000, 5000]),
-                               np.array([-26000, 25000, 5000])],
-           size=5,
-           start_time=0,
-           end_time=140,
-           vel=None,
-       )
-    ]
+               Airplane(dispatcher=dispatcher, ID=3, size=5,
+                        trajectory_planned=[np.array([0, 10000, 10000]),
+                                            np.array([10000, 0, 10000]),
+                                            np.array([10000, 10000, 11000])],
+                        start_time=0, end_time=100),
+               Airplane(dispatcher=dispatcher, ID=4,
+                        trajectory_planned=[np.array([-10000, -10000, 10000])], size=5,
+                        start_time=10, end_time=120),
+               Airplane(
+                   dispatcher=dispatcher, ID=5,
+                   trajectory_planned=[np.array([-1000, -1000, 10000]),
+                                       np.array([-1100, -1000, 10000]),
+                                       np.array([-1200, -1100, 10000]),
+                                       np.array([-1300, -1200, 10000])],
+                   size=5,
+                   start_time=0,
+                   end_time=140),
+                Airplane(
+                   dispatcher=dispatcher, ID=5,
+                   trajectory_planned=[np.array([-20000, 10000, 10000]),
+                                       np.array([-22000, 15000, 7000]),
+                                       np.array([-24000, 20000, 5000]),
+                                       np.array([-26000, 25000, 5000])],
+                   size=5,
+                   start_time=0,
+                   end_time=140
+               )
+               ]
+
     env = AeroEnv(dispatcher, len(targets), targets=targets)
 
     radar = RadarRound(dispatcher, 1, 3000, env, (10, 10, 0), 0, 0, 50000, 360, 180)
@@ -65,7 +57,7 @@ if __name__ == '__main__':
 
     graphics = Graphics(dispatcher=dispatcher, ID=DRAWER_ID, aero_env=env)
 
-    dispatcher.configurate([env, radar, radar2, combat, *start_devices])
+    dispatcher.configurate([env, radar, radar2, combat, *start_devices, graphics])
     dispatcher.run()
 
     # rate, messages_classes = dispatcher.getMessageHistory()

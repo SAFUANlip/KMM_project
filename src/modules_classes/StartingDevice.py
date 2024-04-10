@@ -53,6 +53,7 @@ class StartingDevice(Simulated):
         new_messages = self._checkAvailableMessagesByType(msg_type=MSG_CCP2SD_type)
         logger.starting_device(f"ПУ с ID {self._ID} получила {len(new_messages)} сообщений от ПБУ")
         for msg in new_messages:
+            radar_id = msg.sender_ID
             # проверка наличия свободных зур
             if len(free_missiles) == 0:
                 # если нет - сигналим
@@ -60,6 +61,7 @@ class StartingDevice(Simulated):
             else:
                 # если есть - запускаем
                 free_missiles[0].launch(msg.coord, msg.radar_id, time)
+
                 # пишу пбу
 
                 logger.starting_device(
