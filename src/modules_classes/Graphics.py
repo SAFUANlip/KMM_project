@@ -75,5 +75,5 @@ class Graphics(Simulated):
         fig.canvas.draw()
         fig.canvas.flush_events()
 
-        time_python.sleep(0.2)
+        time_python.sleep(0.5)
         plt.close(fig)

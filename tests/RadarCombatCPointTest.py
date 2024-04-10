@@ -15,16 +15,16 @@ if __name__ == '__main__':
 
     n = 1
     targets = [
-               Airplane(dispatcher=dispatcher, ID=3, size=5,
+               Airplane(dispatcher=dispatcher, ID=3, vel = np.array([100,100,100]), size=5,
                         trajectory_planned=[np.array([0, 10000, 10000]),
                                             np.array([10000, 0, 10000]),
                                             np.array([10000, 10000, 11000])],
                         start_time=0, end_time=100),
-               Airplane(dispatcher=dispatcher, ID=4,
+               Airplane(dispatcher=dispatcher, ID=4, vel = np.array([100,100,100]),
                         trajectory_planned=[np.array([-10000, -10000, 10000])], size=5,
                         start_time=10, end_time=120),
                Airplane(
-                   dispatcher=dispatcher, ID=5,
+                   dispatcher=dispatcher, ID=5, vel = np.array([100,100,100]),
                    trajectory_planned=[np.array([-1000, -1000, 10000]),
                                        np.array([-1100, -1000, 10000]),
                                        np.array([-1200, -1100, 10000]),
@@ -33,7 +33,7 @@ if __name__ == '__main__':
                    start_time=0,
                    end_time=140),
                 Airplane(
-                   dispatcher=dispatcher, ID=5,
+                   dispatcher=dispatcher, ID=5, vel = np.array([100,100,100]),
                    trajectory_planned=[np.array([-20000, 10000, 10000]),
                                        np.array([-22000, 15000, 7000]),
                                        np.array([-24000, 20000, 5000]),
