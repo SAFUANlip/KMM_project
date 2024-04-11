@@ -1,12 +1,11 @@
 import numpy as np
 
+from config.constants import (GuidedMissile_SPEED, EPS,
+                              GuidedMissile_LifeTime, GuidedMissile_ExplRadius, GuidedMissile_MaxRotAngle,
+                              MSG_RADAR2GM_type)
 from src.messages_classes.Messages import GuidedMissileHit2RadarMsg
 from src.modules_classes.ModelDispatcher import ModelDispatcher
 from src.modules_classes.Movable import Movable, angle_between, dist
-from src.messages_classes.BaseMessage import BaseMessage
-from config.constants import (MSG_CCP2GM_type, GuidedMissile_SPEED, EPS,
-                              GuidedMissile_LifeTime, GuidedMissile_ExplRadius, GuidedMissile_MaxRotAngle,
-                              MSG_RADAR2GM_type)
 from src.utils.logger import logger
 
 

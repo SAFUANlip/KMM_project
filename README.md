@@ -6,10 +6,10 @@
 
 
 ## Архитектура проекта:
-![img.png](docs/img.png)
+![img.png](docs/img/img.png)
 
 ## Состав команды "Синий Шуршунчик":
-![team.png](docs/team.png)
+![team.png](docs/img/team.png)
 
 
 ### Структура репозитория
@@ -27,7 +27,7 @@
 [Ссылка на UML-диаграмму](https://drive.google.com/file/d/1ucT0xLzZWOYp1hiXnceom4LKOXFYfxBC/view?usp=sharing)
 ## РЛС
 В РЛС кругового типа обзор происходит по винтовой траектории:
-![RadarRound](docs/img_RadarRound.png)
+![RadarRound](docs/img/img_RadarRound.png)
 В РЛС секторного типа обзор происходит по зигзагообразной траектории:
-![RadarSector](docs/img_RadarSector.png)
+![RadarSector](docs/img/img_RadarSector.png)
 

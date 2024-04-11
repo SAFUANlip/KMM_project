@@ -24,8 +24,10 @@ def angle_between(v1, v2):
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
+
 def dist(pos1: np.array, pos2: np.array) -> float:
     return np.linalg.norm(pos1 - pos2)
+
 
 class Movable(Simulated):
     def __init__(self, dispathcer: ModelDispatcher, ID: int,
