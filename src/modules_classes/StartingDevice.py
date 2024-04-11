@@ -34,7 +34,7 @@ class StartingDevice(Simulated):
 
         return free_missiles, killed_missiles
 
-    def answer2request_gm_capacity(self):
+    def answer2request_gm_capacity(self, time):
         missile_capacity_msg = self._checkAvailableMessagesByType(msg_type=MSG_CCP_MISSILE_CAPACITY_type)
         if len(missile_capacity_msg) != 0:
             logger.starting_device(f"ПУ с ID {self._ID} получила вопрос о кол-ве ЗУР")
@@ -47,7 +47,7 @@ class StartingDevice(Simulated):
             logger.starting_device(f"ПУ с ID {self._ID} отправила ПБУ сколько у ПУ ЗУР")
 
     def runSimulationStep(self, time: float) -> None:
-        self.answer2request_gm_capacity()
+        self.answer2request_gm_capacity(time)
 
         # узнаём статус всех зур
         free_missiles, killed_missiles = self.checkMissiles()
