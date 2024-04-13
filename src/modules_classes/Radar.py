@@ -42,6 +42,9 @@ class RadarRound(Simulated):
     def findObjects(self):
         all_objects = self.aero_env.getEntities()
         visible_objects = []
+        logger.radar(f"Radar с id {self._ID} видит по углу поворота от {self.pan_cur} до {self.pan_cur + self.pan_per_sec}")
+        logger.radar(
+            f"Radar с id {self._ID} видит по углу наклона от {self.tilt_cur} до {self.tilt_cur + self.tilt_per_sec}")
         for obj in all_objects:
             r = np.linalg.norm(obj.pos - self.pos)
             eps = 0.0001
@@ -49,10 +52,9 @@ class RadarRound(Simulated):
 
             if r < self.view_distance:
                 x, y, z = (obj.pos - self.pos)
-                tilt = np.rad2deg(np.arcsin(z / (r + eps)))
-                pan = np.rad2deg(np.arctan2(y, (x + eps)))
+                tilt = np.rad2deg(np.arcsin(z / (r + eps))) % 180
+                pan = np.rad2deg(np.arctan2(y, (x + eps))) % 360
 
-                pan = 360 + pan if pan < 0 else pan
                 # logger.radar(f"радар чекает объект с pan {pan}, с tilt {tilt}, pan_cur {self.pan_cur}, pan per sec {self.pan_per_sec}, tilt cur {self.tilt_cur}, tilt per sec {self.tilt_per_sec}")
 
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
@@ -144,17 +146,16 @@ class RadarRound(Simulated):
         self.tilt_per_sec = new_tilt_sec
 
 
-# FIXME: починить, чтоб работало
 class RadarSector(RadarRound):
     def __init__(self, dispatcher, ID: int, cp_ID: int, aero_env: AeroEnv,
-                 pos, pan_start, tilt_start, dist, pan_angle, tilt_angle, pan_sec, tilt_sec, type_of_view = "horizontal"):
+                 pos, pan_start, tilt_start, dist, pan_angle, tilt_angle, pan_per_sec, tilt_per_sec, type_of_view="horizontal"):
         """ Класс, описывающий работу РЛС секторного обзора, является дочерним классом от РЛС кругового обзора:
          :param pan_angle: максимальный угол раскрыва по азимуту
          :param tilt_angle: максимальный угол раскрыва по углу наклона
          :param type_of_view: horizontal - соответствует рисунку а) для секторного РЛС,
                               vertical - соответствует рисунку б) для секторного РЛС
                               (см. README.md)"""
-        super().__init__(dispatcher, ID, cp_ID, aero_env, pos, pan_start, tilt_start, dist, pan_sec, tilt_sec)
+        super().__init__(dispatcher, ID, cp_ID, aero_env, pos, pan_start, tilt_start, dist, pan_per_sec, tilt_per_sec)
         self.pan_angle = pan_angle
         self.tilt_angle = tilt_angle
         self.type = type_of_view
