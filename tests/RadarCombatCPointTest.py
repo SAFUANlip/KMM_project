@@ -1,7 +1,7 @@
 from config.constants import TARGET_TYPE_DRAWER, DRAWER_ID
 from src.modules_classes.AeroEnv import AeroEnv, Airplane
 from src.modules_classes.CombatControPoint import CombatControlPoint
-from src.modules_classes.Radar import RadarRound
+from src.modules_classes.Radar import RadarRound, RadarSector
 from src.modules_classes.StartingDevice import StartingDevice
 from src.modules_classes.ModelDispatcher import ModelDispatcher
 from src.modules_classes.Graphics import Graphics
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     env = AeroEnv(dispatcher, len(targets), targets=targets)
 
     radar = RadarRound(dispatcher, 1, 3000, env, (10, 10, 0), 0, 0, 50000, 360, 180)
-    radar2 = RadarRound(dispatcher, 2, 3000, env, (-100, -100, 0), 0, 0, 50000, 360, 180)
+    radar2 = RadarSector(dispatcher, 2, 3000, env, (-100, -100, 0), 0, 0, 50000, 180, 180, 90, 90)
 
     start_devices = [StartingDevice(dispatcher, 2000, np.array([0, 0, 0]), env)]
     starting_devices_coords = {}
