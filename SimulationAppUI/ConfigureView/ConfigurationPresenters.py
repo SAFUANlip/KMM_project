@@ -52,11 +52,26 @@ class RadarConfigPresenter(PosConfigPresenter):
         super(RadarConfigPresenter, self).__init__(widget, parent)
         self.widget.fields['pan_start'].editingFinished.connect(self.updateModelData)
         self.widget.fields['overview'].activated.connect(self.updateModelData)
+        self.widget.fields['overview'].activated.connect(self.enableDisableParams)
+        self.widget.fields['type'].activated.connect(self.updateModelData)
+        self.widget.fields['pan_angle'].editingFinished.connect(self.updateModelData)
+        self.type_dict = {'Горизонтальный': 'horizontal',
+                          'Вертикальный': 'vertical'}
+
+    def get_key(self, d, value):
+        for k, v in d.items():
+            if v == value:
+                return k
 
     def updateUIFields(self):
         super().updateUIFields()
         self.widget.fields['pan_start'].setValue(self.model.getPanStart())
         self.widget.fields['overview'].setCurrentIndex(self.model.getOverviewMode())
+        text = self.get_key(self.type_dict, self.model.getSectorType())
+        text_index = self.widget.fields['type'].findText(text)
+        self.widget.fields['type'].setCurrentIndex(text_index)
+        self.widget.fields['pan_angle'].setRange(self.model.pan_per_sec, 360)
+        self.widget.fields['pan_angle'].setValue(self.model.getPanAngle())
 
     @pyqtSlot()
     def updateModelData(self):
@@ -64,6 +79,18 @@ class RadarConfigPresenter(PosConfigPresenter):
         if self.model:
             self.model.setPanStart(self.widget.fields['pan_start'].value())
             self.model.setOverviewMode(self.widget.fields['overview'].currentIndex())
+            text = self.type_dict[self.widget.fields['type'].currentText()]
+            self.model.setSectorType(text)
+            self.model.setPanAngle(self.widget.fields['pan_angle'].value())
+
+    @pyqtSlot()
+    def enableDisableParams(self):
+        if self.widget.fields['overview'].currentIndex() == 0:
+            self.widget.fields['type'].setEnabled(False)
+            self.widget.fields['pan_angle'].setEnabled(False)
+        else:
+            self.widget.fields['type'].setEnabled(True)
+            self.widget.fields['pan_angle'].setEnabled(True)
 
 
 class AeroTargetConfigPresenter(PosConfigPresenter):

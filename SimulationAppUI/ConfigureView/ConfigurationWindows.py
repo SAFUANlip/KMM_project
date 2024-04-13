@@ -71,6 +71,21 @@ class RadarWindow(PosConfigWindow):
         form_layout.addRow('Режим обзора:', combobox)
         self.fields['overview'] = combobox
 
+        combobox = QComboBox()
+        combobox.addItem('Горизонтальный')
+        combobox.addItem('Вертикальный')
+        combobox.setCurrentIndex(0)
+        form_layout.addRow('Тип секторного обзора:', combobox)
+        self.fields['type'] = combobox
+        combobox.setEnabled(False)
+
+        spinbox = QDoubleSpinBox()
+        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox.setRange(0, 360)
+        form_layout.addRow('Угол раскрыва по азимуту:', spinbox)
+        self.fields['pan_angle'] = spinbox
+        spinbox.setEnabled(False)
+
         layout.addLayout(form_layout)
         base_layout.addLayout(layout)
         self.setLayout(base_layout)

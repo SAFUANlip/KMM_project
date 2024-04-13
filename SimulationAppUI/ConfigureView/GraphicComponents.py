@@ -60,11 +60,21 @@ class RadarGraphicComponent(SimpleGraphicComponent):
         super(RadarGraphicComponent, self).__init__(pixmap, start_drag_distance, grid, parent)
         self.round = QGraphicsEllipseItem()
         self.round.setBrush(QColor(0,0,255,10))
+
         self.sector = QGraphicsEllipseItem()
         self.sector.setPen(Qt.red)
         self.sector.setStartAngle(0)
         self.sector.setSpanAngle(0)
 
+        self.whole_sector = QGraphicsEllipseItem()
+        self.whole_sector.setBrush(QColor(0,0,255,10))
+        self.whole_sector.setStartAngle(0)
+        self.whole_sector.setSpanAngle(0)
+
     def setSector(self, start_angle, span):
         self.sector.setStartAngle(16 * start_angle)
         self.sector.setSpanAngle(16 * span)
+
+    def setWholeSector(self, start_angle, span):
+        self.whole_sector.setStartAngle(16 * start_angle)
+        self.whole_sector.setSpanAngle(16 * span)

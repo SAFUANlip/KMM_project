@@ -59,6 +59,9 @@ class RadarSource(BaseSource):
         self.pan_per_sec = 60
         self.tilt_per_sec = 120
         self.view_distance = 150000
+        self.type = 'horizontal'
+        self.pan_angle = self.pan_per_sec
+        self.tilt_angle = self.tilt_per_sec
 
     def setOverviewMode(self, overview_mode):
         self.overview_mode = overview_mode
@@ -66,12 +69,20 @@ class RadarSource(BaseSource):
     def setPanStart(self, pan_start):
         self.pan_start = pan_start
         self.dataChanged.emit()
+    def setPanAngle(self, pan_angle):
+        self.pan_angle = pan_angle
+        self.dataChanged.emit()
+    def setSectorType(self, type):
+        self.type = type
 
     def getOverviewMode(self):
         return self.overview_mode
     def getPanStart(self):
         return self.pan_start
-
+    def getPanAngle(self):
+        return self.pan_angle
+    def getSectorType(self):
+        return self.type
 
 class StartDeviceSource(BaseSource):
     def __init__(self, id, model_type, x, y):
