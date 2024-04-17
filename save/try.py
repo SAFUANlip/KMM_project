@@ -1,0 +1,37 @@
+import Saver
+from Saver import *
+from Models import *
+
+model = Saver()
+dispatcher = DispatcherSource()
+base = BaseSource(10, 0, 1, 1)
+base.setZ(4)
+cps = ControlPointSource(5, 2, 2, 3)
+cps.setZ(7)
+rs = RadarSource(6, 1, 2, 2)
+rs.setZ(8)
+rs.setOverviewMode(0)
+rs.setSectorType(2)
+rs.setPanAngle(4)
+rs.setPanStart(400)
+sds1 = StartDeviceSource(0, 5, 6, 7)
+sds1.setZ(8)
+sds2 = StartDeviceSource(0, 5, 65, 77)
+sds2.setZ(23)
+ats1 = AeroTargetSource(3, 8, 6, 66)
+ats1.setZ(9)
+ats1.setSpeed(200)
+ats1.setDirection(300)
+ats1.setTimeStart(0)
+ats1.setTimeFinish(100)
+ats2 = AeroTargetSource(2, 8, 7, 77)
+ats2.setZ(65)
+ats2.setSpeed(300)
+ats2.setDirection(200)
+ats2.setTimeStart(5)
+ats2.setTimeFinish(120)
+
+objects = [dispatcher, base, cps, rs, sds1, sds2, ats1, ats2]
+model.saveObjects(objects, 'test.txt')
+uploaded_objects = model.uploadObjects('save/test.txt')
+print(uploaded_objects)
