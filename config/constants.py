@@ -1,0 +1,5 @@
+SPEED_GuidedMissile = 1200  # скорость ЗУР
+MAX_DIST_ERROR = 10
+NUMBER_OF_MISSILES = 50
+MSG_RADAR2DRAWER_type = -1
+MSG_CCP2DRAWER_type = -2
