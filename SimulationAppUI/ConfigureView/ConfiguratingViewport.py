@@ -4,6 +4,7 @@ from copy import deepcopy
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog
+from PyQt5.QtGui import QCursor
 
 from ConfigureView.Grid2D import GraphicsPlotItem
 from ConfigureView.GraphicComponents import *
@@ -33,6 +34,7 @@ class ConfiguratingViewport(QGraphicsView):
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
+        self.view.setMouseTracking(True)
 
         self.setGrid()
         self.translator = CoordinatesTranslator(self.plot.gridItem)
@@ -58,12 +60,23 @@ class ConfiguratingViewport(QGraphicsView):
         self.plot.setOrdinateRange(-300000, 300000)
         self.scene.setSceneRect(self.plot.boundingRect())
 
+    def mouseMoveEvent(self, event):
+        self.scene.update()
+        super().mouseMoveEvent(event)
+
     def resizeEvent(self, event):
         #new_size = event.size()
         #self.translator.setNewWidgetSize(new_size.width() // 2, new_size.height() // 2)
         #super().resizeEvent(event)
         self.view.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
     
+    def drawForeground(self, painter, rect):
+        super().drawForeground(painter, rect)
+        pos = self.view.mapToScene(self.view.mapFromGlobal(QCursor.pos()))
+        grid_pos = self.plot.gridItem.mapFromScene(pos)
+        if self.plot.gridItem.boundingRect().contains(grid_pos):
+            painter.drawText(pos, f'X: {round(grid_pos.x())}, Y: {round(grid_pos.y())}')
+
     def getModelSources(self):
         return self.models
 
