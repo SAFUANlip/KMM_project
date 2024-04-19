@@ -42,7 +42,7 @@ class RadarRound(Simulated):
                 pan = np.arcsin(y/(r*np.cos(tilt))) - self.pan_start
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     pos = np.array([obj.x, obj.y, obj.z]) + np.random.randint(-MAX_DIST_ERROR, MAX_DIST_ERROR, size=3)
-                    speed_direction = obj.vel + np.random.randint(-0.001*SPEED_GuidedMissile, 0.001*SPEED_GuidedMissile, size=3)
+                    speed_direction = obj.esk + np.random.randint(-0.001*SPEED_GuidedMissile, 0.001*SPEED_GuidedMissile, size=3)
                     speed_modul = np.linalg.norm(speed_direction)
                     visible_objects.append([pos, speed_direction, speed_modul])
         return visible_objects

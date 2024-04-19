@@ -6,8 +6,7 @@ from src.classes.GuidedMissile import GuidedMissile
 from src.classes.ModelDispatcher import ModelDispatcher
 from src.classes.Simulated import Simulated
 from src.messages.Messages import NoMissiles, MissileStarted
-
-
+from src.utils.logger import logger
 
 # класс ПУ
 class StartingDevice(Simulated):
@@ -47,17 +46,19 @@ class StartingDevice(Simulated):
         new_messages = self._checkAvailableMessagesByType(msg_type = 3001)
         for msg in new_messages:
             # проверка наличия свободных зур
+            logger.starting_device(f"ПУ с id {self._ID} получило сообщение от ПБУ с id {msg.sender_ID}")
             if len(free_missiles) == 0:
                 # если нет - сигналим
                 self._sendMessage(NoMissiles(time, self._ID, msg.sender_ID, msg.order)) # если нет - сигналим
+                logger.starting_device(f"ПУ с id {self._ID} отправила ПБУ сообщение об отсутствии ЗУР")
             else:
-                print(msg.coord)
+                logger.starting_device(f"ПУ с id {self._ID} получила координаты {msg.coord} от ПБУ")
                 # если есть - запускаем
                 free_missiles[0].launch(*msg.coord, time)
                 #пишу пбу
-                print("here")
+                logger.starting_device(f"ПУ с id {self._ID} запустила ЗУР с id {free_missiles[0]._ID}")
                 self._sendMessage(MissileStarted(time, self._ID, msg.sender_ID, free_missiles[0]._ID, msg.order))
-
+                logger.starting_device(f"ПУ с id {self._ID} отправила сообщение ПБУ о запуске ЗУР")
                 # обновляем во
                 self.aeroenv.addEntity(free_missiles[0])
                 #удаляем зур
