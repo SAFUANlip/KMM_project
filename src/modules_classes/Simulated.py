@@ -1,6 +1,7 @@
+import numpy as np
 from abc import ABCMeta, abstractmethod
 from typing import List
-from src.messages.BaseMessage import BaseMessage
+from src.messages_classes.BaseMessage import BaseMessage
 
 # Затычка против зацикливания импорта
 # Импорт модуля диспетчера должен быть в конце
@@ -16,7 +17,7 @@ class Simulated(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def __init__(self, dispatcher: ModelDispatcher, ID: int) -> None:
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, pos: np.array) -> None:
         """ Базовый класс моделей, реализует обмен сообщениями 
         :param dispatcher: диспетчер моделей
         :param ID: ID объекта моделирования
@@ -24,6 +25,7 @@ class Simulated(metaclass=ABCMeta):
         self.__dispatcher = dispatcher
         self._ID = ID
         self._simulating_tick: float = dispatcher.getSimulatingTick()
+        self.pos = pos
 
     @abstractmethod
     def runSimulationStep(self, time: float) -> None:
