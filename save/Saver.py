@@ -117,6 +117,7 @@ class Saver:
         return 0
 
     def uploadObjects(self, way_to_file: str):
+        try:
             with open(way_to_file, 'r') as file:
                 objects = json.load(file)
 
@@ -135,6 +136,10 @@ class Saver:
                         uploaded_objects.append(self.parse_target(obj))
 
             return uploaded_objects
+        except Exception:
+            print("Невозможно загрузить данный файл.")
+            return []
+
 
 
 
