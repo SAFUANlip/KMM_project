@@ -8,7 +8,9 @@ from src.modules_classes.CombatControPoint import CombatControlPoint
 from src.messages_classes.Messages import (CombatControlPoint_InitMessage,
                                            CombatControlPoint_ViewMessage,
                                            AeroEnv_InitMessage,
-                                           AeroEnv_ViewMessage)
+                                           AeroEnv_ViewMessage,
+                                           Radar_InitMessage,
+                                           Radar_ViewMessage)
 
 def parse_messages(all_messages):
     objs = {
@@ -59,6 +61,16 @@ def parse_messages(all_messages):
     # print(objs)
 
     # Radars messages
+    # Controls messages
+    radar_view_messages = []
+    for el in mixed_messages:
+        if isinstance(el, Radar_ViewMessage):
+            radar_view_messages.append(el)
+        elif isinstance(el, Radar_InitMessage):
+            objs["radars"].append(el.sender_ID)
+
+    for control_id in objs["radars"]:
+        trajs["radars"][control_id] = parse_radar_trajectories(control_id, radar_view_messages)
 
     return objs, trajs
 
@@ -100,6 +112,27 @@ def parse_control_trajectories(control_id, messages):
     # print("res_trajs:", objects["targets"])
     return objects
 
+
+def parse_radar_trajectories(radar_id, messages):
+    radar_messages = []
+    for msg in messages:
+        if msg.sender_ID == radar_id:
+            radar_messages.append(msg)
+
+    # print(radar_messages)
+    # print("radar_s_len=", len(radar_messages))
+    radar_messages.sort(key=lambda c_msg: c_msg.time)
+    objects = {
+        "targets": [],
+        "missiles": {}
+    }
+
+    for msg in radar_messages:
+        # keys = ["targets", "missiles"]
+        for pos in msg.pos_objects:
+            # obj_id - None
+            objects["targets"].append(pos)
+    return objects
 
 def parse_env_trajectories(messages):
     # print(messages)

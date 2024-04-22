@@ -63,7 +63,8 @@ class TargetPoint(QGraphicsItem):
         pen = QPen(Qt.blue)
         pen.setWidth(2)
         painter.setPen(pen)
-        painter.drawEllipse(self.point_pos[0], self.point_pos[1], self.radius, self.radius)
+        painter.drawEllipse(int(self.point_pos[0]), int(self.point_pos[1]),
+                            int(self.radius), int(self.radius))
 
     def boundingRect(self):
         return QRectF(self.point_pos[0] - self.radius // 2, self.point_pos[1] - self.radius // 2,
@@ -85,7 +86,8 @@ class TargetTrajectorySection(QGraphicsItem):
         pen = QPen(Qt.blue)
         pen.setWidth(6)
         painter.setPen(pen)
-        painter.drawLine(self.point_start[0], self.point_start[1], self.point_end[0], self.point_end[1])
+        painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
+                         int(self.point_end[0]), int(self.point_end[1]))
 
     def mousePressEvent(self, event):
         print(f"Traj info: {self.traj_info}")
@@ -98,7 +100,8 @@ class MissileTrajectorySection(TargetTrajectorySection):
         pen = QPen(Qt.black)
         pen.setWidth(2)
         painter.setPen(pen)
-        painter.drawLine(self.point_start[0], self.point_start[1], self.point_end[0], self.point_end[1])
+        painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
+                         int(self.point_end[0]), int(self.point_end[1]))
 
     def mousePressEvent(self, event):
         print(f"Traj info: {self.traj_info}")
@@ -142,12 +145,8 @@ class TrajGraphicsScene(QGraphicsScene):
 
         try:
             for rad_id in clicked_radars:
-                obj_trajs = self.trajectories["radars"][rad_id]
-                for key, value in obj_trajs.items():
-                    obj_id = key
-                    obj_traj = value
-                    # print("kv", key, value)
-                    self.addTraj(obj_traj)
+                obj_points = self.trajectories["radars"][rad_id]["targets"]
+                self.addTargetPoints(obj_points)
 
             for control_id in clicked_controls:
                 obj_points = self.trajectories["controls"][control_id]["targets"]
