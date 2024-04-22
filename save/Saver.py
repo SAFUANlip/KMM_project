@@ -46,6 +46,7 @@ class Saver:
         obj_dictionary['direction'] = obj.getDirection()
         obj_dictionary['time_start'] = obj.getTimeStart()
         obj_dictionary['time_finish'] = obj.getTimeFinish()
+        obj_dictionary['track'] = obj.track
         return obj_dictionary
 
     def parse_type(self, obj) -> bool:
@@ -84,6 +85,7 @@ class Saver:
         object.setDirection(obj['direction'])
         object.setTimeStart(obj['time_start'])
         object.setTimeFinish(obj['time_finish'])
+        object.track = obj['track']
         return object
 
 
@@ -136,6 +138,9 @@ class Saver:
                         uploaded_objects.append(self.parse_target(obj))
 
             return uploaded_objects
+        except FileNotFoundError:
+            print("Данного файла не существует.")
+            return []
         except Exception:
             print("Невозможно загрузить данный файл.")
             return []
