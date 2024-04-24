@@ -3,7 +3,8 @@ import sys
 # from ObjectsList import ObjectsList
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QToolBar, QListWidget, QAction)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
+                             QToolBar, QListWidget, QAction, QSlider, QLabel)
 from PyQt5.QtWidgets import QPushButton, QListWidgetItem
 
 from ConfigureView.ConfiguratingViewport import ConfiguratingViewport
@@ -276,7 +277,35 @@ class MainWindow(QMainWindow):
         self.choose_views_list.clear()
         self.left_traj_widget.setTrajectories(obj_trajs)
 
+        max_time = obj_trajs["max_time"]
+
         item_height = 45
+
+        item = QListWidgetItem()
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(int(max_time))
+        self.slider.setValue(int(max_time))
+        self.slider.setTickInterval(int(max_time / 10))
+        self.slider.setTickPosition(QSlider.TicksBelow)
+        self.slider.setFixedHeight(item_height)
+        self.slider.sliderReleased.connect(self.sliderTimeReleased)
+        self.slider.sliderPressed.connect(self.sliderTimeReleased)
+        # self.slider.sliderMoved.connect(self.sliderTimeReleased)
+        self.slider.valueChanged.connect(self.sliderTimeValueMoving)
+
+        self.slider.valueChanged.connect(self.sliderTimeReleased)
+
+        item.setSizeHint(self.slider.sizeHint())
+        self.choose_views_list.addItem(item)
+        self.choose_views_list.setItemWidget(item, self.slider)
+
+        item = QListWidgetItem()
+        self.label_slider_value = QLabel(f"Время: {str(self.slider.value())} сек")
+        self.label_slider_value.setFixedHeight(item_height)
+        item.setSizeHint(self.label_slider_value.sizeHint())
+        self.choose_views_list.addItem(item)
+        self.choose_views_list.setItemWidget(item, self.label_slider_value)
 
         item = QListWidgetItem()
         widget = СhooseViewWidget(f"BO", 0, "vo")
@@ -312,17 +341,20 @@ class MainWindow(QMainWindow):
             self.choose_views_list.addItem(item)
             self.choose_views_list.setItemWidget(item, widget)
 
+    def sliderTimeValueMoving(self, value):
+        self.label_slider_value.setText(f"Время: {value} сек")
+
+    def sliderTimeReleased(self):
+        value = self.slider.value()
+        self.left_traj_widget.updateChosenTime(value)
+
     def onChooseViewItemClicked(self):
         item = self.sender()
-        if item:
-            print("Choose item clicked:", item.text())
+        # if item:
+        #     print("Choose item clicked:", item.text())
 
         if not isinstance(item, CustomCheckBox):
             return
-
-        # print(item)
-        # print(item.obj_type)
-        # print(item.isChecked(), item.simulated_object_id)
 
         if item.obj_type == "radar":
             self.left_traj_widget.menuRadarClicked(item.simulated_object_id, item.isChecked())
