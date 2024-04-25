@@ -8,7 +8,7 @@ from src.modules_classes.GuidedMissile import GuidedMissile
 from src.modules_classes.ModelDispatcher import ModelDispatcher
 from src.modules_classes.Simulated import Simulated
 from src.messages_classes.Messages import NoMissiles, MissileStarted, MissileCapacityMsg
-from src.utils.logger import logger
+from logs.logger import logger
 
 
 # класс ПУ

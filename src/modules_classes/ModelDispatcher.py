@@ -4,7 +4,7 @@ from src.messages_classes.BaseMessage import BaseMessage
 from src.modules_classes.Simulated import Simulated
 from copy import deepcopy
 
-from src.utils.logger import logger
+from logs.logger import logger
 
 from PyQt5.QtCore import QObject, pyqtSignal
 

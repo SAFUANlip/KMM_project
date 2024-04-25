@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 # from ObjectsList import ObjectsList
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
@@ -28,16 +29,17 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        head_path = Path.cwd().resolve()
 
-        # self.pixmaps = {1 : QPixmap(('./images/control_station_icon.png')).scaledToHeight(50),
-        #         2 : QPixmap(('./images/radar_icon.png')).scaledToHeight(50),
-        #         3 : QPixmap(('./images/missile_launcher_icon.png')).scaledToHeight(50),
-        #         4 : QPixmap(('./images/aircraft_icon.png')).scaledToHeight(25)}
-
-        self.pixmaps = {1 : QPixmap(('SimulationAppUI/images/control_station_icon.png')).scaledToHeight(50),
-                2 : QPixmap(('SimulationAppUI/images/radar_icon.png')).scaledToHeight(50),
-                3 : QPixmap(('SimulationAppUI/images/missile_launcher_icon.png')).scaledToHeight(50),
-                4 : QPixmap(('SimulationAppUI/images/aircraft_icon.png')).scaledToHeight(25)}
+        self.pixmaps = {1 : QPixmap(str(head_path/Path(('images/control_station_icon.png')))).scaledToHeight(50),
+                2 : QPixmap(str(head_path/Path(('./images/radar_icon.png')))).scaledToHeight(50),
+                3 : QPixmap(str(head_path/Path(('./images/missile_launcher_icon.png')))).scaledToHeight(50),
+                4 : QPixmap(str(head_path/Path(('./images/aircraft_icon.png')))).scaledToHeight(25)}
+        #
+        # self.pixmaps = {1 : QPixmap(('SimulationAppUI/images/control_station_icon.png')).scaledToHeight(50),
+        #         2 : QPixmap(('SimulationAppUI/images/radar_icon.png')).scaledToHeight(50),
+        #         3 : QPixmap(('SimulationAppUI/images/missile_launcher_icon.png')).scaledToHeight(50),
+        #         4 : QPixmap(('SimulationAppUI/images/aircraft_icon.png')).scaledToHeight(25)}
 
 
         # потом перепишем)
