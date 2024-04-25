@@ -1,13 +1,12 @@
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.Movable import Movable, angle_between, dist
 from src.modules_classes.GuidedMissile import GuidedMissile
-from src.utils.logger import logger
+from logs.logger import logger
 from config.constants import Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZE, Airplane_DistUpdate, EPS, DISPATCHER_ID
 from src.messages_classes.Messages import AeroEnv_InitMessage, AeroEnv_ViewMessage
 
 import numpy as np
 import random
-import copy
 
 
 class AeroEnv(Simulated):
