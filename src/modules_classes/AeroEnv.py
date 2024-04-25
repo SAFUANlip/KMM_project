@@ -2,7 +2,7 @@ from src.modules_classes.Simulated import Simulated
 from src.modules_classes.Movable import Movable, angle_between, dist
 from src.modules_classes.GuidedMissile import GuidedMissile
 from logs.logger import logger
-from config.constants import Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZE, Airplane_DistUpdate, EPS, DISPATCHER_ID
+from config.constants import (Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZE, Airplane_DistUpdate, EPS, DISPATCHER_ID)
 from src.messages_classes.Messages import AeroEnv_InitMessage, AeroEnv_ViewMessage
 
 import numpy as np
@@ -39,12 +39,18 @@ class AeroEnv(Simulated):
                 not_launched_targets.append(target)
         self.targets = not_launched_targets
 
+        to_del = []
         for entity in self.entities:
             if isinstance(entity, Airplane) or isinstance(entity, Helicopter):
                 if entity.start_time <= time < entity.end_time:
                     entity.runSimulationStep(time)
+                else:
+                    to_del.append(entity)
             else:
                 entity.runSimulationStep(time)
+
+        for el in to_del:
+            self.entities.remove(el)
         logger.aero_env(f"AeroEnv имеет {len(self.entities)}")
         self.send_vis_objects2gui(time)
 

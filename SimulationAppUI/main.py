@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
 
         # ------ Radar button --------------------------------------------------
         item = QListWidgetItem()
-        button = QPushButton(text=f" МФР(дальность 150км)", parent=self)
+        button = QPushButton(text=f" МФР(дальность 50км)", parent=self)
         button.clicked.connect(self.onListRadarClicked)
 
         button.setFixedHeight(80)
