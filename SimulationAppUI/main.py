@@ -185,13 +185,6 @@ class MainWindow(QMainWindow):
         if action:
             print("ToolBarButton clicked:", action.text())
         print("Swapping widgets")
-
-        # TODO: for debug ONLY -> remove
-        # -----------------------------------------------------------------
-        # objs, trajs = fake_parse_messages([])
-        # self.configure_choosing_view_widgets(objs, trajs)
-        # -----------------------------------------------------------------
-
         self.setViewTraj()
 
     def changeViewConf(self):
@@ -199,6 +192,7 @@ class MainWindow(QMainWindow):
         if action:
             print("ToolBarButton clicked:", action.text())
         print("Swapping widgets")
+        self.left_traj_widget.clearAll()
         self.left_traj_widget.hide()
         self.choose_views_list.hide()
         self.left_conf_widget.show()
