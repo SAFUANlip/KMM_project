@@ -331,6 +331,11 @@ class TrajectoryViews(QWidget):
         self.frameColor = QColor(169, 169, 169)
         # self.show()
 
+    def clearAll(self):
+        self.clicked_vo = False
+        self.clicked_radars = []
+        self.clicked_controls = []
+
     def menuVOClicked(self, value):
         self.clicked_vo = value
         self.updateAllLines()

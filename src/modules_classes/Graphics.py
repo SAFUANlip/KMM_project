@@ -1,4 +1,4 @@
-from matplotlib.ticker import MultipleLocator, AutoMinorLocator
+from matplotlib.ticker import MultipleLocator
 
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.GuidedMissile import GuidedMissile
@@ -8,7 +8,7 @@ from config.constants import MSG_RADAR2DRAWER_type, MISSILE_TYPE_DRAWER, MSG_CCP
 
 import time as time_python
 
-from src.utils.logger import logger
+from logs.logger import logger
 
 
 class Graphics(Simulated):

@@ -6,7 +6,7 @@ from config.constants import (GuidedMissile_SPEED, EPS,
 from src.messages_classes.Messages import GuidedMissileHit2RadarMsg
 from src.modules_classes.ModelDispatcher import ModelDispatcher
 from src.modules_classes.Movable import Movable, angle_between, dist
-from src.utils.logger import logger
+from logs.logger import logger
 
 
 class GuidedMissile(Movable):

@@ -16,7 +16,7 @@ from ConfigureView.ConfigurationPresenters import *
 from ConfigureView.CoordinatesTranslator import CoordinatesTranslator
 from ConfigureView.MVPCreator import MVPCreator
 
-world_max_coord = 300000
+world_max_coord = 100000
 
 class ConfiguratingViewport(QGraphicsView):
     def __init__(self, pixmaps, start_drag_distance, parent=None):
@@ -56,8 +56,8 @@ class ConfiguratingViewport(QGraphicsView):
         self.plot.setRect(QRectF(0, 0, 1000, 1000))
         self.plot.setAxisText(0, "x, м")
         self.plot.setAxisText(1, "y, м")
-        self.plot.setAbscissaRange(-300000, 300000)
-        self.plot.setOrdinateRange(-300000, 300000)
+        self.plot.setAbscissaRange(-world_max_coord, world_max_coord)
+        self.plot.setOrdinateRange(-world_max_coord, world_max_coord)
         self.scene.setSceneRect(self.plot.boundingRect())
 
     def mouseMoveEvent(self, event):
