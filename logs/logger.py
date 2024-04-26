@@ -60,7 +60,7 @@ class CustomFormatter(logging.Formatter):
 logger = logging.getLogger(__name__)
 now = datetime.now()
 dt_string = now.strftime("%d_%m_%Y %H_%M_%S")
-filename = Path.cwd().resolve().parent / Path("logs") / Path(dt_string + ".log")
+filename = Path.cwd().resolve() / Path("logs") / Path(dt_string + ".log")
 logging.basicConfig(filename=filename,
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',

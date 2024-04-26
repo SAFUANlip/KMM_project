@@ -158,10 +158,10 @@ class TrajGraphicsScene(QGraphicsScene):
         self.setSceneRect(-100, -100, 200, 200)  # Устанавливаем размер сцены
         self.trajectories = None
         self.setLinesData(lines_data)
-        self.kx_compression = 500
-        self.ky_compression = -500
-        self.y_max = 300000
-        self.x_max = 300000
+        self.kx_compression = 215
+        self.ky_compression = -215
+        self.y_max = 100000
+        self.x_max = 100000
         self.add_grid()
         self.add_axis()
         self.traj_info_widget = QGraphicsTextItem(f"")
@@ -266,7 +266,7 @@ class TrajGraphicsScene(QGraphicsScene):
         x_axis.setPen(Qt.black)
         self.addItem(x_axis)
 
-        step_x = 30000
+        step_x = 10000
         for x in range(-self.x_max, self.x_max + 1, step_x):
             text_item = QGraphicsTextItem(str(x))
             text_item.setPos(x / self.kx_compression, -5)
@@ -276,7 +276,7 @@ class TrajGraphicsScene(QGraphicsScene):
         y_axis.setPen(Qt.black)
         self.addItem(y_axis)
 
-        step_y = 30000
+        step_y = 10000
         for y in range(-self.y_max, self.y_max, step_y):
             if abs(y) < step_y/4:
                 continue
@@ -287,14 +287,14 @@ class TrajGraphicsScene(QGraphicsScene):
     def add_grid(self):
         grid_group = QGraphicsItemGroup()
 
-        step_x = 30000
+        step_x = 10000
         for x in range(-self.x_max, self.x_max + 1, step_x):
             line = QGraphicsLineItem(x / self.kx_compression, -self.y_max / self.ky_compression,
                                      x / self.kx_compression, self.y_max / self.ky_compression)
             line.setPen(Qt.lightGray)
             grid_group.addToGroup(line)
 
-        step_y = 30000
+        step_y = 10000
         for y in range(-self.y_max, self.y_max, step_y):
             line = QGraphicsLineItem(-self.x_max / self.kx_compression, y / self.ky_compression,
                                      self.x_max / self.kx_compression, y / self.ky_compression)
