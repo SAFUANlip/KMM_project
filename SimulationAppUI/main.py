@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 # from ObjectsList import ObjectsList
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
@@ -28,16 +29,17 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        head_path = Path.cwd().resolve()
 
-        # self.pixmaps = {1 : QPixmap(('./images/control_station_icon.png')).scaledToHeight(50),
-        #         2 : QPixmap(('./images/radar_icon.png')).scaledToHeight(50),
-        #         3 : QPixmap(('./images/missile_launcher_icon.png')).scaledToHeight(50),
-        #         4 : QPixmap(('./images/aircraft_icon.png')).scaledToHeight(25)}
-
-        self.pixmaps = {1 : QPixmap(('SimulationAppUI/images/control_station_icon.png')).scaledToHeight(50),
-                2 : QPixmap(('SimulationAppUI/images/radar_icon.png')).scaledToHeight(50),
-                3 : QPixmap(('SimulationAppUI/images/missile_launcher_icon.png')).scaledToHeight(50),
-                4 : QPixmap(('SimulationAppUI/images/aircraft_icon.png')).scaledToHeight(25)}
+        self.pixmaps = {1 : QPixmap(str(head_path/Path(('images/control_station_icon.png')))).scaledToHeight(50),
+                2 : QPixmap(str(head_path/Path(('./images/radar_icon.png')))).scaledToHeight(50),
+                3 : QPixmap(str(head_path/Path(('./images/missile_launcher_icon.png')))).scaledToHeight(50),
+                4 : QPixmap(str(head_path/Path(('./images/aircraft_icon.png')))).scaledToHeight(25)}
+        #
+        # self.pixmaps = {1 : QPixmap(('SimulationAppUI/images/control_station_icon.png')).scaledToHeight(50),
+        #         2 : QPixmap(('SimulationAppUI/images/radar_icon.png')).scaledToHeight(50),
+        #         3 : QPixmap(('SimulationAppUI/images/missile_launcher_icon.png')).scaledToHeight(50),
+        #         4 : QPixmap(('SimulationAppUI/images/aircraft_icon.png')).scaledToHeight(25)}
 
 
         # потом перепишем)
@@ -99,7 +101,7 @@ class MainWindow(QMainWindow):
 
         # ------ Radar button --------------------------------------------------
         item = QListWidgetItem()
-        button = QPushButton(text=f" МФР(дальность 150км)", parent=self)
+        button = QPushButton(text=f" МФР(дальность 50км)", parent=self)
         button.clicked.connect(self.onListRadarClicked)
 
         button.setFixedHeight(80)
@@ -185,13 +187,6 @@ class MainWindow(QMainWindow):
         if action:
             print("ToolBarButton clicked:", action.text())
         print("Swapping widgets")
-
-        # TODO: for debug ONLY -> remove
-        # -----------------------------------------------------------------
-        # objs, trajs = fake_parse_messages([])
-        # self.configure_choosing_view_widgets(objs, trajs)
-        # -----------------------------------------------------------------
-
         self.setViewTraj()
 
     def changeViewConf(self):
@@ -199,6 +194,7 @@ class MainWindow(QMainWindow):
         if action:
             print("ToolBarButton clicked:", action.text())
         print("Swapping widgets")
+        self.left_traj_widget.clearAll()
         self.left_traj_widget.hide()
         self.choose_views_list.hide()
         self.left_conf_widget.show()
