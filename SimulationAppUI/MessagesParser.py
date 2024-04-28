@@ -8,7 +8,9 @@ from src.modules_classes.CombatControPoint import CombatControlPoint
 from src.messages_classes.Messages import (CombatControlPoint_InitMessage,
                                            CombatControlPoint_ViewMessage,
                                            AeroEnv_InitMessage,
-                                           AeroEnv_ViewMessage)
+                                           AeroEnv_ViewMessage,
+                                           Radar_InitMessage,
+                                           Radar_ViewMessage)
 
 def parse_messages(all_messages):
     objs = {
@@ -19,7 +21,8 @@ def parse_messages(all_messages):
     trajs = {
         "vo": {},
         "radars": {},
-        "controls": {}
+        "controls": {},
+        "max_time": 0
     }
     mixed_messages = []
     for el in all_messages:
@@ -34,7 +37,7 @@ def parse_messages(all_messages):
         elif isinstance(el, AeroEnv_InitMessage):
             objs["vo"].append(el.sender_ID)
 
-    trajs["vo"] = parse_env_trajectories(env_view_messages)
+    trajs["vo"], trajs["max_time"] = parse_env_trajectories(env_view_messages)
 
     print("Parsed VO views")
     # print(env_view_messages)
@@ -59,6 +62,18 @@ def parse_messages(all_messages):
     # print(objs)
 
     # Radars messages
+    # Controls messages
+    radar_view_messages = []
+    for el in mixed_messages:
+        if isinstance(el, Radar_ViewMessage):
+            radar_view_messages.append(el)
+        elif isinstance(el, Radar_InitMessage):
+            objs["radars"].append(el.sender_ID)
+
+    for control_id in objs["radars"]:
+        trajs["radars"][control_id] = parse_radar_trajectories(control_id, radar_view_messages)
+
+    print("Parsed radar views")
 
     return objs, trajs
 
@@ -87,6 +102,7 @@ def parse_control_trajectories(control_id, messages):
         for pair_id_pos in msg.view_dict["missiles"]:
             obj_id = pair_id_pos[1]
             obj_pos = pair_id_pos[2]
+            obj_pos = list(obj_pos) + [msg.time]
             if obj_id in objects["missiles"]:
                 objects["missiles"][obj_id].append(obj_pos)
             else:
@@ -95,34 +111,63 @@ def parse_control_trajectories(control_id, messages):
         for pair_time_pos in msg.view_dict["targets"]:
             obj_time = pair_time_pos[0]
             obj_pos = pair_time_pos[1]
+            obj_pos = list(obj_pos) + [msg.time]
             objects["targets"].append(obj_pos)
 
     # print("res_trajs:", objects["targets"])
     return objects
 
 
+def parse_radar_trajectories(radar_id, messages):
+    radar_messages = []
+    for msg in messages:
+        if msg.sender_ID == radar_id:
+            radar_messages.append(msg)
+
+    # print(radar_messages)
+    # print("radar_s_len=", len(radar_messages))
+    radar_messages.sort(key=lambda c_msg: c_msg.time)
+    objects = {
+        "targets": [],
+        "missiles": {}
+    }
+
+    for msg in radar_messages:
+        # keys = ["targets", "missiles"]
+        for pos in msg.pos_objects:
+            # obj_id - None
+            position_and_time = list(pos) + [msg.time]
+            objects["targets"].append(position_and_time)
+    return objects
+
 def parse_env_trajectories(messages):
-    # print(messages)
-    # print("env_msgs_len=", len(messages))
+    #print(messages)
+    #print("env_msgs_len=", len(messages))
     messages.sort(key=lambda c_msg: c_msg.time)
     objects = {
         "targets": {},
         "missiles": {}
     }
+    if len(messages) == 0:
+        return objects, 0
+
+    max_time = messages[-1].time
     for msg in messages:
         # print(msg.view_dict)
+        time_stamp = msg.time
         keys = ["targets", "missiles"]
         for key in keys:
             for pair_id_pos in msg.view_dict[key]:
                 obj_id = pair_id_pos[0]
-                obj_pos = pair_id_pos[1]
+                # position and time
+                obj_pos = list(pair_id_pos[1]) + [time_stamp]
                 if obj_id in objects[key]:
                     objects[key][obj_id].append(obj_pos)
                 else:
                     objects[key][obj_id] = [obj_pos]
 
     # print("res_trajs:", objects["targets"])
-    return objects
+    return objects, max_time
 
 
 def fake_parse_messages(all_messages):

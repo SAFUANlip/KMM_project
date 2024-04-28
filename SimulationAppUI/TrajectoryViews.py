@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import QWidget, QApplication
 from PyQt5.QtGui import QPainter, QColor, QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget
-from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QWidget, QVBoxLayout, QGraphicsItemGroup
+from PyQt5.QtWidgets import (QCheckBox, QHBoxLayout, QWidget, QVBoxLayout, QGraphicsItemGroup,
+                             QGraphicsSimpleTextItem, QGraphicsRectItem)
 
 import sys
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsItem, QMainWindow
@@ -17,6 +18,14 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem
 from PyQt5.QtWidgets import QApplication,  QGraphicsEllipseItem
 from PyQt5.QtCore import Qt, QPointF, QRectF
+
+def filter_sorted_traj(traj, time):
+    res = []
+    for el in traj:
+        if el[3] > time:
+            break
+        res.append(el)
+    return res
 
 
 class CustomCheckBox(QCheckBox):
@@ -54,16 +63,18 @@ class СhooseViewWidget(QWidget):
 
 
 class TargetPoint(QGraphicsItem):
-    def __init__(self, point_pos, radius):
+    def __init__(self, point_pos, radius, color=Qt.blue):
         super().__init__()
         self.point_pos = point_pos
         self.radius = radius
+        self.color = color
 
     def paint(self, painter, option, widget):
-        pen = QPen(Qt.blue)
+        pen = QPen(self.color)
         pen.setWidth(2)
         painter.setPen(pen)
-        painter.drawEllipse(self.point_pos[0], self.point_pos[1], self.radius, self.radius)
+        painter.drawEllipse(int(self.point_pos[0]), int(self.point_pos[1]),
+                            int(self.radius), int(self.radius))
 
     def boundingRect(self):
         return QRectF(self.point_pos[0] - self.radius // 2, self.point_pos[1] - self.radius // 2,
@@ -78,17 +89,49 @@ class TargetTrajectorySection(QGraphicsItem):
         self.setFlags(QGraphicsItem.ItemIsSelectable)
 
     def boundingRect(self):
-        return QRectF(self.point_start[0], self.point_start[1],
-                      self.point_end[0] - self.point_start[0], self.point_end[1] - self.point_start[1])
+        padding = 2
+        return QRectF(self.point_start[0] - padding, self.point_start[1] - padding,
+                      self.point_end[0] - self.point_start[0] + padding, self.point_end[1] - self.point_start[1] + padding)
 
     def paint(self, painter, option, widget):
         pen = QPen(Qt.blue)
-        pen.setWidth(6)
+        pen.setWidth(4)
         painter.setPen(pen)
-        painter.drawLine(self.point_start[0], self.point_start[1], self.point_end[0], self.point_end[1])
+        painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
+                         int(self.point_end[0]), int(self.point_end[1]))
 
     def mousePressEvent(self, event):
         print(f"Traj info: {self.traj_info}")
+        scene = self.scene()  # Получаем сцену из родительского виджета
+        if scene:
+            if scene.traj_info_widget:
+                try:
+                    scene.removeItem(scene.traj_info_widget)
+                    scene.removeItem(scene.traj_info_widget_rect)
+                except:
+                    print("TrajViews: error removing prev traj-info-text-rect")
+
+            text = f"Traj info: {self.traj_info}"
+
+            # Создаем текстовый элемент
+            text_item = QGraphicsTextItem(text)
+            text_item.setPos(event.scenePos().x() + 10, event.scenePos().y() + 10)
+
+            # Получаем прямоугольник, охватывающий текст
+            text_rect = text_item.boundingRect()
+            # Создаем прямоугольник с рамкой на основе размеров текста
+            rect = QGraphicsRectItem(QRectF(text_rect.x(), text_rect.y(), text_rect.width(), text_rect.height()))
+            rect.setPen(QPen(Qt.black))  # Устанавливаем цвет рамки
+            #rect.setBrush(Qt.NoBrush)  # Устанавливаем прозрачную заливку
+            rect.setBrush(Qt.white)
+
+            scene.traj_info_widget = text_item #QGraphicsTextItem(text)
+            scene.traj_info_widget_rect = rect
+            scene.traj_info_widget.setPos(event.scenePos().x() + 10, event.scenePos().y() + 10)
+            scene.traj_info_widget_rect.setPos(event.scenePos().x() + 10, event.scenePos().y() + 10)
+            scene.addItem(scene.traj_info_widget_rect)  # Добавляем рамку
+            scene.addItem(scene.traj_info_widget)  # Добавляем текстовый элемент в сцену
+            # rect.addToGroup(text_item)
 
 class MissileTrajectorySection(TargetTrajectorySection):
     def __init__(self, point_start, point_end, info):
@@ -96,12 +139,11 @@ class MissileTrajectorySection(TargetTrajectorySection):
 
     def paint(self, painter, option, widget):
         pen = QPen(Qt.black)
-        pen.setWidth(2)
+        pen.setWidth(1)
         painter.setPen(pen)
-        painter.drawLine(self.point_start[0], self.point_start[1], self.point_end[0], self.point_end[1])
+        painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
+                         int(self.point_end[0]), int(self.point_end[1]))
 
-    def mousePressEvent(self, event):
-        print(f"Traj info: {self.traj_info}")
 
 
 class TrajGraphicsView(QGraphicsView):
@@ -116,23 +158,28 @@ class TrajGraphicsScene(QGraphicsScene):
         self.setSceneRect(-100, -100, 200, 200)  # Устанавливаем размер сцены
         self.trajectories = None
         self.setLinesData(lines_data)
-        self.kx_compression = 500
-        self.ky_compression = -500
-        self.y_max = 300000
-        self.x_max = 300000
+        self.kx_compression = 215
+        self.ky_compression = -215
+        self.y_max = 100000
+        self.x_max = 100000
         self.add_grid()
         self.add_axis()
+        self.traj_info_widget = QGraphicsTextItem(f"")
+        self.traj_info_widget_rect = QGraphicsTextItem(f"")
+        self.chosen_time = 0
 
     def setLinesData(self, data):
         # if not isinstance(data, dict):
         #     return
         self.trajectories = data
 
-    def updateLinesData(self, clicked_radars, clicked_controls, clicked_vo):
+    def updateLinesData(self, clicked_radars, clicked_controls, clicked_vo, chosen_time=None):
         if not isinstance(self.trajectories, dict):
             return
 
-        print("updating lines data")
+        self.chosen_time = chosen_time
+
+        # print("updating lines data")
         # print(clicked_controls)
         # print(clicked_vo)
         # print(self.trajectories)
@@ -142,21 +189,20 @@ class TrajGraphicsScene(QGraphicsScene):
 
         try:
             for rad_id in clicked_radars:
-                obj_trajs = self.trajectories["radars"][rad_id]
-                for key, value in obj_trajs.items():
-                    obj_id = key
-                    obj_traj = value
-                    # print("kv", key, value)
-                    self.addTraj(obj_traj)
+                traj = self.trajectories["radars"][rad_id]["targets"]
+                obj_points = filter_sorted_traj(traj, self.chosen_time)
+                self.addTargetPoints(obj_points, Qt.green)
 
             for control_id in clicked_controls:
-                obj_points = self.trajectories["controls"][control_id]["targets"]
+                traj = self.trajectories["controls"][control_id]["targets"]
+                obj_points = filter_sorted_traj(traj, self.chosen_time)
                 self.addTargetPoints(obj_points)
                 obj_trajs = self.trajectories["controls"][control_id]["missiles"]
                 for key, value in obj_trajs.items():
                     obj_id = key
                     obj_traj = value
                     # print("kv for vo", key, len(value))
+                    obj_traj = filter_sorted_traj(obj_traj, self.chosen_time)
                     self.addMissileTraj(obj_traj)
 
             if clicked_vo:
@@ -166,12 +212,14 @@ class TrajGraphicsScene(QGraphicsScene):
                     obj_id = key
                     obj_traj = value
                     # print("kv for vo", key, len(value))
+                    obj_traj = filter_sorted_traj(obj_traj, self.chosen_time)
                     self.addTargetTraj(obj_traj)
                 obj_trajs = self.trajectories["vo"]["missiles"]
                 for key, value in obj_trajs.items():
                     obj_id = key
                     obj_traj = value
                     # print("kv for vo", key, len(value))
+                    obj_traj = filter_sorted_traj(obj_traj, self.chosen_time)
                     self.addMissileTraj(obj_traj)
         except:
             traceback.print_exc()
@@ -183,10 +231,11 @@ class TrajGraphicsScene(QGraphicsScene):
         #print(self.coordinates_center)
         traj = obj_traj
         for i in range(1, len(traj)):
-            # print(i, len(traj))
-            #print(self.coordinates_center, traj[i - 1])
-            #point = self.coordinates_center + traj[i]
-            #prev_point = self.coordinates_center + traj[i - 1]
+            # time = traj[i][3]
+            #
+            # if time > self.chosen_time:
+            #     break
+
             point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
             prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
             # print(point, prev_point)
@@ -202,13 +251,13 @@ class TrajGraphicsScene(QGraphicsScene):
             line = TargetTrajectorySection(point, prev_point, f"section {i}")
             self.addItem(line)
 
-    def addTargetPoints(self, obj_traj):
+    def addTargetPoints(self, obj_traj, color=Qt.blue):
         # print(f"Adding target traj len ={len(obj_traj)}")
         traj = obj_traj
         for i in range(len(traj)):
             point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
             # prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
-            point = TargetPoint(point, 2)
+            point = TargetPoint(point, 2, color)
             self.addItem(point)
 
 
@@ -217,7 +266,7 @@ class TrajGraphicsScene(QGraphicsScene):
         x_axis.setPen(Qt.black)
         self.addItem(x_axis)
 
-        step_x = 30000
+        step_x = 10000
         for x in range(-self.x_max, self.x_max + 1, step_x):
             text_item = QGraphicsTextItem(str(x))
             text_item.setPos(x / self.kx_compression, -5)
@@ -227,7 +276,7 @@ class TrajGraphicsScene(QGraphicsScene):
         y_axis.setPen(Qt.black)
         self.addItem(y_axis)
 
-        step_y = 30000
+        step_y = 10000
         for y in range(-self.y_max, self.y_max, step_y):
             if abs(y) < step_y/4:
                 continue
@@ -238,14 +287,14 @@ class TrajGraphicsScene(QGraphicsScene):
     def add_grid(self):
         grid_group = QGraphicsItemGroup()
 
-        step_x = 30000
+        step_x = 10000
         for x in range(-self.x_max, self.x_max + 1, step_x):
             line = QGraphicsLineItem(x / self.kx_compression, -self.y_max / self.ky_compression,
                                      x / self.kx_compression, self.y_max / self.ky_compression)
             line.setPen(Qt.lightGray)
             grid_group.addToGroup(line)
 
-        step_y = 30000
+        step_y = 10000
         for y in range(-self.y_max, self.y_max, step_y):
             line = QGraphicsLineItem(-self.x_max / self.kx_compression, y / self.ky_compression,
                                      self.x_max / self.kx_compression, y / self.ky_compression)
@@ -268,6 +317,7 @@ class TrajectoryViews(QWidget):
         self.coordinates_center = np.array([center_x, center_y])
 
         self.initUI()
+        self.chosen_time = 0
 
     def initUI(self):
         self.view_layout = QVBoxLayout()
@@ -281,9 +331,14 @@ class TrajectoryViews(QWidget):
         self.frameColor = QColor(169, 169, 169)
         # self.show()
 
+    def clearAll(self):
+        self.clicked_vo = False
+        self.clicked_radars = []
+        self.clicked_controls = []
+
     def menuVOClicked(self, value):
         self.clicked_vo = value
-        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.clicked_vo)
+        self.updateAllLines()
 
     def menuRadarClicked(self, radar_id : int, value : bool):
         if not value:
@@ -293,7 +348,7 @@ class TrajectoryViews(QWidget):
             self.clicked_radars.append(radar_id)
 
         # print(f"List updated: {self.clicked_radars}")
-        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.clicked_vo)
+        self.updateAllLines()
 
     def menuControlClicked(self, control_id : int, value : bool):
         if not value:
@@ -303,11 +358,20 @@ class TrajectoryViews(QWidget):
             self.clicked_controls.append(control_id)
 
         # print(f"List updated: {self.clicked_controls}")
-        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.clicked_vo)
+        self.updateAllLines()
+
+    def updateChosenTime(self, value):
+        self.chosen_time = value
+        self.updateAllLines()
+
+    def updateAllLines(self):
+        self.scene.updateLinesData(self.clicked_radars, self.clicked_controls, self.clicked_vo, self.chosen_time)
 
     def setTrajectories(self, trajs):
         self.trajectories = trajs
+        self.chosen_time = trajs["max_time"]
         self.scene.setLinesData(trajs)
+        self.updateAllLines()
 
 
 if __name__ == '__main__':

@@ -1,6 +1,8 @@
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
+from config.constants import Airplane_SPEED
+
 class DispatcherSource:
     def __init__(self):
         self.time = 250
@@ -58,7 +60,7 @@ class RadarSource(BaseSource):
         self.tilt_start = 0
         self.pan_per_sec = 60
         self.tilt_per_sec = 120
-        self.view_distance = 150000
+        self.view_distance = 50000
         self.type = 'horizontal'
         self.pan_angle = self.pan_per_sec
         self.tilt_angle = self.tilt_per_sec
@@ -93,7 +95,7 @@ class AeroTargetSource(BaseSource):
     def __init__(self, id, model_type, x, y):
         super(AeroTargetSource, self).__init__(id, model_type, x, y)
         self.z = 10000
-        self.speed = 150
+        self.speed = Airplane_SPEED
         self.direction = 0
         self.time_start = 0
         self.time_finish = 100

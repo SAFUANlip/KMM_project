@@ -1,5 +1,7 @@
 import logging
-
+from datetime import datetime
+import pathlib
+from pathlib import  Path
 
 class CustomFormatter(logging.Formatter):
     logging.COMBAT_CONTROL = 22  # between WARNING and INFO
@@ -54,12 +56,16 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
+
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(CustomFormatter())
-logger.addHandler(ch)
+now = datetime.now()
+dt_string = now.strftime("%d_%m_%Y %H_%M_%S")
+filename = Path.cwd().resolve() / Path("logs") / Path(dt_string + ".log")
+logging.basicConfig(filename=filename,
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 
 setattr(logger, 'combat_control', lambda message, *args: logger._log(logging.COMBAT_CONTROL, message, args))
 setattr(logger, 'starting_device', lambda message, *args: logger._log(logging.STARTING_DEVICE, message, args))

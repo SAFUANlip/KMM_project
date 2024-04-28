@@ -8,7 +8,7 @@ from config.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
 from src.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2RadarMsg, MissileCapacityMsg, \
     CombatControlPoint_ViewMessage, CombatControlPoint_InitMessage, CombatControl2DrawerMsg
 from src.modules_classes.Simulated import Simulated, ModelDispatcher
-from src.utils.logger import logger
+from logs.logger import logger
 
 
 class CCTarget:

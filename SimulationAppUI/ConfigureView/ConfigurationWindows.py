@@ -1,7 +1,9 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QFormLayout
+from config.constants import Airplane_SPEED_MIN, Airplane_SPEED_MAX
 
-h_max_abs_coord = 300000
+
+h_max_abs_coord = 100000
 v_max_abs_coord = 20000
 
 class DispatcherConfigWindow(QDialog):
@@ -109,7 +111,7 @@ class AeroTargetWindow(PosConfigWindow):
 
         spinbox = QDoubleSpinBox()
         spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        spinbox.setRange(0, 3000)
+        spinbox.setRange(Airplane_SPEED_MIN, Airplane_SPEED_MAX)
         form_layout.addRow('Скорость:', spinbox)
         self.fields['V'] = spinbox
 

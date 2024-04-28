@@ -1,11 +1,11 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type, MSG_RADAR2DRAWER_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID
+from config.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg, \
-    GuidedMissileHit2RadarMsg, GuidedMissileHit2CCPMsg, Radar_InitMessage, Radar_ViewMessage
+    GuidedMissileHit2CCPMsg, Radar_InitMessage, Radar_ViewMessage
 from src.modules_classes.Simulated import Simulated
 from src.modules_classes.AeroEnv import AeroEnv
-from src.utils.logger import logger
+from logs.logger import logger
 
 
 class RadarRound(Simulated):
