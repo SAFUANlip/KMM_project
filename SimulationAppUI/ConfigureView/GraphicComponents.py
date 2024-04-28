@@ -133,7 +133,7 @@ class PointGraphicComponent(SimpleGraphicComponent):
         selectedAction = context_menu.exec(event.screenPos())
 
     def boundingRect(self):
-        return QRectF(-15, -15, 30, 30)
+        return QRectF(-5, -5, 10, 10)
 
     def paint(self, painter, option, widget):
         if self.is_collided:
