@@ -1,16 +1,21 @@
 from PyQt5.QtWidgets import QApplication
 import sys
 
-from PyQt5.QtWidgets import QProgressDialog
+from PyQt5.QtWidgets import QProgressDialog, QMessageBox
 from PyQt5.QtCore import Qt, QThread, QObject, pyqtSlot, pyqtSignal, QTimer
 import numpy as np
 from math import floor
+from enum import Enum
 
 from src.modules_classes.AeroEnv import *
 from src.modules_classes.CombatControPoint import *
 from src.modules_classes.Radar import *
 from src.modules_classes.StartingDevice import *
 from src.modules_classes.ModelDispatcher import *
+
+class STATUS(Enum):
+    NO_ERROR = 1
+    BAD_TRACE_CONFIG = 2
 
 class CustomThread(QThread):
     def __init__(self, target=None):
@@ -35,8 +40,11 @@ class SimulationModule(QObject):
         self.window.canceled.connect(self.onCancel)
         self.thread = None
         self.dispatcher = None
+        self.status = STATUS.NO_ERROR
 
     def buildModels(self, model_sources):
+        self.status = STATUS.NO_ERROR
+
         dispatcher = ModelDispatcher()
         dispatcher.setSimulatingRate(10)
         dispatcher.setSimulationTime(model_sources[0].getTime())
@@ -45,11 +53,18 @@ class SimulationModule(QObject):
         targets = list()
 
         for t_s in [model_source for model_source in model_sources[1:] if model_source.model_type // 1000 == 4]:
+            trace = [np.array([t_s.x, t_s.y, t_s.z])]
+            if t_s.track.is_good:
+                for point in t_s.track.points:
+                    trace.append(np.array([point.getX(), point.getY(), point.getZ()]))
+            else:
+                self.status = STATUS.BAD_TRACE_CONFIG
+
             targets.append(
                 Airplane(
                     dispatcher,
                     t_s.id,
-                    trajectory_planned=[np.array([t_s.x, t_s.y, t_s.z])],
+                    trajectory_planned=trace,
                     size=5,
                     start_time=t_s.time_start,
                     end_time=t_s.time_finish,
@@ -88,13 +103,16 @@ class SimulationModule(QObject):
 
     def startSimulation(self, model_sources):
         self.dispatcher = self.buildModels(model_sources)
-        self.dispatcher.tick.connect(self.updateProgress)
-        self.thread = CustomThread(self.dispatcher.run)
-        self.thread.finished.connect(self.onSimulationEnded)
-        self.window.setValue(0)
-        self.window.setMaximum(floor(model_sources[0].getTime() * 10))
-        self.thread.start()
-        self.window.exec_()
+        if self.status == STATUS.NO_ERROR:
+            self.dispatcher.tick.connect(self.updateProgress)
+            self.thread = CustomThread(self.dispatcher.run)
+            self.thread.finished.connect(self.onSimulationEnded)
+            self.window.setValue(0)
+            self.window.setMaximum(floor(model_sources[0].getTime() * 10))
+            self.thread.start()
+            self.window.exec_()
+        else:
+            self.onErrorRaised()
 
     @pyqtSlot(int)
     def updateProgress(self, step):
@@ -120,3 +138,9 @@ class SimulationModule(QObject):
         self.thread = None
         self.dispatcher = None
         self.simulationEnded.emit(result)
+
+    def onErrorRaised(self):
+        msgBox = QMessageBox()
+        if self.status == STATUS.BAD_TRACE_CONFIG:
+            msgBox.setText("Неправильная конфигурация трасс воздушных целей. Исправьте, сделав все трассы синими.")
+        msgBox.exec()

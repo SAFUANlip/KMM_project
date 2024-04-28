@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsObject, QGraphicsEllipseItem, QAction, QMenu
+from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsObject, QGraphicsEllipseItem, QGraphicsLineItem, QAction, QMenu
 from PyQt5.QtCore import  Qt, QLineF, QPointF, QRectF, QObject, pyqtSignal
 from PyQt5.QtGui import QColor
 
@@ -55,6 +55,28 @@ class SimpleGraphicComponent(QGraphicsObject):
         painter.drawPixmap(QPointF(-self.pixmap.width()//2, -self.pixmap.height()//2), self.pixmap)
 
 
+class GraphicAeroTargetComponent(SimpleGraphicComponent):
+    def __init__(self, pixmap, start_drag_distance, grid, parent = None):
+        super(GraphicAeroTargetComponent, self).__init__(pixmap, start_drag_distance, grid, parent)
+        self.__create_actions()
+
+    def __create_actions(self):
+        self.add_track_action = QAction('Задать траекторию')
+        self.del_track_action = QAction('Удалить траекторию')
+        self.del_track_action.setVisible(False)
+        self.configurate_action = QAction('Изменить')
+        self.del_action = QAction('Удалить')
+        
+    def contextMenuEvent(self, event):
+        context_menu = QMenu()
+        context_menu.setStyleSheet('background-color: gray;')
+        context_menu.addAction(self.add_track_action)
+        context_menu.addAction(self.del_track_action)
+        context_menu.addAction(self.configurate_action)
+        context_menu.addAction(self.del_action)
+        selectedAction = context_menu.exec(event.screenPos())
+
+
 class RadarGraphicComponent(SimpleGraphicComponent):
     def __init__(self, pixmap, start_drag_distance, grid, parent = None):
         super(RadarGraphicComponent, self).__init__(pixmap, start_drag_distance, grid, parent)
@@ -78,3 +100,57 @@ class RadarGraphicComponent(SimpleGraphicComponent):
     def setWholeSector(self, start_angle, span):
         self.whole_sector.setStartAngle(16 * start_angle)
         self.whole_sector.setSpanAngle(16 * span)
+
+
+class PointGraphicComponent(SimpleGraphicComponent):
+
+    addPointRequest = pyqtSignal()
+    configurateRequested = pyqtSignal(QObject)
+    deleteRequest = pyqtSignal(QObject)
+
+    def __init__(self, start_drag_distance, grid, parent = None):
+        super(PointGraphicComponent, self).__init__(None, start_drag_distance, grid, parent)
+        self.is_collided = False
+        self.left_line = None
+        self.right_line = None
+        self.__create_actions()
+
+
+    def __create_actions(self):
+        self.add_point_action = QAction('Добавить точку')
+        self.add_point_action.triggered.connect(lambda: self.addPointRequest.emit())
+        self.configurate_action = QAction('Изменить')
+        self.configurate_action.triggered.connect(lambda: self.configurateRequested.emit(self))
+        self.del_action = QAction('Удалить')
+        self.del_action.triggered.connect(lambda: self.deleteRequest.emit(self))
+
+    def contextMenuEvent(self, event):
+        context_menu = QMenu()
+        context_menu.setStyleSheet('background-color: gray;')
+        context_menu.addAction(self.add_point_action)
+        context_menu.addAction(self.configurate_action)
+        context_menu.addAction(self.del_action)
+        selectedAction = context_menu.exec(event.screenPos())
+
+    def boundingRect(self):
+        return QRectF(-15, -15, 30, 30)
+
+    def paint(self, painter, option, widget):
+        if self.is_collided:
+            painter.setBrush(Qt.red)
+        else:
+            painter.setBrush(Qt.blue)
+        painter.drawEllipse(self.boundingRect())
+
+
+class LineGraphicComponent(QGraphicsLineItem):
+    def __init__(self, parent=None):
+        super(LineGraphicComponent, self).__init__(parent)
+        self.left_point = None
+        self.right_point = None
+
+    def paint(self, painter, option, widget):
+        if self.left_point and self.right_point:
+            self.setLine(self.left_point.x(), self.left_point.y(),
+                         self.right_point.x(), self.right_point.y())
+            super().paint(painter, option, widget)

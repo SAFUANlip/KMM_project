@@ -8,7 +8,7 @@ class MVPCreator:
             1 : [ControlPointSource, SimpleGraphicComponent, GraphicComponentPresenter],
             2 : [RadarSource, RadarGraphicComponent, GraphicRadarPresenter],
             3 : [StartDeviceSource, SimpleGraphicComponent, GraphicComponentPresenter],
-            4 : [AeroTargetSource, SimpleGraphicComponent, GraphicAeroTargetPresenter] }
+            4 : [AeroTargetSource, GraphicAeroTargetComponent, GraphicAeroTargetPresenter] }
 
     def create(self, model_type, id, x, y, translator, pixmap, start_drag_distance):
         m_f, v_f, p_f = self.map[model_type // 1000]

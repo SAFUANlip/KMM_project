@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QObject
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 class DispatcherSource:
     def __init__(self):
@@ -97,6 +97,7 @@ class AeroTargetSource(BaseSource):
         self.direction = 0
         self.time_start = 0
         self.time_finish = 100
+        self.track = TrackSource(self)
 
     def setSpeed(self, speed):
         self.speed = speed
@@ -120,3 +121,85 @@ class AeroTargetSource(BaseSource):
     def getTimeFinish(self):
         return self.time_finish
 
+
+class PointSource(BaseSource):
+    def __init__(self, x, y, radius = 1000):
+        super(PointSource, self).__init__(-1000, -1000, x, y)
+        self.prev_point = None
+        self.next_point = None
+        self.radius = radius
+
+    def isFirst(self):
+        return self.prev_point == None
+
+    def isLast(self):
+        return self.next_point == None
+
+    def r2BetweenPoints(self, point):
+        return (self.x - point.x)**2 + (self.y - point.y)**2 + (self.z - point.z)**2
+
+    def checkCollisions(self):
+        if self.prev_point and self.r2BetweenPoints(self.prev_point) < self.radius**2 or \
+            self.next_point and self.r2BetweenPoints(self.next_point) < self.radius**2:
+            return True
+        return False
+
+class TrackSource(QObject):
+
+    dataChanged = pyqtSignal()
+
+    def __init__(self, target):
+        super(TrackSource, self).__init__()
+        self.target = target
+        self.points = list()
+        self.is_good = True
+
+    def isEmpty(self):
+        return len(self.points) == 0
+
+    def getLastPoint(self):
+        if not self.isEmpty():
+            return self.points[-1]
+        return None
+
+    def addPoint(self, point):
+        if len(self.points) == 0:
+            point.setZ(self.target.getZ())
+        else:
+            point.setZ(self.points[-1].getZ())
+            self.points[-1].next_point = point
+            point.prev_point = self.points[-1]
+        point.dataChanged.connect(self.dataChanged)
+        point.dataChanged.connect(self.onTrackStateChanged)
+        self.points.append(point)
+        self.onTrackStateChanged()
+        
+    def deletePoint(self, point):
+        point.dataChanged.disconnect()
+
+        if point.prev_point:
+            if point.next_point:
+                point.prev_point.next_point = point.next_point
+            else:
+                point.prev_point.next_point = None
+        if point.next_point:
+            if point.prev_point:
+                point.next_point.prev_point = point.prev_point
+            else:
+                point.next_point.prev_point = None
+
+        self.points.remove(point)
+        self.onTrackStateChanged()
+
+    def deleteAllPoint(self):
+        for point in self.points:
+            point.dataChanged.disconnect()
+        self.points = list()
+
+    @pyqtSlot()
+    def onTrackStateChanged(self):
+        for point in self.points:
+            if point.checkCollisions():
+                self.is_good = False
+                return
+        self.is_good = True

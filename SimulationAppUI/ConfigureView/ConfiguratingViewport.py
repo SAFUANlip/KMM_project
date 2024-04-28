@@ -1,7 +1,7 @@
 import sys
 import pathlib
 from copy import deepcopy
-
+from enum import Enum
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog
 from PyQt5.QtGui import QCursor
@@ -17,6 +17,10 @@ from ConfigureView.CoordinatesTranslator import CoordinatesTranslator
 from ConfigureView.MVPCreator import MVPCreator
 
 world_max_coord = 300000
+
+class Modes(Enum):
+    DEFAULT = 1
+    TRACK_CREATING = 2
 
 class ConfiguratingViewport(QGraphicsView):
     def __init__(self, pixmaps, start_drag_distance, parent=None):
@@ -42,13 +46,17 @@ class ConfiguratingViewport(QGraphicsView):
         self.view.show()
 
         self.config_windows = [ControlPointWindow(self), RadarWindow(self),
-                              StartDeviceWindow(self), AeroTargetWindow(self),
+                              StartDeviceWindow(self), AeroTargetWindow(self), TrackPointWindow(self),
                               DispatcherConfigWindow(self)]
         self.dialog_presenters = [PosConfigPresenter(self.config_windows[0]),
                                  RadarConfigPresenter(self.config_windows[1]),
                                  PosConfigPresenter(self.config_windows[2]),
                                  AeroTargetConfigPresenter(self.config_windows[3]),
+                                 PosConfigPresenter(self.config_windows[4]),
                                  DispatcherConfigPresenter(self.config_windows[-1], self.models[0])]
+
+        self.mode = Modes.DEFAULT
+        self.track_presenter = None
 
     def setGrid(self):
         self.plot = GraphicsPlotItem()
@@ -63,6 +71,43 @@ class ConfiguratingViewport(QGraphicsView):
     def mouseMoveEvent(self, event):
         self.scene.update()
         super().mouseMoveEvent(event)
+        if self.mode == Modes.TRACK_CREATING:
+            p = self.view.mapToScene(event.pos())
+            grid_pos = self.plot.gridItem.mapFromScene(p)
+            if self.plot.gridItem.boundingRect().contains(grid_pos):
+                pass
+            else:
+                self.track_presenter.target_presenter.onAddTrackCanceled()
+                self.returnToNormalMode()
+
+    def mousePressEvent(self, event):
+        if self.mode == Modes.DEFAULT:
+            super().mousePressEvent(event)
+        elif self.mode == Modes.TRACK_CREATING:
+            pass
+
+    def mouseReleaseEvent(self, event):
+        if self.mode == Modes.DEFAULT:
+            super().mouseReleaseEvent(event)
+        elif self.mode == Modes.TRACK_CREATING and event.button() == Qt.LeftButton:
+            p = self.view.mapToScene(event.pos())
+            grid_pos = self.plot.gridItem.mapFromScene(p)
+            if self.plot.gridItem.boundingRect().contains(grid_pos):
+                self.addPointWithLine(self.plot.gridItem.mapToScene(grid_pos))
+                self.returnToNormalMode()
+
+    def contextMenuEvent(self, event):
+        if self.mode == Modes.DEFAULT:
+            super().contextMenuEvent(event)
+        elif self.mode == Modes.TRACK_CREATING:
+            self.track_presenter.target_presenter.onAddTrackCanceled()
+            self.returnToNormalMode()
+
+    def leaveEvent(self, event):
+        if self.mode != Modes.DEFAULT:
+            self.track_presenter.target_presenter.onAddTrackCanceled()
+            self.returnToNormalMode()
+        super().leaveEvent(event)
 
     def resizeEvent(self, event):
         #new_size = event.size()
@@ -92,6 +137,10 @@ class ConfiguratingViewport(QGraphicsView):
         component.setPos(self.plot.gridItem.mapToScene(x, y))
         presenter.configurateRequested.connect(self.openConfigurationWindow)
         presenter.deleteRequested.connect(self.deleteItem)
+        if isinstance(presenter, GraphicAeroTargetPresenter):
+            presenter.track_presenter.addPointRequested.connect(self.onAddPointRequested)
+            presenter.track_presenter.configurateRequested.connect(self.openPointConfigurationWindow)
+            presenter.track_presenter.deleteRequested.connect(self.deletePointWithLine)
         self.presenters.append(presenter)
         self.id_counter += 1
 
@@ -110,4 +159,39 @@ class ConfiguratingViewport(QGraphicsView):
         self.presenters.remove(presenter)
         presenter.configurateRequested.disconnect(self.openConfigurationWindow)
         presenter.deleteRequested.disconnect(self.deleteItem)
+        if isinstance(presenter, GraphicAeroTargetPresenter):
+            presenter.track_presenter.addPointRequested.disconnect(self.onAddPointRequested)
+            presenter.track_presenter.configurateRequested.disconnect(self.openPointConfigurationWindow)
+            presenter.track_presenter.deleteRequested.disconnect(self.deletePointWithLine)
         presenter.delSelf()
+
+    @pyqtSlot(QObject)
+    def onAddPointRequested(self, presenter):
+        self.mode = Modes.TRACK_CREATING
+        self.track_presenter = presenter
+        self.setCursor(Qt.CrossCursor)
+
+    def returnToNormalMode(self):
+        self.mode = Modes.DEFAULT
+        self.track_presenter = None
+        self.setCursor(Qt.ArrowCursor)
+
+    def addPointWithLine(self, pos):
+        line = LineGraphicComponent()
+        component = PointGraphicComponent(self.start_drag_distance, self.plot.gridItem)
+
+        self.scene.addItem(component)
+        self.scene.addItem(line)
+
+        component.setPos(pos)
+        model = PointSource(0, 0)
+        self.track_presenter.onAddPoint(model, component, line)
+
+    @pyqtSlot(QObject)
+    def openPointConfigurationWindow(self, point):
+        self.dialog_presenters[4].configurate(point)
+
+    @pyqtSlot(object)
+    def deletePointWithLine(self, objects):
+        for obj in objects:
+            self.scene.removeItem(obj)

@@ -139,3 +139,9 @@ class AeroTargetWindow(PosConfigWindow):
 
         base_layout.addLayout(layout)
         self.setLayout(base_layout)
+
+
+class TrackPointWindow(PosConfigWindow):
+    def __init__(self, parent=None):
+        super(TrackPointWindow, self).__init__(parent)
+        self.setWindowTitle("Свойства точки траектории")
