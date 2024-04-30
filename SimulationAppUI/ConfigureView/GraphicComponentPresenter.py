@@ -170,8 +170,9 @@ class GraphicTrackPresenter(QObject):
     def onAllDeleteRequested(self):
         self.track.deleteAllPoint()
         lines = [component.left_line for component in self.points]
-        lines[0].left_point = None # Предосторожность, чтобы gc уж точно уничтожил линию соед воздушную цель и точку
-        self.deleteRequested.emit(lines + [*self.points])
+        if lines:
+            lines[0].left_point = None # Предосторожность, чтобы gc уж точно уничтожил линию соед воздушную цель и точку
+            self.deleteRequested.emit(lines + [*self.points])
 
 
 class GraphicAeroTargetPresenter(GraphicComponentPresenter):
