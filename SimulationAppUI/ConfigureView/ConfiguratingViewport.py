@@ -2,14 +2,15 @@ import sys
 import pathlib
 from copy import deepcopy
 from enum import Enum
-from PyQt5.QtCore import QObject, pyqtSlot, Qt
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog
+from PyQt5.QtCore import QObject, pyqtSlot, Qt, QDir, QPointF
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog, QFileDialog
 from PyQt5.QtGui import QCursor
 
 from ConfigureView.Grid2D import GraphicsPlotItem
 from ConfigureView.GraphicComponents import *
 from ConfigureView.GraphicComponentPresenter import *
 from ConfigureView.Models import *
+from ConfigureView.SaveLoader import SaveLoader
 
 from ConfigureView.ConfigurationWindows import *
 from ConfigureView.ConfigurationPresenters import *
@@ -195,3 +196,46 @@ class ConfiguratingViewport(QGraphicsView):
     def deletePointWithLine(self, objects):
         for obj in objects:
             self.scene.removeItem(obj)
+
+    @pyqtSlot()
+    def onConfigurationSaveClicked(self):
+        file_name = QFileDialog.getSaveFileName(filter='Text files (*.txt)')[0]
+        if file_name:
+            SaveLoader.saveObjects(self.models, file_name)
+
+    @pyqtSlot()
+    def onConfigurationLoadClicked(self):
+        file_name = QFileDialog.getOpenFileName(filter='Text files (*.txt)')[0]
+        if file_name:
+            presenter_list = self.presenters[-1::-1]
+            for presenter in presenter_list:
+                if isinstance(presenter, GraphicAeroTargetPresenter):
+                    presenter.track_presenter.onAllDeleteRequested()
+                self.deleteItem(presenter)
+
+            self.models = SaveLoader.uploadObjects(file_name)
+            self.dialog_presenters[-1].dispatcher = self.models[0]
+            self.dialog_presenters[-1].updateUIFields()
+
+            for model in self.models[1:]:
+                self.id_counter = max(self.id_counter, model.id)
+                component, presenter = self.mvp_creator.createByModel(model, self.translator, 
+                                                                         self.pixmaps[model.model_type // 1000], self.start_drag_distance)
+                self.scene.addItem(component)
+                component.setPos(self.plot.gridItem.mapToScene(model.getX(), model.getY()))
+                presenter.configurateRequested.connect(self.openConfigurationWindow)
+                presenter.deleteRequested.connect(self.deleteItem)
+                if isinstance(presenter, GraphicAeroTargetPresenter):
+                    presenter.track_presenter.addPointRequested.connect(self.onAddPointRequested)
+                    presenter.track_presenter.configurateRequested.connect(self.openPointConfigurationWindow)
+                    presenter.track_presenter.deleteRequested.connect(self.deletePointWithLine)
+                    points = model.track.points
+                    model.track.deleteAllPoint()
+                    self.track_presenter = presenter.track_presenter
+                    for point in points:
+                        self.addPointWithLine(self.plot.gridItem.mapToScene((QPointF(point.getX(), point.getY()))))
+                    self.track_presenter = None
+
+                presenter.updateUI()
+                self.presenters.append(presenter)
+

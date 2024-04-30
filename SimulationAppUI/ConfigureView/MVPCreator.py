@@ -16,3 +16,9 @@ class MVPCreator:
         v = v_f(pixmap, start_drag_distance, translator.grid)
         p = p_f(m, v, translator)
         return m, v, p
+
+    def createByModel(self, model, translator, pixmap, start_drag_distance):
+        _, v_f, p_f = self.map[model.model_type // 1000]
+        v = v_f(pixmap, start_drag_distance, translator.grid)
+        p = p_f(model, v, translator)
+        return v, p

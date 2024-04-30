@@ -11,6 +11,9 @@ class DispatcherConfigPresenter(QObject):
 
     def updateModelData(self):
         self.dispatcher.setTime(self.widget.fields['sim_time'].value())
+    
+    def updateUIFields(self):
+        self.widget.fields['sim_time'].setValue(self.dispatcher.getTime())
 
     def configurate(self):
         self.widget.exec_()
@@ -72,6 +75,7 @@ class RadarConfigPresenter(PosConfigPresenter):
         self.widget.fields['type'].setCurrentIndex(text_index)
         self.widget.fields['pan_angle'].setRange(self.model.pan_per_sec, 360)
         self.widget.fields['pan_angle'].setValue(self.model.getPanAngle())
+        self.enableDisableParams()
 
     @pyqtSlot()
     def updateModelData(self):

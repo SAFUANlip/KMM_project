@@ -1,8 +1,0 @@
-13:35:30,143 logs.logger INFO Цвета логов
-13:35:30,143 logs.logger COMBAT_CONTROL combat_control
-13:35:30,143 logs.logger STARTING_DEVICE starting_device
-13:35:30,143 logs.logger GUIDED_MISSILE guided_missile
-13:35:30,143 logs.logger DISPATCHER dispatcher
-13:35:30,143 logs.logger RADAR radar
-13:35:30,143 logs.logger AERO_ENV aero_env
-13:35:30,143 logs.logger AIRPLANE airplane
