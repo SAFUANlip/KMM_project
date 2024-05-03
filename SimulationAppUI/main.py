@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
         self.addToolBar(tool_bar)
 
         action1 = QAction("ConfigureView", self)
-        action2 = QAction("TrajView", self)
+        action2 = QAction("Отображение траекторий", self)
         action3 = QAction("Настройки моделирования", self)
         action4 = QAction("Начать моделирование", self)
         action5 = QAction("Сохранить конфигурацию", self)
