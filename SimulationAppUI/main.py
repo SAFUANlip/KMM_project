@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
         tool_bar = QToolBar("Toolbar", self)
         self.addToolBar(tool_bar)
 
-        action1 = QAction("ConfigureView", self)
+        action1 = QAction("Отображение конфигурации", self)
         action2 = QAction("Отображение траекторий", self)
         action3 = QAction("Настройки моделирования", self)
         action4 = QAction("Начать моделирование", self)
@@ -373,10 +373,6 @@ class MainWindow(QMainWindow):
             self.left_traj_widget.menuControlClicked(item.simulated_object_id, item.isChecked())
         elif item.obj_type == "vo":
             self.left_traj_widget.menuVOClicked(item.isChecked())
-
-
-
-
 
 
 if __name__ == "__main__":
