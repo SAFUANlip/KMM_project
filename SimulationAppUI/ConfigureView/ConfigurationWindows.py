@@ -60,8 +60,8 @@ class RadarWindow(PosConfigWindow):
         layout = QHBoxLayout()
         form_layout = QFormLayout()
 
-        spinbox = QDoubleSpinBox()
-        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox = QSpinBox()
+        spinbox.setButtonSymbols(QSpinBox.NoButtons)
         spinbox.setRange(-360, 360)
         form_layout.addRow('Начальный сектор:', spinbox)
         self.fields['pan_start'] = spinbox
