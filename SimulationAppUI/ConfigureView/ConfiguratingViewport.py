@@ -6,16 +6,16 @@ from PyQt5.QtCore import QObject, pyqtSlot, Qt, QDir, QPointF
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog, QFileDialog
 from PyQt5.QtGui import QCursor
 
-from ConfigureView.Grid2D import GraphicsPlotItem
-from ConfigureView.GraphicComponents import *
-from ConfigureView.GraphicComponentPresenter import *
-from ConfigureView.Models import *
-from ConfigureView.SaveLoader import SaveLoader
+from .Grid2D import GraphicsPlotItem
+from .GraphicComponents import *
+from .GraphicComponentPresenter import *
+from .Models import *
+from .SaveLoader import SaveLoader
 
-from ConfigureView.ConfigurationWindows import *
-from ConfigureView.ConfigurationPresenters import *
-from ConfigureView.CoordinatesTranslator import CoordinatesTranslator
-from ConfigureView.MVPCreator import MVPCreator
+from .ConfigurationWindows import *
+from .ConfigurationPresenters import *
+from .CoordinatesTranslator import CoordinatesTranslator
+from .MVPCreator import MVPCreator
 
 world_max_coord = 100000
 

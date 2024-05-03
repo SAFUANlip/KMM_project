@@ -3,6 +3,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 from config.constants import Airplane_SPEED
 
+
 class DispatcherSource:
     def __init__(self):
         self.time = 250
