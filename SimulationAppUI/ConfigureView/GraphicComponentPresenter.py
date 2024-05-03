@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from ConfigureView.GraphicComponents import PointGraphicComponent
+from SimulationAppUI.ConfigureView.GraphicComponents import PointGraphicComponent
 
 class GraphicComponentPresenter(QObject):
 

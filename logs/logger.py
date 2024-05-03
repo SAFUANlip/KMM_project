@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
 import pathlib
-from pathlib import  Path
+from pathlib import Path
+
 
 class CustomFormatter(logging.Formatter):
     logging.COMBAT_CONTROL = 22  # between WARNING and INFO
@@ -54,7 +55,6 @@ class CustomFormatter(logging.Formatter):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt, "%H:%M:%S")
         return formatter.format(record)
-
 
 
 logger = logging.getLogger(__name__)
