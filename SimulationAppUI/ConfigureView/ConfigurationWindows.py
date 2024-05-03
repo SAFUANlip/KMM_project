@@ -81,8 +81,8 @@ class RadarWindow(PosConfigWindow):
         self.fields['type'] = combobox
         combobox.setEnabled(False)
 
-        spinbox = QDoubleSpinBox()
-        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox = QSpinBox()
+        spinbox.setButtonSymbols(QSpinBox.NoButtons)
         spinbox.setRange(0, 360)
         form_layout.addRow('Угол раскрыва по азимуту:', spinbox)
         self.fields['pan_angle'] = spinbox
