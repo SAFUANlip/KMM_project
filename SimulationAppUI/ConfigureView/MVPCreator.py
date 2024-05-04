@@ -1,6 +1,7 @@
-from ConfigureView.Models import *
-from ConfigureView.GraphicComponents import *
-from ConfigureView.GraphicComponentPresenter import *
+from SimulationAppUI.ConfigureView.Models import *
+from SimulationAppUI.ConfigureView.GraphicComponents import *
+from SimulationAppUI.ConfigureView.GraphicComponentPresenter import *
+
 
 class MVPCreator:
     def __init__(self):

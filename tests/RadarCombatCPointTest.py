@@ -1,21 +1,20 @@
-from config.constants import TARGET_TYPE_DRAWER, DRAWER_ID
+from config.constants import DRAWER_ID
 from src.modules_classes.AeroEnv import AeroEnv, Airplane
 from src.modules_classes.CombatControPoint import CombatControlPoint
 from src.modules_classes.Radar import RadarRound, RadarSector
 from src.modules_classes.StartingDevice import StartingDevice
 from src.modules_classes.ModelDispatcher import ModelDispatcher
 from src.modules_classes.Graphics import Graphics
-from random import randint
 import numpy as np
 
 if __name__ == '__main__':
     dispatcher = ModelDispatcher()
     dispatcher.setSimulatingRate(1)
-    dispatcher.setSimulationTime(60)
+    dispatcher.setSimulationTime(70)
 
     n = 1
     targets = [
-               Airplane(dispatcher=dispatcher, ID=3, vel = np.array([100,100,100]), size=5,
+               Airplane(dispatcher=dispatcher, ID=3, vel=np.array([100,100,100]), size=5,
                         trajectory_planned=[np.array([0, 10000, 10000]),
                                             np.array([10000, 0, 10000]),
                                             np.array([10000, 10000, 11000])],
@@ -24,7 +23,7 @@ if __name__ == '__main__':
                         trajectory_planned=[np.array([-10000, -10000, 10000])], size=5,
                         start_time=10, end_time=120),
                Airplane(
-                   dispatcher=dispatcher, ID=5, vel = np.array([100,100,100]),
+                   dispatcher=dispatcher, ID=5, vel=np.array([100,100,100]),
                    trajectory_planned=[np.array([-1000, -1000, 10000]),
                                        np.array([-1100, -1000, 10000]),
                                        np.array([-1200, -1100, 10000]),
@@ -33,11 +32,11 @@ if __name__ == '__main__':
                    start_time=0,
                    end_time=140),
                 Airplane(
-                   dispatcher=dispatcher, ID=5, vel = np.array([100,100,100]),
+                   dispatcher=dispatcher, ID=5, vel=np.array([100,100,100]),
                    trajectory_planned=[np.array([-20000, 10000, 10000]),
                                        np.array([-22000, 15000, 7000]),
                                        np.array([-24000, 20000, 5000]),
-                                       np.array([-26000, 25000, 5000])],
+                                       np.array([-24000, -25000, 5000])],
                    size=5,
                    start_time=0,
                    end_time=140

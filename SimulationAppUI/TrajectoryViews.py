@@ -327,7 +327,7 @@ class TrajectoryViews(QWidget):
         self.view_layout.addWidget(self.view)
 
         # self.setGeometry(300, 300, 280, 170)
-        self.setWindowTitle('TrajView')
+        self.setWindowTitle('Отображение траекторий')
         self.frameColor = QColor(169, 169, 169)
         # self.show()
 
