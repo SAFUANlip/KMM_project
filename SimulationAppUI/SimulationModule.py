@@ -83,21 +83,24 @@ class SimulationModule(QObject):
             sd_info[sd_s.id] = pos
             configuration.append(StartingDevice(dispatcher, sd_s.id, pos, env))
 
-        cp_source = [model_source for model_source in model_sources[1:] if model_source.model_type // 1000 == 1][0]
+        # CP preload
+        cp_source = [model_source for model_source in model_sources[1:] if model_source.model_type // 1000 == 1]
+        cp_id = cp_source[0].id if len(cp_source) > 0 else -2000
 
         # radars
         for r_s in [model_source for model_source in model_sources[1:] if model_source.model_type // 1000 == 2]:
             if r_s.overview_mode == 0:
-                configuration.append(RadarRound(dispatcher, r_s.id, cp_source.id, env, np.array([r_s.x, r_s.y, r_s.z]), 
+                configuration.append(RadarRound(dispatcher, r_s.id, cp_id, env, np.array([r_s.x, r_s.y, r_s.z]), 
                                                 r_s.pan_start, r_s.tilt_start, r_s.view_distance,
                                                 r_s.pan_per_sec, r_s.tilt_per_sec))
             else: 
-                configuration.append(RadarSector(dispatcher, r_s.id, cp_source.id, env, np.array([r_s.x, r_s.y, r_s.z]), 
+                configuration.append(RadarSector(dispatcher, r_s.id, cp_id, env, np.array([r_s.x, r_s.y, r_s.z]), 
                                                  r_s.pan_start, r_s.tilt_start, r_s.view_distance, r_s.pan_angle, r_s.tilt_angle,
                                                  r_s.pan_per_sec, r_s.tilt_per_sec, r_s.type))
 
         # CP
-        configuration.append(CombatControlPoint(dispatcher, cp_source.id, sd_info))
+        if len(cp_source) > 0:
+            configuration.append(CombatControlPoint(dispatcher, cp_source[0].id, sd_info))
         dispatcher.configurate(configuration)
         return dispatcher
 

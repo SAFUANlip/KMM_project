@@ -3,7 +3,7 @@ import pathlib
 from copy import deepcopy
 from enum import Enum
 from PyQt5.QtCore import QObject, pyqtSlot, Qt, QDir, QPointF
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog, QFileDialog
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog, QFileDialog, QMessageBox
 from PyQt5.QtGui import QCursor
 
 from ConfigureView.Grid2D import GraphicsPlotItem
@@ -18,6 +18,10 @@ from ConfigureView.CoordinatesTranslator import CoordinatesTranslator
 from ConfigureView.MVPCreator import MVPCreator
 
 world_max_coord = 100000
+
+class STATUS(Enum):
+    NO_ERROR = 1
+    TO_MANY_CP = 2
 
 class Modes(Enum):
     DEFAULT = 1
@@ -130,6 +134,10 @@ class ConfiguratingViewport(QGraphicsView):
 
     @pyqtSlot(int)
     def addItem(self, model_type, x=0, y=0):
+        if len([model_source for model_source in self.models[1:] if model_source.model_type // 1000 == 1]) > 0 and model_type // 1000 == 1:
+            self.onErrorRaised(STATUS.TO_MANY_CP)
+            return
+
         model, component, presenter = self.mvp_creator.create(model_type, self.id_counter, x, y, 
                                                          self.translator, self.pixmaps[model_type // 1000],
                                                          self.start_drag_distance)
@@ -239,3 +247,8 @@ class ConfiguratingViewport(QGraphicsView):
                 presenter.updateUI()
                 self.presenters.append(presenter)
 
+    def onErrorRaised(self, status):
+        msgBox = QMessageBox()
+        if status == STATUS.TO_MANY_CP:
+            msgBox.setText("В конфигурации не может быть больше одного ПБУ")
+        msgBox.exec()
