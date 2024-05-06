@@ -88,7 +88,7 @@ class AeroEnv(Simulated):
 
         for el in self.entities:
             logger.aero_env(
-                f"AeroEnv расстояние между ЗУР и объектом {dist(pos, el.pos)}, размер объекта {el.size}, радиус взрыва {expl_rad}")
+                f"AeroEnv расстояние между ЗУР и объектом {dist(pos, el.pos)}, размер объекта {el.size}, радиус взрыва {expl_rad},  dist(pos, el.pos) - el.size < expl_rad { dist(pos, el.pos) - el.size < expl_rad}")
             if dist(pos, el.pos) - el.size < expl_rad:
                 if isinstance(el, GuidedMissile) and (el.pos != pos).all():
                     chain_explosion.append((el.pos, el.expl_radius))

@@ -114,6 +114,9 @@ class CombatControlPoint(Simulated):
 
         for key, target in self.target_dict.items():
             target_coord = target.coord
+
+            logger.combat_control(f"ПБУ видит объект чекает цель  с координатой {target_coord}")
+
             target_speed_mod = target.speed_mod
             last_target_time = target.upd_time
 
@@ -121,28 +124,32 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_target_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, target_speed_mod *(time_went - tick)- obj_error)}, {coord_dif}, {max(0, target_speed_mod * (time_went + tick)+  obj_error)}")
+            logger.combat_control(f"ПБУ видит объект, {max(0, target_speed_mod *(time_went - 4*tick)- obj_error)}, {coord_dif}, {max(0, target_speed_mod * (time_went + 4*tick)+  obj_error)} чекает Цели")
+
             if (coord_dif < min_diff and max(0, target_speed_mod *
-                                                (time_went - tick) - obj_error) <= coord_dif
-                    <= max(0, target_speed_mod * (time_went + tick) + obj_error)):
+                                                (time_went - 4*tick) - obj_error) <= coord_dif
+                    <= max(0, target_speed_mod * (time_went + 4*tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_TARGET
                 sim_obj_key = key
 
         for key, missile in self.missile_dict.items():
+
             missile_coord = missile.coord
+            logger.combat_control(f"ПБУ видит объект чекает ЗУР  с координатой {missile_coord}")
+
             missile_speed_mod = missile.speed_mod
             last_missile_time = missile.upd_time
             coord_dif = (np.sum((missile_coord - obj_coord) ** 2)) ** 0.5
 
             time_went = cur_time - last_missile_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, missile_speed_mod *(time_went - tick)- obj_error)}, {coord_dif}, {max(0, missile_speed_mod * (time_went + tick)+ obj_error)}")
+            logger.combat_control(f"ПБУ видит объект, {max(0, missile_speed_mod *(time_went - 4*tick)- obj_error)}, {coord_dif}, {max(0, missile_speed_mod * (time_went + 4*tick)+ obj_error)} чекает ЗУР")
 
 
-            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - tick) - obj_error)
+            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - 4*tick) - obj_error)
                     <= coord_dif <= max(0,
-                                        missile_speed_mod * (time_went + tick) + obj_error)):
+                                        missile_speed_mod * (time_went + 4*tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_GM
                 sim_obj_key = key
@@ -307,6 +314,7 @@ class CombatControlPoint(Simulated):
                     obj_coord = visible_object[0]
                     obj_speed_direct = visible_object[1]
                     obj_speed_mod = visible_object[2]
+                    logger.combat_control(f"ПБУ получил от радара координаты объекта {obj_coord}")
 
                     obj_type, sim_obj_key = self.findMostSimilarObject(visible_object, time)
                     if obj_type == NEW_TARGET:
