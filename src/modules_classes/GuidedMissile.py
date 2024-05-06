@@ -37,7 +37,7 @@ class GuidedMissile(Movable):
         self.launch_time = None
         self.target_vel = np.array([0., 0., 0.])
 
-    def launch(self, pos_target: np.array, radar_id: int, launch_time: float) -> None:
+    def launch(self, pos_target: np.array, radar_id:int, launch_time: float) -> None:
 
         """
         :param pos_target: np array of pos_objects (x, y, z)
@@ -88,7 +88,7 @@ class GuidedMissile(Movable):
         """
         Проверка поражена ли цель
         """
-        if dist(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time, self.pos) < self.expl_radius:
+        if dist(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time, self.pos) < self.expl_radius - 30:
             self.status = 2
         logger.guided_missile(
                 f"ЗУР ID: {self._ID}, pos_target {self.pos_target}, target_vel {self.target_vel},  pos {self.pos}")
