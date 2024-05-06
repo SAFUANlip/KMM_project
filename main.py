@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import copy
 
 # from ObjectsList import ObjectsList
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
@@ -110,7 +111,7 @@ class MainWindow(QMainWindow):
         action6.triggered.connect(self.left_conf_widget.onConfigurationLoadClicked)
         self.layout.addWidget(self.left_conf_widget)
 
-        self.left_traj_widget = TrajectoryViews()
+        self.left_traj_widget = TrajectoryViews(pixmaps=self.pixmaps)
         self.left_traj_widget.hide()
         self.layout.addWidget(self.left_traj_widget)
 
@@ -282,13 +283,19 @@ class MainWindow(QMainWindow):
 
         # parse messages
         objs, trajs = parse_messages(all_messages)
+        # load configured data of radars and controls
+        # conf_items = copy.deepcopy(self.left_conf_widget.scene.items())
+        conf_items = self.left_conf_widget.models
+        self.configure_choosing_view_widgets(objs, trajs, conf_items)
 
-        self.configure_choosing_view_widgets(objs, trajs)
         self.setViewTraj()
 
-    def configure_choosing_view_widgets(self, obj_viewing: dict[str, list[int]], obj_trajs): #: dict[str, dict(int, dict(int,list[np.array])):
+
+    def configure_choosing_view_widgets(self, obj_viewing: dict[str, list[int]], obj_trajs, conf_items): #: dict[str, dict(int, dict(int,list[np.array])):
         self.choose_views_list.clear()
         self.left_traj_widget.setTrajectories(obj_trajs)
+        filtered_items = conf_items[1:]
+        self.left_traj_widget.setConfItems(filtered_items)
 
         max_time = obj_trajs["max_time"]
 

@@ -5,11 +5,12 @@ import numpy as np
 
 from PyQt5.QtGui import QPainter, QPen, QBrush
 from PyQt5.QtWidgets import QWidget, QApplication
-from PyQt5.QtGui import QPainter, QColor, QFont
+from PyQt5.QtGui import QPainter, QColor, QFont, QPainterPath
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget
 from PyQt5.QtWidgets import (QCheckBox, QHBoxLayout, QWidget, QVBoxLayout, QGraphicsItemGroup,
-                             QGraphicsSimpleTextItem, QGraphicsRectItem)
+                             QGraphicsSimpleTextItem, QGraphicsRectItem,  QGraphicsEllipseItem,
+                             QGraphicsPathItem, QGraphicsPixmapItem)
 
 import sys
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsItem, QMainWindow
@@ -18,6 +19,10 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem
 from PyQt5.QtWidgets import QApplication,  QGraphicsEllipseItem
 from PyQt5.QtCore import Qt, QPointF, QRectF
+
+
+from SimulationAppUI.ConfigureView.Models import RadarSource
+
 
 def filter_sorted_traj(traj, time):
     res = []
@@ -167,6 +172,7 @@ class TrajGraphicsScene(QGraphicsScene):
         self.traj_info_widget = QGraphicsTextItem(f"")
         self.traj_info_widget_rect = QGraphicsTextItem(f"")
         self.chosen_time = 0
+        self.collected_items = []
 
     def setLinesData(self, data):
         # if not isinstance(data, dict):
@@ -186,6 +192,7 @@ class TrajGraphicsScene(QGraphicsScene):
         self.clear()
         self.add_grid()
         self.add_axis()
+        self.renderCollectedItems()
 
         try:
             for rad_id in clicked_radars:
@@ -260,6 +267,40 @@ class TrajGraphicsScene(QGraphicsScene):
             point = TargetPoint(point, 2, color)
             self.addItem(point)
 
+    def addCollectedItem(self, item):
+        self.collected_items.append(item)
+
+    def renderCollectedItems(self):
+        for item_pair in self.collected_items:
+            item = item_pair[0]
+            x, y = int(item.x / self.kx_compression), int(item.y / self.ky_compression)
+            if isinstance(item, RadarSource):
+                view_dist_x = item.view_distance / self.kx_compression
+                view_dist_y = item.view_distance / self.ky_compression
+                center_x, center_y = x - view_dist_x, y - view_dist_y
+                if item.getOverviewMode() == 0:
+                    ellipse_item = QGraphicsEllipseItem()
+                    ellipse_item.setRect(center_x, center_y, 2 * view_dist_x, 2 * view_dist_y)
+                    brush = QBrush(QColor(0, 255, 0, 18))
+                    ellipse_item.setBrush(brush)
+                    self.addItem(ellipse_item)
+                elif item.getOverviewMode() == 1:
+                    angle = item.pan_angle
+                    start_angle = item.pan_start + 270 - angle / 2
+                    path = QPainterPath()
+                    path.moveTo(center_x + view_dist_x, center_y + view_dist_y)
+                    path.arcTo(center_x, center_y, 2 * view_dist_x, 2 * view_dist_y, start_angle, angle)
+                    path.lineTo(center_x + view_dist_x, center_y + view_dist_y)
+                    sector_item = QGraphicsPathItem(path)
+                    brush = QBrush(QColor(0, 255, 0, 18))
+                    sector_item.setBrush(brush)
+                    self.addItem(sector_item)
+
+            pixmap = item_pair[1]
+            pixmap_item = QGraphicsPixmapItem(pixmap)
+            center_x, center_y = x - pixmap.width() / 2, y - pixmap.height() / 2
+            pixmap_item.setPos(center_x, center_y)
+            self.addItem(pixmap_item)
 
     def add_axis(self):
         x_axis = QGraphicsLineItem(-self.x_max / self.kx_compression, 0, self.x_max / self.kx_compression, 0)
@@ -305,16 +346,20 @@ class TrajGraphicsScene(QGraphicsScene):
 
 
 class TrajectoryViews(QWidget):
-    def __init__(self):
+    def __init__(self, pixmaps):
         super().__init__()
         self.clicked_vo = False
         self.clicked_radars = []
         self.clicked_controls = []
 
+        self.pixmaps = pixmaps
+
         widget_geometry = self.geometry()
         center_x = widget_geometry.x() + widget_geometry.width() / 2
         center_y = widget_geometry.y() + widget_geometry.height() / 2
         self.coordinates_center = np.array([center_x, center_y])
+
+        self.conf_items_models = None
 
         self.initUI()
         self.chosen_time = 0
@@ -372,6 +417,16 @@ class TrajectoryViews(QWidget):
         self.chosen_time = trajs["max_time"]
         self.scene.setLinesData(trajs)
         self.updateAllLines()
+
+    def setConfItems(self, conf_items):
+        self.conf_items_models = conf_items
+        for el in self.conf_items_models:
+            self.addModelGraphicItem(el)
+        self.scene.renderCollectedItems()
+
+    def addModelGraphicItem(self, item):
+        pixmap = self.pixmaps[item.model_type // 1000]
+        self.scene.addCollectedItem([item, pixmap])
 
 
 if __name__ == '__main__':
