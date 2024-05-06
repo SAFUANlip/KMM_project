@@ -1,6 +1,5 @@
 import numpy as np
 
-from src.modules_classes.AeroEnv import AeroEnv, Airplane, Helicopter
 from src.modules_classes.Radar import RadarRound
 from src.modules_classes.StartingDevice import StartingDevice
 from src.modules_classes.CombatControPoint import CombatControlPoint
