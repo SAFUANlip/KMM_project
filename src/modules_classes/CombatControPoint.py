@@ -121,10 +121,10 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_target_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, target_speed_mod *(time_went - tick)- obj_error)}, {coord_dif}, {max(0, target_speed_mod * (time_went + tick)+  obj_error)}")
+            logger.combat_control(f"ПБУ видит объект, {max(0, target_speed_mod *(time_went - 4*tick)- obj_error)}, {coord_dif}, {max(0, target_speed_mod * (time_went + 4*tick)+  obj_error)}")
             if (coord_dif < min_diff and max(0, target_speed_mod *
-                                                (time_went - tick) - obj_error) <= coord_dif
-                    <= max(0, target_speed_mod * (time_went + tick) + obj_error)):
+                                                (time_went - 4*tick) - obj_error) <= coord_dif
+                    <= max(0, target_speed_mod * (time_went + 4*tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_TARGET
                 sim_obj_key = key
@@ -137,12 +137,12 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_missile_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, missile_speed_mod *(time_went - tick)- obj_error)}, {coord_dif}, {max(0, missile_speed_mod * (time_went + tick)+ obj_error)}")
+            logger.combat_control(f"ПБУ видит объект, {max(0, missile_speed_mod *(time_went - 4*tick)- obj_error)}, {coord_dif}, {max(0, missile_speed_mod * (time_went + 4*tick)+ obj_error)}")
 
 
-            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - tick) - obj_error)
+            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - 4*tick) - obj_error)
                     <= coord_dif <= max(0,
-                                        missile_speed_mod * (time_went + tick) + obj_error)):
+                                        missile_speed_mod * (time_went + 4*tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_GM
                 sim_obj_key = key

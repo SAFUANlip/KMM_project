@@ -1,4 +1,4 @@
-from src.modules_classes.Simulated import Simulated
+from src.modules_classes.Simulated import Simulated, ModelDispatcher
 from src.modules_classes.Movable import Movable, angle_between, dist
 from src.modules_classes.GuidedMissile import GuidedMissile
 from logs.logger import logger
@@ -6,22 +6,33 @@ from config.constants import (Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZ
 from src.messages_classes.Messages import AeroEnv_InitMessage, AeroEnv_ViewMessage
 
 import numpy as np
-import random
 
 
 class AeroEnv(Simulated):
-    def __init__(self, dispatcher, ID: int, targets: list) -> None:
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, targets: list[Movable]) -> None:
+        """
+        :param dispatcher: диспетчер, для синхронизации с другими модулями
+        :param ID: ID воздушной обстановки
+        :param targets: список целей класса Movable
+        """
         super().__init__(dispatcher, ID, None)
-        # self.unpacked_entities = []
         self.entities = []
         self.cur_time = 0  # ( ? )
         self.targets = targets
         self.start = True
     
     def getEntities(self) -> list:
+        """
+        :return: список существующих целей
+        """
         return self.entities
 
     def runSimulationStep(self, time: float = 1) -> None:
+        """
+        Шаг симуляции для ВО
+        :param time: текущее время
+        :return:
+        """
         if self.start:
             init_msg = AeroEnv_InitMessage(
                 time=time,
@@ -41,7 +52,7 @@ class AeroEnv(Simulated):
 
         to_del = []
         for entity in self.entities:
-            if isinstance(entity, Airplane) or isinstance(entity, Helicopter):
+            if isinstance(entity, Airplane):
                 if entity.start_time <= time < entity.end_time:
                     entity.runSimulationStep(time)
                 else:
@@ -54,13 +65,18 @@ class AeroEnv(Simulated):
         logger.aero_env(f"AeroEnv имеет {len(self.entities)}")
         self.send_vis_objects2gui(time)
 
-    def send_vis_objects2gui(self, time):
+    def send_vis_objects2gui(self, time: float):
+        """
+        Отправка сообщений визуализатору с тем что видит ВО (цели и ракеты)
+        :param time: текущее время
+        :return:
+        """
         missile_list = []
         target_list = []
         view_dict = {}
 
         for entity in self.entities:
-            if isinstance(entity, Airplane) or isinstance(entity, Helicopter):
+            if isinstance(entity, Airplane):
                 target_list.append((entity._ID, entity.pos))
             else:
                 missile_list.append((entity._ID, entity.pos))
@@ -77,10 +93,22 @@ class AeroEnv(Simulated):
         self._sendMessage(msg2drawer)
         logger.aero_env(f"ВО отправил GUI: {len(missile_list)} ЗУР и {len(target_list)} ЦЕЛЕЙ")
 
-    def addEntity(self, entity) -> None:
+    def addEntity(self, entity: Movable) -> None:
+        """
+        Добавление цели в список существующих целей
+        :param entity: Movable объект
+        :return:
+        """
         self.entities.append(entity)
 
-    def explosion(self, pos: np.array, expl_rad: float) -> None:
+    def explosion(self, pos: np.array([float, float, float]), expl_rad: float) -> None:
+        """
+        Взрыв ракеты, уничтожает все то попало в радиус взрыва
+         + рекурсивно взрывает другие ракеты, если они попали в область
+        :param pos: текущая позиция ракеты, где она взрывается
+        :param expl_rad: радиус взрыва ракеты
+        :return:
+        """
         chain_explosion = []
         to_del = []
         logger.aero_env(
@@ -103,17 +131,24 @@ class AeroEnv(Simulated):
         for pos, expl_rad in chain_explosion:
             self.explosion(pos, expl_rad)
 
-    def allTrajectories(self):
-        trajectories = []
-        for el in self.entities:
-            if isinstance(el, Airplane) or isinstance(el, Helicopter):
-                trajectories.append(el)
-        return trajectories
-
 
 class Airplane(Movable):
-    def __init__(self, dispatcher, ID: int, vel: np.array, size=Airplane_SIZE, speed=Airplane_SPEED,
-                 trajectory_planned=[], start_time: float = 0.0, end_time: float = np.inf) -> None:
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, vel: np.array([float, float, float]),
+                 size: float = Airplane_SIZE, speed: int = Airplane_SPEED,
+                 trajectory_planned=[np.array([float, float, float])],
+                 start_time: float = 0.0, end_time: float = np.inf) -> None:
+        """
+        Класс самолета
+        :param dispatcher: диспетчер, для синхронизации с другими модулями
+        :param ID: ID самолета
+        :param vel: вектор скорости самолета
+        :param size: характерный размер самолета
+        :param speed: скорость самолета (модуль)
+        :param trajectory_planned: траектория полета самолета, [0] элемент - это начальное положение,
+         остальные - контрольные точки
+        :param start_time: когда самолет начинает свое существование и появится в ВО
+        :param end_time: когда самолет закончит свое существование и исчезнит из ВО
+        """
         super().__init__(dispatcher, ID, pos=trajectory_planned[0],
                          vel=vel if vel is not None else np.array([Airplane_SPEED, 0, 0]), size=size, speed=speed)
         self.type_id = 1
@@ -130,6 +165,11 @@ class Airplane(Movable):
                         np.linalg.norm(self.target_point - self.pos) + EPS) * self.speed
 
     def runSimulationStep(self, time: float = 1.0) -> None:
+        """
+        Шаг симуляции для самолета
+        :param time: текущее время
+        :return:
+        """
         if self.target_point is not None:
             if dist(self.target_point, self.pos) <= Airplane_DistUpdate:
                 if len(self.trajectory_planned) > 0:
@@ -165,29 +205,4 @@ class Airplane(Movable):
 
         self.pos = self.pos + self.vel * self._simulating_tick
         self.cur_time += self._simulating_tick
-        self.trajectory.append((self.pos, self.cur_time))
-
-
-class Helicopter(Airplane):
-    def __init__(self, dispatcher, ID: int, pos, size, vel, start_time, end_time) -> None:
-        super().__init__(dispatcher, ID, pos, size, vel, start_time, end_time)
-        self.type_id = 2
-
-
-if __name__ == "__main__":
-    n = random.randint(3, 10)
-    targets = [
-                Airplane(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), size=5, vel=np.array([1, 1, 1]),
-                         start_time=0, end_time=10)
-
-                if random.randint(1, 100) % 3 else
-
-                Helicopter(dispatcher=None, ID=i, pos=np.array([0, 0, 0]), size=5,
-                           vel=np.array([1, 1, 1]), start_time=0, end_time=10)
-
-                for i in range(n)
-    ]
-
-    env = AeroEnv(None, len(targets))
-    for el in targets:
-        env.addEntity(el)
+        self.trajectory.append(self.pos)
