@@ -286,7 +286,6 @@ class TrajGraphicsScene(QGraphicsScene):
                     self.addItem(ellipse_item)
                 elif item.getOverviewMode() == 1:
                     angle = item.pan_angle
-                    print(item.pan_start, item.pan_angle)
                     start_angle = -item.pan_start - angle
                     path = QPainterPath()
                     path.moveTo(center_x + view_dist_x, center_y + view_dist_y)

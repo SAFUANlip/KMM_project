@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
                                                    action4.setVisible(False),
                                                    action5.setVisible(False),
                                                    action6.setVisible(False)]]
-        
+
         # self.action_toolbar = lambda: action2.trigger()
 
         action1.triggered.connect(self.changeViewConf)
