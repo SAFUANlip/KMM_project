@@ -76,6 +76,15 @@ class MainWindow(QMainWindow):
         action5 = QAction("Сохранить конфигурацию", self)
         action6 = QAction("Загрузить конфигурацию", self)
 
+        self.action_toolbar = lambda: [f for f in [action2.setVisible(False),
+                                                   action1.setVisible(True),
+                                                   action3.setVisible(False),
+                                                   action4.setVisible(False),
+                                                   action5.setVisible(False),
+                                                   action6.setVisible(False)]]
+        
+        # self.action_toolbar = lambda: action2.trigger()
+
         action1.triggered.connect(self.changeViewConf)
         action1.triggered.connect(lambda: action3.setVisible(True))
         action1.triggered.connect(lambda: action1.setVisible(False))
@@ -97,6 +106,7 @@ class MainWindow(QMainWindow):
         tool_bar.addAction(action3)
         tool_bar.addAction(action4)
         action1.setVisible(False)
+
 
         self.traj_view = False
         self.configure_view = False
@@ -288,7 +298,9 @@ class MainWindow(QMainWindow):
         conf_items = self.left_conf_widget.models
         self.configure_choosing_view_widgets(objs, trajs, conf_items)
 
+
         self.setViewTraj()
+        self.action_toolbar()
 
 
     def configure_choosing_view_widgets(self, obj_viewing: dict[str, list[int]], obj_trajs, conf_items): #: dict[str, dict(int, dict(int,list[np.array])):
