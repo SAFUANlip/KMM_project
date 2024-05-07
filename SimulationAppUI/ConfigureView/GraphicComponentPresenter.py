@@ -72,7 +72,7 @@ class GraphicRadarPresenter(GraphicComponentPresenter):
             self.component.round.show()
             self.component.sector.show()
             span = self.model.pan_per_sec
-            start_angle = -self.model.pan_start + 90 - span // 2
+            start_angle = self.model.pan_start #-self.model.pan_start + 90 - span // 2
             self.component.setSector(start_angle, span)
             self.component.whole_sector.hide()
         else:
@@ -80,7 +80,7 @@ class GraphicRadarPresenter(GraphicComponentPresenter):
             self.component.sector.hide()
             self.component.whole_sector.show()
             span = self.model.pan_angle
-            start_angle = -self.model.pan_start + 90 - span // 2
+            start_angle = self.model.pan_start #-self.model.pan_start + 90 - span // 2
             self.component.setWholeSector(start_angle, span)
 
 
