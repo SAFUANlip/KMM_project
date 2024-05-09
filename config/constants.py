@@ -2,11 +2,11 @@
 GuidedMissile_SPEED = 1200  # скорость ЗУР по дефолту, в м/с 1200
 GuidedMissile_SPEED_MAX = 2200  # верхняя граница скорости ЗУР
 GuidedMissile_SPEED_MIN = 1100  # нижняя граница скорости ЗУР
-GuidedMissile_LifeTime = 36000  # максмальное время жизни ЗУР, в секундах
+GuidedMissile_LifeTime = 400  # максмальное время жизни ЗУР, в секундах
 GuidedMissile_ExplRadius = 100  # поражающих радиус осколков ЗУР, в метрах
 GuidedMissile_MaxRotAngle = 0.79  # максимальный угол, на который может повернуть ракета при каждом шаге, в радианах 45град
 GuidedMissile_SIZE = 2.0  # характерный размер ракеты в метрах
-GuidedMissile_ExplRadiusError = 30  # допустимая ошибка определения расстояния до цели, при проверке взрыва
+GuidedMissile_ExplRadiusError = 60  # допустимая ошибка определения расстояния до цели, при проверке взрыва
 
 Airplane_SPEED = 555  # скорость самолета в м/c 555
 Airplane_SPEED_MAX = 700  # верхняя граница для скорости самолета
