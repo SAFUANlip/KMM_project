@@ -1,7 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QFormLayout
-from config.constants import Airplane_SPEED_MIN, Airplane_SPEED_MAX, env_limits
-
+from config.constants import Airplane_SPEED_MIN, Airplane_SPEED_MAX, env_limits, min_model_time, max_model_time
 
 
 class DispatcherConfigWindow(QDialog):
@@ -14,7 +13,7 @@ class DispatcherConfigWindow(QDialog):
         form_layout = QFormLayout()
         spinbox = QDoubleSpinBox()
         spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        spinbox.setRange(5, 3600 * 4)
+        spinbox.setRange(min_model_time, max_model_time)
         form_layout.addRow("Время моделирования", spinbox)
         self.fields['sim_time'] = spinbox
         base_layout.addLayout(form_layout)
@@ -115,7 +114,7 @@ class AeroTargetWindow(PosConfigWindow):
 
         spinbox = QDoubleSpinBox()
         spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        spinbox.setRange(0, 3600)
+        spinbox.setRange(0, max_model_time//2)
         form_layout.addRow('Время начала:', spinbox)
         self.fields['t_start'] = spinbox
 
@@ -131,7 +130,7 @@ class AeroTargetWindow(PosConfigWindow):
 
         spinbox = QDoubleSpinBox()
         spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
-        spinbox.setRange(0, 3600)
+        spinbox.setRange(max_model_time//2, max_model_time)
         form_layout.addRow('Время окончания:', spinbox)
         self.fields['t_finish'] = spinbox
 
