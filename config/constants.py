@@ -54,6 +54,12 @@ MSG_CCP2GUItype = -2
 MSG_AEROENV2DISPATCHER_type = 7001
 MSG_AEROENV2DISPATCHER_VIEW_type = 7002
 
+env_limits = {
+    'X: м': [-100000, 100000],
+    'Y: м': [-100000, 100000],
+    'Z: м': [0, 20000],
+}
+
 
 
 
