@@ -416,6 +416,7 @@ class TrajectoryViews(QWidget):
         self.trajectories = trajs
         self.chosen_time = trajs["max_time"]
         self.scene.setLinesData(trajs)
+        self.scene.collected_items = []
         self.updateAllLines()
 
     def setConfItems(self, conf_items):
