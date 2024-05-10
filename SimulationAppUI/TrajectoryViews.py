@@ -22,7 +22,7 @@ from PyQt5.QtCore import Qt, QPointF, QRectF
 
 
 from SimulationAppUI.ConfigureView.Models import RadarSource
-
+from SimulationAppUI.ConfigureView.Grid2D import GraphicsPlotNocksTube, Graphics2DPlotGrid, GraphicsPlotItem
 
 def filter_sorted_traj(traj, time):
     res = []
@@ -157,27 +157,40 @@ class TrajGraphicsView(QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
+    def resizeEvent(self, event):
+        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+
 class TrajGraphicsScene(QGraphicsScene):
     def __init__(self, lines_data=None, parent=None,):
         super().__init__(parent)
-        self.setSceneRect(-100, -100, 200, 200)  # Устанавливаем размер сцены
+        # self.setSceneRect(-100, -100, 200, 200)  # Устанавливаем размер сцены
         self.trajectories = None
         self.setLinesData(lines_data)
         self.kx_compression = 215
         self.ky_compression = -215
         self.y_max = 100000
         self.x_max = 100000
-        self.add_grid()
-        self.add_axis()
         self.traj_info_widget = QGraphicsTextItem(f"")
         self.traj_info_widget_rect = QGraphicsTextItem(f"")
         self.chosen_time = 0
         self.collected_items = []
+        self.setGrid()
 
     def setLinesData(self, data):
         # if not isinstance(data, dict):
         #     return
         self.trajectories = data
+
+    def setGrid(self):
+        self.grid = GraphicsPlotItem()
+        self.addItem(self.grid)
+        self.addItem(self.grid)
+        self.grid.setRect(QRectF(0, 0, 1000, 1000))
+        self.grid.setAxisText(0, "x, м")
+        self.grid.setAxisText(1, "y, м")
+        self.grid.setAbscissaRange(-self.x_max, self.x_max)
+        self.grid.setOrdinateRange(-self.y_max, self.y_max)
+        self.setSceneRect(self.grid.boundingRect())
 
     def updateLinesData(self, clicked_radars, clicked_controls, clicked_vo, chosen_time=None):
         if not isinstance(self.trajectories, dict):
@@ -190,8 +203,7 @@ class TrajGraphicsScene(QGraphicsScene):
         # print(clicked_vo)
         # print(self.trajectories)
         self.clear()
-        self.add_grid()
-        self.add_axis()
+        self.setGrid()
         self.renderCollectedItems()
 
         try:
@@ -218,14 +230,12 @@ class TrajGraphicsScene(QGraphicsScene):
                 for key, value in obj_trajs.items():
                     obj_id = key
                     obj_traj = value
-                    # print("kv for vo", key, len(value))
                     obj_traj = filter_sorted_traj(obj_traj, self.chosen_time)
                     self.addTargetTraj(obj_traj)
                 obj_trajs = self.trajectories["vo"]["missiles"]
                 for key, value in obj_trajs.items():
                     obj_id = key
                     obj_traj = value
-                    # print("kv for vo", key, len(value))
                     obj_traj = filter_sorted_traj(obj_traj, self.chosen_time)
                     self.addMissileTraj(obj_traj)
         except:
@@ -234,38 +244,30 @@ class TrajGraphicsScene(QGraphicsScene):
         self.update()
 
     def addMissileTraj(self, obj_traj):
-        # print(f"Adding missele traj len ={len(obj_traj)}")
-        #print(self.coordinates_center)
         traj = obj_traj
         for i in range(1, len(traj)):
-            # time = traj[i][3]
-            #
-            # if time > self.chosen_time:
-            #     break
-
             point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
             prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
-            # print(point, prev_point)
             line = MissileTrajectorySection(point, prev_point, f"section {i}")
             self.addItem(line)
+            line.setPos(self.grid.gridItem.mapToScene(point[0], point[1]))
 
     def addTargetTraj(self, obj_traj):
-        # print(f"Adding target traj len ={len(obj_traj)}")
         traj = obj_traj
         for i in range(1, len(traj)):
             point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
             prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
             line = TargetTrajectorySection(point, prev_point, f"section {i}")
             self.addItem(line)
+            line.setPos(self.grid.gridItem.mapToScene(point[0], point[1]))
 
     def addTargetPoints(self, obj_traj, color=Qt.blue):
-        # print(f"Adding target traj len ={len(obj_traj)}")
         traj = obj_traj
         for i in range(len(traj)):
-            point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
-            # prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
-            point = TargetPoint(point, 2, color)
+            point_coord = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
+            point = TargetPoint(point_coord, 2, color)
             self.addItem(point)
+            point.setPos(self.grid.gridItem.mapToScene(point_coord[0], point_coord[1]))
 
     def addCollectedItem(self, item):
         self.collected_items.append(item)
@@ -279,70 +281,39 @@ class TrajGraphicsScene(QGraphicsScene):
                 view_dist_y = item.view_distance / self.ky_compression
                 center_x, center_y = x - view_dist_x, y - view_dist_y
                 if item.getOverviewMode() == 0:
-                    ellipse_item = QGraphicsEllipseItem()
-                    ellipse_item.setRect(center_x, center_y, 2 * view_dist_x, 2 * view_dist_y)
-                    brush = QBrush(QColor(0, 255, 0, 18))
-                    ellipse_item.setBrush(brush)
-                    self.addItem(ellipse_item)
+                    self.renderRoundRadarView(center_x, center_y, view_dist_x, view_dist_y)
                 elif item.getOverviewMode() == 1:
-                    angle = item.pan_angle
-                    start_angle = -item.pan_start - angle
-                    path = QPainterPath()
-                    path.moveTo(center_x + view_dist_x, center_y + view_dist_y)
-                    path.arcTo(center_x, center_y, 2 * view_dist_x, 2 * view_dist_y, start_angle, angle)
-                    path.lineTo(center_x + view_dist_x, center_y + view_dist_y)
-                    sector_item = QGraphicsPathItem(path)
-                    brush = QBrush(QColor(0, 255, 0, 18))
-                    sector_item.setBrush(brush)
-                    self.addItem(sector_item)
+                    self.renderSectorRadarView(item.pan_angle, item.pan_start, center_x, center_y, view_dist_x, view_dist_y)
 
             pixmap = item_pair[1]
             pixmap_item = QGraphicsPixmapItem(pixmap)
-            center_x, center_y = x - pixmap.width() / 2, y - pixmap.height() / 2
-            pixmap_item.setPos(center_x, center_y)
+            # center_x, center_y = x - pixmap.width() / 2, y - pixmap.width() / 2
+            center_x, center_y = x, y
+            # pixmap_item.setPos(center_x, center_y)
             self.addItem(pixmap_item)
+            pixmap_item.setOffset(-pixmap.width() / 2, -pixmap.width() / 2)
+            pixmap_item.setPos(self.grid.gridItem.mapToScene(center_x * self.kx_compression, center_y * self.ky_compression))
 
-    def add_axis(self):
-        x_axis = QGraphicsLineItem(-self.x_max / self.kx_compression, 0, self.x_max / self.kx_compression, 0)
-        x_axis.setPen(Qt.black)
-        self.addItem(x_axis)
+    def renderRoundRadarView(self, center_x, center_y, view_dist_x, view_dist_y):
+        ellipse_item = QGraphicsEllipseItem()
+        ellipse_item.setRect(center_x, center_y, 2 * view_dist_x, 2 * view_dist_y)
+        brush = QBrush(QColor(0, 255, 0, 18))
+        ellipse_item.setBrush(brush)
+        self.addItem(ellipse_item)
+        ellipse_item.setPos(self.grid.gridItem.mapToScene(center_x, center_y))
 
-        step_x = 10000
-        for x in range(-self.x_max, self.x_max + 1, step_x):
-            text_item = QGraphicsTextItem(str(x))
-            text_item.setPos(x / self.kx_compression, -5)
-            self.addItem(text_item)
-
-        y_axis = QGraphicsLineItem(0, -self.y_max / self.ky_compression, 0, self.y_max / self.ky_compression)
-        y_axis.setPen(Qt.black)
-        self.addItem(y_axis)
-
-        step_y = 10000
-        for y in range(-self.y_max, self.y_max, step_y):
-            if abs(y) < step_y/4:
-                continue
-            text_item = QGraphicsTextItem(str(y))
-            text_item.setPos(1, y / self.ky_compression)
-            self.addItem(text_item)
-
-    def add_grid(self):
-        grid_group = QGraphicsItemGroup()
-
-        step_x = 10000
-        for x in range(-self.x_max, self.x_max + 1, step_x):
-            line = QGraphicsLineItem(x / self.kx_compression, -self.y_max / self.ky_compression,
-                                     x / self.kx_compression, self.y_max / self.ky_compression)
-            line.setPen(Qt.lightGray)
-            grid_group.addToGroup(line)
-
-        step_y = 10000
-        for y in range(-self.y_max, self.y_max, step_y):
-            line = QGraphicsLineItem(-self.x_max / self.kx_compression, y / self.ky_compression,
-                                     self.x_max / self.kx_compression, y / self.ky_compression)
-            line.setPen(Qt.lightGray)
-            grid_group.addToGroup(line)
-
-        self.addItem(grid_group)
+    def renderSectorRadarView(self, pan_angle, pan_start, center_x, center_y, view_dist_x, view_dist_y):
+        angle = pan_angle
+        start_angle = -pan_start - angle
+        path = QPainterPath()
+        path.moveTo(center_x + view_dist_x, center_y + view_dist_y)
+        path.arcTo(center_x, center_y, 2 * view_dist_x, 2 * view_dist_y, start_angle, angle)
+        path.lineTo(center_x + view_dist_x, center_y + view_dist_y)
+        sector_item = QGraphicsPathItem(path)
+        brush = QBrush(QColor(0, 255, 0, 18))
+        sector_item.setBrush(brush)
+        self.addItem(sector_item)
+        sector_item.setPos(self.grid.gridItem.mapToScene(center_x, center_y))
 
 
 class TrajectoryViews(QWidget):
@@ -354,10 +325,11 @@ class TrajectoryViews(QWidget):
 
         self.pixmaps = pixmaps
 
-        widget_geometry = self.geometry()
-        center_x = widget_geometry.x() + widget_geometry.width() / 2
-        center_y = widget_geometry.y() + widget_geometry.height() / 2
-        self.coordinates_center = np.array([center_x, center_y])
+        # widget_geometry = self.geometry()
+        # center_x = widget_geometry.x() + widget_geometry.width() / 2
+        # center_y = widget_geometry.y() + widget_geometry.height() / 2
+        # self.coordinates_center = np.array([center_x, center_y])
+        self.coordinates_center = np.array([0, 0])
 
         self.conf_items_models = None
 
