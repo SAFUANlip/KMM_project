@@ -22,6 +22,11 @@ MIN_DIST_DETECTION = 30  # м
 
 EPS = 1e-7  # слагаемое, чтобы избежать деление на 0
 
+#Radar constants
+RATE_ERROR_DIST = 0.05
+RATE_ERROR_SPEED = 0.001
+MIN_DIST_DETECTION = 30  # м
+
 NUMBER_OF_MISSILES = 10
 
 DISPATCHER_ID = 0
