@@ -2,15 +2,16 @@ import sys
 import traceback
 
 import numpy as np
+import math
 
-from PyQt5.QtGui import QPainter, QPen, QBrush
+from PyQt5.QtGui import QPainter, QPen, QBrush, QTransform
 from PyQt5.QtWidgets import QWidget, QApplication
 from PyQt5.QtGui import QPainter, QColor, QFont, QPainterPath
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget
 from PyQt5.QtWidgets import (QCheckBox, QHBoxLayout, QWidget, QVBoxLayout, QGraphicsItemGroup,
                              QGraphicsSimpleTextItem, QGraphicsRectItem,  QGraphicsEllipseItem,
-                             QGraphicsPathItem, QGraphicsPixmapItem)
+                             QGraphicsPathItem, QGraphicsPixmapItem, QSizePolicy)
 
 import sys
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsItem, QMainWindow
@@ -19,6 +20,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsTextItem, QGraphicsLineItem
 from PyQt5.QtWidgets import QApplication,  QGraphicsEllipseItem
 from PyQt5.QtCore import Qt, QPointF, QRectF
+from PyQt5.QtCore import pyqtSignal, QObject
 
 
 from SimulationAppUI.ConfigureView.Models import RadarSource
@@ -86,13 +88,36 @@ class TargetPoint(QGraphicsItem):
                       self.point_pos[0] + self.radius // 2, self.point_pos[1] + self.radius // 2)
 
 
-class TargetTrajectorySection(QGraphicsItem):
+class TargetTrajectorySection(QGraphicsLineItem):
     def __init__(self, point_start, point_end, info):
         super().__init__()
         self.point_start = point_start
         self.point_end = point_end
         self.traj_info = info
         self.setFlags(QGraphicsItem.ItemIsSelectable)
+
+        # self.center_x = (point_start[0] + point_end[0]) / 2
+        # self.center_y = (point_start[1] + point_end[1]) / 2
+        # self.setTransformOriginPoint(self.line().center())
+
+    # def setPos(self, new_pos):
+    #     old_pos = self.pos()
+    #     delta_x = new_pos.x() - old_pos.x()
+    #     delta_y = new_pos.y() - old_pos.y()
+    #     super().setPos(new_pos)
+    #
+    #     self.center_x += delta_x
+    #     self.center_y += delta_y
+
+    #     self.setRotation(math.atan2(delta_y, delta_x) * 180 / math.pi)
+
+    # def setPos(self, new_pos):
+    #     old_pos = self.pos()
+    #     delta_x = new_pos.x() - old_pos.x()
+    #     delta_y = new_pos.y() - old_pos.y()
+    #     super().setPos(new_pos)
+    #     # self.setRotation(math.atan2(delta_y, delta_x) * 180 / math.pi)
+
 
     def boundingRect(self):
         padding = 2
@@ -105,6 +130,8 @@ class TargetTrajectorySection(QGraphicsItem):
         painter.setPen(pen)
         painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
                          int(self.point_end[0]), int(self.point_end[1]))
+
+
 
     def mousePressEvent(self, event):
         print(f"Traj info: {self.traj_info}")
@@ -177,6 +204,13 @@ class TrajGraphicsScene(QGraphicsScene):
         self.chosen_time = 0
         self.collected_items = []
         self.setGrid()
+
+        # for zoom_view
+        self.mouse_tracker = MouseTracker()
+
+    def mouseMoveEvent(self, event):
+        # print(f"moved: {event.scenePos().x(), event.scenePos().y()}")
+        self.mouse_tracker.track_mouse(event)
 
     def setLinesData(self, data):
         # if not isinstance(data, dict):
@@ -251,6 +285,7 @@ class TrajGraphicsScene(QGraphicsScene):
             point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
             prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
             line = MissileTrajectorySection(point, prev_point, f"section {i}")
+            # print(traj[i][0], traj[i][1], )
             self.addItem(line)
             line.setPos(self.grid.gridItem.mapToScene(point[0], point[1]))
 
@@ -402,6 +437,45 @@ class TrajectoryViews(QWidget):
     def addModelGraphicItem(self, item):
         pixmap = self.pixmaps[item.model_type // 1000]
         self.scene.addCollectedItem([item, pixmap])
+
+
+
+class ZoomGraphicsView(QGraphicsView):
+    def __init__(self, main_scene):
+        super().__init__(main_scene)
+        # self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+        # self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        # self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
+
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setAlignment(Qt.AlignCenter)
+
+        zoom_rect = QRectF(0, 0, 100, 100)
+        self.setSceneRect(zoom_rect)
+        self.scale(10, 10)
+
+        main_scene.mouse_tracker.mouseMoved.connect(self.update_view)
+
+    def update_view(self, x, y):
+        zoom_rect = QRectF(x - 50, y - 50, 100, 100)
+        self.setSceneRect(zoom_rect)
+
+class MouseTracker(QObject):
+    mouseMoved = pyqtSignal(int, int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+
+    def track_mouse(self, event):
+        pos = event.scenePos()
+        self.mouseMoved.emit(pos.x(), pos.y())
+        # print(f"emmited: {pos.x(), pos.y()}")
 
 
 if __name__ == '__main__':

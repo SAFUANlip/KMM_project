@@ -7,14 +7,15 @@ from PyQt5.QtCore import (pyqtSignal, pyqtSlot)
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QToolBar, QListWidget, QAction, QSlider, QLabel)
-from PyQt5.QtWidgets import QPushButton, QListWidgetItem
+from PyQt5.QtWidgets import QPushButton, QListWidgetItem, QSizePolicy
 
 from SimulationAppUI.ConfigureView.ConfiguratingViewport import ConfiguratingViewport
 from SimulationAppUI.SimulationModule import SimulationModule
 from SimulationAppUI.TrajectoryViews import TrajectoryViews, СhooseViewWidget, CustomCheckBox
 
 from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
-from SimulationAppUI.TrajectoryViews import TrajectoryViews
+from SimulationAppUI.TrajectoryViews import TrajectoryViews, ZoomGraphicsView
+# from SimulationAppUI.TrajectoryViews import ZoomView
 
 from SimulationAppUI.MessagesParser import parse_messages, fake_parse_messages
 
@@ -321,6 +322,7 @@ class MainWindow(QMainWindow):
         self.slider.setTickInterval(int(max_time / 10))
         self.slider.setTickPosition(QSlider.TicksBelow)
         self.slider.setFixedHeight(item_height)
+        # self.slider.setMaximumWidth(250)
         self.slider.sliderReleased.connect(self.sliderTimeReleased)
         self.slider.sliderPressed.connect(self.sliderTimeReleased)
         # self.slider.sliderMoved.connect(self.sliderTimeReleased)
@@ -372,6 +374,27 @@ class MainWindow(QMainWindow):
             item.setSizeHint(widget.sizeHint())
             self.choose_views_list.addItem(item)
             self.choose_views_list.setItemWidget(item, widget)
+
+        item = QListWidgetItem()
+        zoom_view = ZoomGraphicsView(self.left_traj_widget.scene)
+        zoom_view.show()
+        # zoom_view.setMaximumHeight(600)
+        # zoom_view.setMaximumWidth(600)
+        # zoom_view.setFixedSize(270, 270)
+        zoom_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        zoom_view.setFixedHeight(450)
+        # zoom_view.setFixedWidth(200)
+        # item.setSizeHint(zoom_view.sizeHint())
+        self.choose_views_list.addItem(item)
+        self.choose_views_list.setItemWidget(item, zoom_view)
+
+        # item = QListWidgetItem()
+        # zoom_view = ZoomView(self.left_traj_widget.scene)
+        # zoom_view.show()
+        # zoom_view.setFixedHeight(item_height * 5)
+        # item.setSizeHint(zoom_view.sizeHint())
+        # self.choose_views_list.addItem(item)
+        # self.choose_views_list.setItemWidget(item, zoom_view)
 
     def sliderTimeValueMoving(self, value):
         self.label_slider_value.setText(f"Время: {value} сек")
