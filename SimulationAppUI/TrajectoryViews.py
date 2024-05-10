@@ -88,50 +88,23 @@ class TargetPoint(QGraphicsItem):
                       self.point_pos[0] + self.radius // 2, self.point_pos[1] + self.radius // 2)
 
 
+
 class TargetTrajectorySection(QGraphicsLineItem):
-    def __init__(self, point_start, point_end, info):
-        super().__init__()
+    def __init__(self, point_start, point_end, info, color=Qt.blue):
+        super().__init__(point_start[0], point_start[1], point_end[0], point_end[1])
         self.point_start = point_start
         self.point_end = point_end
         self.traj_info = info
         self.setFlags(QGraphicsItem.ItemIsSelectable)
-
-        # self.center_x = (point_start[0] + point_end[0]) / 2
-        # self.center_y = (point_start[1] + point_end[1]) / 2
-        # self.setTransformOriginPoint(self.line().center())
-
-    # def setPos(self, new_pos):
-    #     old_pos = self.pos()
-    #     delta_x = new_pos.x() - old_pos.x()
-    #     delta_y = new_pos.y() - old_pos.y()
-    #     super().setPos(new_pos)
-    #
-    #     self.center_x += delta_x
-    #     self.center_y += delta_y
-
-    #     self.setRotation(math.atan2(delta_y, delta_x) * 180 / math.pi)
-
-    # def setPos(self, new_pos):
-    #     old_pos = self.pos()
-    #     delta_x = new_pos.x() - old_pos.x()
-    #     delta_y = new_pos.y() - old_pos.y()
-    #     super().setPos(new_pos)
-    #     # self.setRotation(math.atan2(delta_y, delta_x) * 180 / math.pi)
+        pen = QPen(color)
+        pen.setWidth(1)
+        self.setPen(pen)
 
 
     def boundingRect(self):
         padding = 2
         return QRectF(self.point_start[0] - padding, self.point_start[1] - padding,
                       self.point_end[0] - self.point_start[0] + padding, self.point_end[1] - self.point_start[1] + padding)
-
-    def paint(self, painter, option, widget):
-        pen = QPen(Qt.blue)
-        pen.setWidth(4)
-        painter.setPen(pen)
-        painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
-                         int(self.point_end[0]), int(self.point_end[1]))
-
-
 
     def mousePressEvent(self, event):
         print(f"Traj info: {self.traj_info}")
@@ -170,15 +143,9 @@ class TargetTrajectorySection(QGraphicsLineItem):
 class MissileTrajectorySection(TargetTrajectorySection):
     def __init__(self, point_start, point_end, info):
         super().__init__(point_start, point_end, info)
-
-    def paint(self, painter, option, widget):
         pen = QPen(Qt.red)
-        pen.setWidth(2)
-        painter.setPen(pen)
-        painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
-                         int(self.point_end[0]), int(self.point_end[1]))
-
-
+        pen.setWidth(1)
+        self.setPen(pen)
 
 class TrajGraphicsView(QGraphicsView):
     def __init__(self, scene):
@@ -258,7 +225,7 @@ class TrajGraphicsScene(QGraphicsScene):
                     obj_traj = value
                     # print("kv for vo", key, len(value))
                     obj_traj = filter_sorted_traj(obj_traj, self.chosen_time)
-                    self.addMissileTraj(obj_traj)
+                    self.addTargetTraj(obj_traj, Qt.red)
 
             if clicked_vo:
                 #for key in ["targets", "missiles"]:
@@ -273,30 +240,34 @@ class TrajGraphicsScene(QGraphicsScene):
                     obj_id = key
                     obj_traj = value
                     obj_traj = filter_sorted_traj(obj_traj, self.chosen_time)
-                    self.addMissileTraj(obj_traj)
+                    self.addTargetTraj(obj_traj, Qt.red)
         except:
             traceback.print_exc()
 
         self.update()
 
-    def addMissileTraj(self, obj_traj):
-        traj = obj_traj
-        for i in range(1, len(traj)):
-            point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
-            prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
-            line = MissileTrajectorySection(point, prev_point, f"section {i}")
-            # print(traj[i][0], traj[i][1], )
-            self.addItem(line)
-            line.setPos(self.grid.gridItem.mapToScene(point[0], point[1]))
+    # def addMissileTraj(self, obj_traj):
+    #     traj = obj_traj
+    #     for i in range(1, len(traj)):
+    #         point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
+    #         prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
+    #         line = MissileTrajectorySection(point, prev_point, f"section {i}")
+    #         # print(traj[i][0], traj[i][1], )
+    #         center_x = (point[0] + prev_point[0])/2
+    #         center_y = (point[1] + prev_point[1])/2
+    #         self.addItem(line)
+    #         line.setPos(self.grid.gridItem.mapToScene(center_x, center_y))
 
-    def addTargetTraj(self, obj_traj):
+    def addTargetTraj(self, obj_traj, color=Qt.blue):
         traj = obj_traj
         for i in range(1, len(traj)):
             point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
             prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
-            line = TargetTrajectorySection(point, prev_point, f"section {i}")
+            line = TargetTrajectorySection(point, prev_point, f"section {i}", color)
+            center_x = (point[0] + prev_point[0]) / 2
+            center_y = (point[1] + prev_point[1]) / 2
             self.addItem(line)
-            line.setPos(self.grid.gridItem.mapToScene(point[0], point[1]))
+            line.setPos(self.grid.gridItem.mapToScene(center_x, center_y))
 
     def addTargetPoints(self, obj_traj, color=Qt.blue):
         traj = obj_traj
