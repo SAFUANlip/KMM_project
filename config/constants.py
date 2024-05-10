@@ -14,6 +14,12 @@ Airplane_SPEED_MIN = 220  # нижняя граница для скорости 
 Airplane_MaxRotAngle = 0.79  # максимальный угол, на который может повернуть самолет при каждом шаге, в радианах 45град
 Airplane_SIZE = 20.0  # характерный размер самолета
 Airplane_DistUpdate = 100  # расстояние до контрольной точки, при которой она считается достигнутой
+
+#Radar constants
+RATE_ERROR_DIST = 0.05
+RATE_ERROR_SPEED = 0.001
+MIN_DIST_DETECTION = 30  # м
+
 EPS = 1e-7  # слагаемое, чтобы избежать деление на 0
 
 #Radar constants
