@@ -1,6 +1,7 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID
+from config.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID, EPS, \
+    RATE_ERROR_DIST, RATE_ERROR_SPEED, MIN_DIST_DETECTION
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg, \
     GuidedMissileHit2CCPMsg, Radar_InitMessage, Radar_ViewMessage
 from src.modules_classes.Simulated import Simulated
@@ -47,25 +48,24 @@ class RadarRound(Simulated):
             f"Radar с id {self._ID} видит по углу наклона от {self.tilt_cur} до {self.tilt_cur + self.tilt_per_sec}")
         for obj in all_objects:
             r = np.linalg.norm(obj.pos - self.pos)
-            eps = 0.0001
             # logger.radar(f"радар чекает объект с координатами {obj.pos}, дальность {r}")
 
-            if r < self.view_distance:
+            if MIN_DIST_DETECTION < r < self.view_distance:
                 x, y, z = (obj.pos - self.pos)
-                tilt = np.rad2deg(np.arcsin(z / (r + eps))) % 180
-                pan = np.rad2deg(np.arctan2(y, (x + eps))) % 360
+                tilt = np.rad2deg(np.arcsin(z / (r + EPS))) % 180
+                pan = np.rad2deg(np.arctan2(y, (x + EPS))) % 360
 
                 # logger.radar(f"радар чекает объект с pan {pan}, с tilt {tilt}, pan_cur {self.pan_cur}, pan per sec {self.pan_per_sec}, tilt cur {self.tilt_cur}, tilt per sec {self.tilt_per_sec}")
 
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     logger.radar(
                         f"Radar с id {self._ID} видит объект с сферическими координатами (dist, pan, tilt): {r, pan, tilt}")
-                    error_r = int(0.001 * r) + 1
+                    error_r = int(RATE_ERROR_DIST * r) + 1
                     pos = obj.pos + np.random.randint(-error_r, error_r, size=3)
 
                     speed = np.linalg.norm(obj.vel)
 
-                    velocity_from_radar = obj.vel + np.random.randint(-int(0.001 * speed) - 1, int(0.001 * speed) + 1,
+                    velocity_from_radar = obj.vel + np.random.randint(-int(RATE_ERROR_SPEED * speed) - 1, int(RATE_ERROR_SPEED * speed) + 1,
                                                                       size=3)
                     speed_from_radar = np.linalg.norm(velocity_from_radar)
                     visible_objects.append([pos, velocity_from_radar, speed_from_radar, error_r])
