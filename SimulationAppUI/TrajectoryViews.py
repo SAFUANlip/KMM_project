@@ -85,6 +85,7 @@ class TargetPoint(QGraphicsItem):
         return QRectF(self.point_pos[0] - self.radius // 2, self.point_pos[1] - self.radius // 2,
                       self.point_pos[0] + self.radius // 2, self.point_pos[1] + self.radius // 2)
 
+
 class TargetTrajectorySection(QGraphicsItem):
     def __init__(self, point_start, point_end, info):
         super().__init__()
@@ -138,13 +139,14 @@ class TargetTrajectorySection(QGraphicsItem):
             scene.addItem(scene.traj_info_widget)  # Добавляем текстовый элемент в сцену
             # rect.addToGroup(text_item)
 
+
 class MissileTrajectorySection(TargetTrajectorySection):
     def __init__(self, point_start, point_end, info):
         super().__init__(point_start, point_end, info)
 
     def paint(self, painter, option, widget):
-        pen = QPen(Qt.black)
-        pen.setWidth(1)
+        pen = QPen(Qt.red)
+        pen.setWidth(2)
         painter.setPen(pen)
         painter.drawLine(int(self.point_start[0]), int(self.point_start[1]),
                          int(self.point_end[0]), int(self.point_end[1]))

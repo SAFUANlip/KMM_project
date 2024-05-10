@@ -4,7 +4,7 @@ import numpy as np
 
 from config.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
     MSG_SD2CCP_MS_type, MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2CCP_GM_HIT_type, NEW_TARGET, OLD_TARGET, \
-    OLD_GM, DISPATCHER_ID, MISSILE_TYPE_DRAWER, TARGET_TYPE_DRAWER, DRAWER_ID
+    OLD_GM, DISPATCHER_ID, MISSILE_TYPE_DRAWER, TARGET_TYPE_DRAWER, DRAWER_ID, ccp_rad
 from src.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2RadarMsg, MissileCapacityMsg, \
     CombatControlPoint_ViewMessage, CombatControlPoint_InitMessage, CombatControl2DrawerMsg
 from src.modules_classes.Simulated import Simulated, ModelDispatcher
@@ -78,6 +78,13 @@ class CCMissile:
         """
         self.target_coord = new_target_coord
 
+    def updTargetVel(self, new_target_vel: float) -> None:
+        """
+        Функция для обновления вектора скорости цели, за которой летит ЗУР
+        :param new_target_vel: новая координата цели ЗУР
+        """
+        self.target_vel = new_target_vel
+
 
 class CombatControlPoint(Simulated):
     def __init__(self, dispatcher: ModelDispatcher, ID: int, starting_devices_coords: dict):
@@ -121,10 +128,10 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_target_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, target_speed_mod *(time_went - 4*tick)- obj_error)}, {coord_dif}, {max(0, target_speed_mod * (time_went + 4*tick)+  obj_error)}")
+            logger.combat_control(f"ПБУ видит объект, {max(0, target_speed_mod *(time_went - ccp_rad*tick)- obj_error)}, {coord_dif}, {max(0, target_speed_mod * (time_went + ccp_rad*tick)+  obj_error)}")
             if (coord_dif < min_diff and max(0, target_speed_mod *
-                                                (time_went - 4*tick) - obj_error) <= coord_dif
-                    <= max(0, target_speed_mod * (time_went + 4*tick) + obj_error)):
+                                                (time_went - ccp_rad*tick) - obj_error) <= coord_dif
+                    <= max(0, target_speed_mod * (time_went + ccp_rad*tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_TARGET
                 sim_obj_key = key
@@ -137,12 +144,12 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_missile_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, missile_speed_mod *(time_went - 4*tick)- obj_error)}, {coord_dif}, {max(0, missile_speed_mod * (time_went + 4*tick)+ obj_error)}")
+            logger.combat_control(f"ПБУ видит объект, {max(0, missile_speed_mod *(time_went - ccp_rad*tick)- obj_error)}, {coord_dif}, {max(0, missile_speed_mod * (time_went + ccp_rad*tick)+ obj_error)}")
 
 
-            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - 4*tick) - obj_error)
+            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - ccp_rad*tick) - obj_error)
                     <= coord_dif <= max(0,
-                                        missile_speed_mod * (time_went + 4*tick) + obj_error)):
+                                        missile_speed_mod * (time_went + ccp_rad*tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_GM
                 sim_obj_key = key
@@ -352,6 +359,7 @@ class CombatControlPoint(Simulated):
 
                             if (missile.target_coord == old_target_coord).all():
                                 self.missile_dict[key].updTargetCoord(obj_coord)
+                                self.missile_dict[key].updTargetVel(obj_speed_direct)
 
                                 missile_id = self.missile_dict[key].id
                                 target_vel = self.missile_dict[key].target_vel

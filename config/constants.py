@@ -2,11 +2,11 @@
 GuidedMissile_SPEED = 1200  # скорость ЗУР по дефолту, в м/с 1200
 GuidedMissile_SPEED_MAX = 2200  # верхняя граница скорости ЗУР
 GuidedMissile_SPEED_MIN = 1100  # нижняя граница скорости ЗУР
-GuidedMissile_LifeTime = 36000  # максмальное время жизни ЗУР, в секундах
+GuidedMissile_LifeTime = 400  # максмальное время жизни ЗУР, в секундах
 GuidedMissile_ExplRadius = 100  # поражающих радиус осколков ЗУР, в метрах
 GuidedMissile_MaxRotAngle = 0.79  # максимальный угол, на который может повернуть ракета при каждом шаге, в радианах 45град
 GuidedMissile_SIZE = 2.0  # характерный размер ракеты в метрах
-GuidedMissile_ExplRadiusError = 30  # допустимая ошибка определения расстояния до цели, при проверке взрыва
+GuidedMissile_ExplRadiusError = 60  # допустимая ошибка определения расстояния до цели, при проверке взрыва
 
 Airplane_SPEED = 555  # скорость самолета в м/c 555
 Airplane_SPEED_MAX = 700  # верхняя граница для скорости самолета
@@ -14,7 +14,18 @@ Airplane_SPEED_MIN = 220  # нижняя граница для скорости 
 Airplane_MaxRotAngle = 0.79  # максимальный угол, на который может повернуть самолет при каждом шаге, в радианах 45град
 Airplane_SIZE = 20.0  # характерный размер самолета
 Airplane_DistUpdate = 100  # расстояние до контрольной точки, при которой она считается достигнутой
+
+#Radar constants
+RATE_ERROR_DIST = 0.05
+RATE_ERROR_SPEED = 0.001
+MIN_DIST_DETECTION = 30  # м
+
 EPS = 1e-7  # слагаемое, чтобы избежать деление на 0
+
+#Radar constants
+RATE_ERROR_DIST = 0.05
+RATE_ERROR_SPEED = 0.001
+MIN_DIST_DETECTION = 30  # м
 
 NUMBER_OF_MISSILES = 10
 
@@ -53,6 +64,20 @@ MSG_CCP2GUItype = -2
 
 MSG_AEROENV2DISPATCHER_type = 7001
 MSG_AEROENV2DISPATCHER_VIEW_type = 7002
+
+
+# ограничения на положения объектов и сетку
+env_limits = {
+    'X: м': [-100000, 100000],
+    'Y: м': [-100000, 100000],
+    'Z: м': [0, 20000],
+}
+
+# ограничение на максимальное и минимальное время моделирования в секундах
+min_model_time = 60
+max_model_time = 500
+
+ccp_rad = 10  # Радиус, в котром ПБУ проверяет возможное положение целей
 
 
 

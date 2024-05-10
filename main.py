@@ -177,7 +177,7 @@ class MainWindow(QMainWindow):
 
         # ------ Airplane button --------------------------------------------------
         item = QListWidgetItem()
-        button = QPushButton(text=f" TС", parent=self)
+        button = QPushButton(text=f" Самолет", parent=self)
         button.clicked.connect(self.onListAirplaneClicked)
 
         button.setFixedHeight(80)
