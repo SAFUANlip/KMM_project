@@ -33,7 +33,7 @@ class GuidedMissile(Movable):
         self.life_time = life_time
         self.expl_radius = expl_radius
         self.pos_target = None
-        self.delay_time = 2    # задержка между ЗУР и ПБУ (в тактах)
+        self.delay_time = 2  # задержка между ЗУР и ПБУ (в тактах)
         self.time2exploit = False
         self.status = 0
         self.launch_time = None
@@ -52,9 +52,11 @@ class GuidedMissile(Movable):
         self.vel = (self.pos_target - self.pos + EPS) / (np.linalg.norm(self.pos_target - self.pos) + EPS) * self.speed
         self.launch_time = launch_time
         self.status = 1
-        logger.guided_missile(f"Запуск. ЗУР ID: {self._ID}, начальная позиция: {self.pos}, начальная позиция цели: {self.pos_target}, общается с Радаром ID: {self.radar_id}")
-        
-    def updateTarget(self, pos_target: np.array([float, float, float]), target_vel: np.array([float, float, float])) -> None:
+        logger.guided_missile(
+            f"Запуск. ЗУР ID: {self._ID}, начальная позиция: {self.pos}, начальная позиция цели: {self.pos_target}, общается с Радаром ID: {self.radar_id}")
+
+    def updateTarget(self, pos_target: np.array([float, float, float]),
+                     target_vel: np.array([float, float, float])) -> None:
         """
         Обновление координат цели
         :param target_vel: вектор скорости цели
@@ -62,7 +64,7 @@ class GuidedMissile(Movable):
         :return:
         """
         self.target_vel = target_vel
-        self.pos_target = pos_target + self.target_vel*self._simulating_tick
+        self.pos_target = pos_target + self.target_vel * self._simulating_tick
 
     def updateCoordinate(self) -> None:
         """
@@ -75,28 +77,29 @@ class GuidedMissile(Movable):
 
         if angle_between(self.vel, vel_old) > GuidedMissile_MaxRotAngle:
             logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos},"
-                                  f" корректировка большого угла поворота {round(np.rad2deg(angle_between(self.vel, vel_old)),2)}°")
+                                  f" корректировка большого угла поворота {round(np.rad2deg(angle_between(self.vel, vel_old)), 2)}°")
             self.vel = (self.vel + vel_old) / np.linalg.norm(self.vel + vel_old) * self.speed
 
         # добавить задержку от передачи смс от ПБУ к РАДАРУ к ЗУР, чтобы расстояние до цели считалось верно
-        dist2target = dist(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time, self.pos)
-        if dist2target < np.linalg.norm(self.vel*self._simulating_tick):
-            self.pos = self.pos_target+self.target_vel*self._simulating_tick*self.delay_time
-
+        dist2target = dist(self.pos_target + self.target_vel * self._simulating_tick * self.delay_time, self.pos)
+        if dist2target < np.linalg.norm(self.vel * self._simulating_tick):
+            self.pos = self.pos_target + self.target_vel * self._simulating_tick * self.delay_time
         else:
-            self.pos = self.pos + self.vel*self._simulating_tick
+            self.pos = self.pos + self.vel * self._simulating_tick
 
     def checkIsHit(self):
         """
         Проверка поражена ли цель
         :return:
         """
-        if dist(self.pos_target+self.target_vel*self._simulating_tick*self.delay_time, self.pos) < self.expl_radius - GuidedMissile_ExplRadiusError:
+        if dist(self.pos_target + self.target_vel * self._simulating_tick * self.delay_time,
+                self.pos) < self.expl_radius - GuidedMissile_ExplRadiusError:
             self.status = 2
         logger.guided_missile(
-                f"ЗУР ID: {self._ID}, pos_target {self.pos_target}, target_vel {self.target_vel},  pos {self.pos}")
+            f"ЗУР ID: {self._ID}, pos_target {self.pos_target}, target_vel {self.target_vel},  pos {self.pos}")
 
-        logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}, расстояние до цели и нтерполированное {(((self.pos_target+self.target_vel*self._simulating_tick*self.delay_time - self.pos) ** 2).sum())**0.5}")
+        logger.guided_missile(
+            f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, расстояние до цели: {(((self.pos - self.pos_target) ** 2).sum()) ** 0.5}, расстояние до цели интерполированное {(((self.pos_target + self.target_vel * self._simulating_tick * self.delay_time - self.pos) ** 2).sum()) ** 0.5}")
 
     def getStatus(self):
         """
@@ -116,20 +119,21 @@ class GuidedMissile(Movable):
         :param time: текущее время в симуляции
         :return:
         """
-        #logger.guided_missile(f"жду сообщения типа {MSG_CCP2GM_type}")
+        # logger.guided_missile(f"жду сообщения типа {MSG_CCP2GM_type}")
         messages = self._checkAvailableMessagesByType(msg_type=MSG_RADAR2GM_type)
         messages.sort(key=lambda x: x.priority, reverse=True)
 
         pos_target = self.pos_target
         target_vel = self.target_vel
 
-        #logger.guided_missile(f"ЗУР ID: {self._ID}, получила сообщение от ПБУ, столько сообщение: {len(messages_classes)}")
+        # logger.guided_missile(f"ЗУР ID: {self._ID}, получила сообщение от ПБУ, столько сообщение: {len(messages_classes)}")
 
         if len(messages) != 0:
             pos_target = messages[0].new_target_coord
             target_vel = messages[0].target_vel
             self.radar_id = messages[0].sender_ID
-            logger.guided_missile(f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара ID: {self.radar_id}, новые координаты цели: {pos_target}, ее вектор скорости: {target_vel}")
+            logger.guided_missile(
+                f"ЗУР ID: {self._ID}, координаты ЗУР: {self.pos}, получила сообщение от Радара ID: {self.radar_id}, новые координаты цели: {pos_target}, ее вектор скорости: {target_vel}")
 
         if self.status == 1:
             self.updateTarget(pos_target, target_vel)
@@ -157,4 +161,3 @@ class GuidedMissile(Movable):
         if self.status > 1:
             logger.guided_missile(
                 f"ЗУР ID: {self._ID} прекратила существоавние из-за {'поражения цели' if self.status == 2 else 'нехватки топлива'}")
-

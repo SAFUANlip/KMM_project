@@ -66,6 +66,8 @@ env_limits = {
 min_model_time = 60
 max_model_time = 500
 
+ccp_rad = 10  # Радиус, в котром ПБУ проверяет возможное положение целей
+
 
 
 
