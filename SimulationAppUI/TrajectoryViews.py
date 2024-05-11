@@ -32,7 +32,11 @@ def filter_sorted_traj(traj, time):
         if el[3] > time:
             break
         res.append(el)
-    return res
+    final_res = [res[0]]
+    for i in range(1, len(res)):
+        if res[i][0] != res[i - 1][0] or res[i][1] != res[i - 1][1]: #or res[i][2] != res[i - 1][2]:
+            final_res.append(res[i])
+    return final_res
 
 
 class CustomCheckBox(QCheckBox):
@@ -152,6 +156,7 @@ class TrajGraphicsView(QGraphicsView):
         super().__init__(scene)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setMouseTracking(True)
 
     def resizeEvent(self, event):
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
@@ -174,6 +179,7 @@ class TrajGraphicsScene(QGraphicsScene):
 
         # for zoom_view
         self.mouse_tracker = MouseTracker()
+        # self.setSceneRect(self.itemsBoundingRect())
 
     def mouseMoveEvent(self, event):
         # print(f"moved: {event.scenePos().x(), event.scenePos().y()}")
@@ -245,18 +251,6 @@ class TrajGraphicsScene(QGraphicsScene):
             traceback.print_exc()
 
         self.update()
-
-    # def addMissileTraj(self, obj_traj):
-    #     traj = obj_traj
-    #     for i in range(1, len(traj)):
-    #         point = [traj[i][0] / self.kx_compression, traj[i][1] / self.ky_compression]
-    #         prev_point = [traj[i - 1][0] / self.kx_compression, traj[i - 1][1] / self.ky_compression]
-    #         line = MissileTrajectorySection(point, prev_point, f"section {i}")
-    #         # print(traj[i][0], traj[i][1], )
-    #         center_x = (point[0] + prev_point[0])/2
-    #         center_y = (point[1] + prev_point[1])/2
-    #         self.addItem(line)
-    #         line.setPos(self.grid.gridItem.mapToScene(center_x, center_y))
 
     def addTargetTraj(self, obj_traj, color=Qt.blue):
         traj = obj_traj
@@ -428,13 +422,27 @@ class ZoomGraphicsView(QGraphicsView):
 
         zoom_rect = QRectF(0, 0, 100, 100)
         self.setSceneRect(zoom_rect)
-        self.scale(10, 10)
+
+        self.scale_factor = 10
+        self.scale(self.scale_factor, self.scale_factor)
 
         main_scene.mouse_tracker.mouseMoved.connect(self.update_view)
 
     def update_view(self, x, y):
-        zoom_rect = QRectF(x - 50, y - 50, 100, 100)
+        # widget_geometry = self.geometry()
+        # center_x = widget_geometry.x() + widget_geometry.width() / 2
+        # center_y = widget_geometry.y() + widget_geometry.height() / 2
+        # zoom_rect = QRectF(x - 50, y - 50, 100, 100)
+        zoom_x = x * self.scale_factor
+        zoom_y = y * self.scale_factor
+        zoom_width = 50
+        zoom_height = 50
+
+        zoom_rect = QRectF(x - zoom_width / 2, y - zoom_height / 2, zoom_width, zoom_height)
+
         self.setSceneRect(zoom_rect)
+        self.update()
+        self.repaint()
 
 class MouseTracker(QObject):
     mouseMoved = pyqtSignal(int, int)
