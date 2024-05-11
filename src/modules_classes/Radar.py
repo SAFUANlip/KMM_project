@@ -1,7 +1,7 @@
 import numpy as np
 
 from config.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID, EPS, \
-    RATE_ERROR_DIST, RATE_ERROR_SPEED, MIN_DIST_DETECTION
+    MAX_ERROR_DIST, RATE_ERROR_SPEED, MIN_DIST_DETECTION
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg, \
     GuidedMissileHit2CCPMsg, Radar_InitMessage, Radar_ViewMessage
 from src.modules_classes.Simulated import Simulated
@@ -60,13 +60,14 @@ class RadarRound(Simulated):
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     logger.radar(
                         f"Radar с id {self._ID} видит объект с сферическими координатами (dist, pan, tilt): {r, pan, tilt}")
-                    error_r = int(0.001 * r) + 1
-                    pos = obj.pos + np.random.randint(-error_r, error_r, size=3)
+                    error_dist = np.random.randint(-MAX_ERROR_DIST, MAX_ERROR_DIST, size=3)
+                    pos = obj.pos + error_dist
+                    error_r = int(np.mean(error_dist)) + 1
 
                     speed = np.linalg.norm(obj.vel)
-
-                    velocity_from_radar = obj.vel + np.random.randint(-int(RATE_ERROR_SPEED * speed) - 1, int(RATE_ERROR_SPEED * speed) + 1,
+                    error_vel = np.random.randint(-int(RATE_ERROR_SPEED * speed) - 1, int(RATE_ERROR_SPEED * speed) + 1,
                                                                       size=3)
+                    velocity_from_radar = obj.vel + error_vel
                     speed_from_radar = np.linalg.norm(velocity_from_radar)
                     visible_objects.append([pos, velocity_from_radar, speed_from_radar, error_r])
 
