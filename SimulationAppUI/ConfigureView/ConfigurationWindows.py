@@ -11,8 +11,8 @@ class DispatcherConfigWindow(QDialog):
         self.fields = {}
         base_layout = QVBoxLayout()
         form_layout = QFormLayout()
-        spinbox = QDoubleSpinBox()
-        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox = QSpinBox()
+        spinbox.setButtonSymbols(QSpinBox.NoButtons)
         spinbox.setRange(min_model_time, max_model_time)
         form_layout.addRow("Время моделирования", spinbox)
         self.fields['sim_time'] = spinbox
@@ -30,8 +30,8 @@ class PosConfigWindow(QDialog):
         layout = QHBoxLayout()
         for label_name in env_limits:
             form_layout = QFormLayout()
-            spinbox = QDoubleSpinBox()
-            spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+            spinbox = QSpinBox()
+            spinbox.setButtonSymbols(QSpinBox.NoButtons)
             spinbox.setRange(env_limits[label_name][0], env_limits[label_name][1])
             form_layout.addRow(label_name, spinbox)
             layout.addLayout(form_layout)
@@ -106,14 +106,14 @@ class AeroTargetWindow(PosConfigWindow):
         layout = QHBoxLayout()
         form_layout = QFormLayout()
 
-        spinbox = QDoubleSpinBox()
-        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox = QSpinBox()
+        spinbox.setButtonSymbols(QSpinBox.NoButtons)
         spinbox.setRange(Airplane_SPEED_MIN, Airplane_SPEED_MAX)
         form_layout.addRow('Скорость:', spinbox)
         self.fields['V'] = spinbox
 
-        spinbox = QDoubleSpinBox()
-        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox = QSpinBox()
+        spinbox.setButtonSymbols(QSpinBox.NoButtons)
         spinbox.setRange(0, max_model_time//2)
         form_layout.addRow('Время начала:', spinbox)
         self.fields['t_start'] = spinbox
@@ -122,14 +122,14 @@ class AeroTargetWindow(PosConfigWindow):
 
         form_layout = QFormLayout()
 
-        spinbox = QDoubleSpinBox()
-        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox = QSpinBox()
+        spinbox.setButtonSymbols(QSpinBox.NoButtons)
         spinbox.setRange(-360, 360)
         form_layout.addRow('Курс:', spinbox)
         self.fields['direction'] = spinbox
 
-        spinbox = QDoubleSpinBox()
-        spinbox.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        spinbox = QSpinBox()
+        spinbox.setButtonSymbols(QSpinBox.NoButtons)
         spinbox.setRange(max_model_time//2, max_model_time)
         form_layout.addRow('Время окончания:', spinbox)
         self.fields['t_finish'] = spinbox

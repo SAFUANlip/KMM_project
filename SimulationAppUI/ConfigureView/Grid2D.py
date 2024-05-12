@@ -207,6 +207,8 @@ class GraphicsPlotItem(QGraphicsItem):
         #self.ordinateSecondaryNocks.setTransform(transform)
         self.abscissMainNocks.setTransform(transform)
         #self.abscissSecondaryNocks.setTransform(transform)
+        self.abscissText.setScale(scaleX + 1.5)
+        self.ordinateText.setScale(scaleX + 1.5)
 
     def autoSetRange(self):
         pass
@@ -225,7 +227,7 @@ class GraphicsPlotItem(QGraphicsItem):
         if count > 0:
             lines.clear()
             for i in range(count):
-                guidCoordinate = minValue + i * guides.step
+                guidCoordinate = int(minValue + i * guides.step)
                 lines.append(QLineF(self.abscissRange.max, guidCoordinate, self.abscissRange.min, guidCoordinate))
                 nocksList.append(QGraphicsSimpleTextItem(str(guidCoordinate)))
                 nocksList[-1].setPos(self.abscissRange.min, guidCoordinate)
@@ -253,7 +255,7 @@ class GraphicsPlotItem(QGraphicsItem):
         if count > 0:
             lines.clear()
             for i in range(count):
-                guidCoordinate = minValue + i * guides.step
+                guidCoordinate = int(minValue + i * guides.step)
                 lines.append(QLineF( guidCoordinate, self.ordinateRange.max, guidCoordinate, self.ordinateRange.min))
                 nocksList.append(QGraphicsSimpleTextItem(str(guidCoordinate)))
                 nocksList[-1].setPos(guidCoordinate, self.ordinateRange.min)
