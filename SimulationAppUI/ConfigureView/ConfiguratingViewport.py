@@ -226,7 +226,7 @@ class ConfiguratingViewport(QGraphicsView):
             self.dialog_presenters[-1].updateUIFields()
 
             for model in self.models[1:]:
-                self.id_counter = max(self.id_counter, model.id)
+                self.id_counter = max(self.id_counter, model.id + 1)
                 component, presenter = self.mvp_creator.createByModel(model, self.translator, 
                                                                          self.pixmaps[model.model_type // 1000], self.start_drag_distance)
                 self.scene.addItem(component)
