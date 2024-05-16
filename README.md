@@ -15,7 +15,7 @@
 ### Структура репозитория
 - docs/
   - img/ изображения
-  - Документация ЕСПД/ документация
+  - documentation_espd документация
 - exec/ 
   - simulation_app_ui/ 
   - example_configs/ примеры конфигураций ВО
@@ -30,7 +30,7 @@
     - pass
 - tests/ - тесты
 
-[Ссылка на Руководство Оператора]([Руководство оператора Шуршунчик.pdf](docs%2F%C4%EE%EA%F3%EC%E5%ED%F2%E0%F6%E8%FF%20%C5%D1%CF%C4%2F%D0%F3%EA%EE%E2%EE%E4%F1%F2%E2%EE%20%EE%EF%E5%F0%E0%F2%EE%F0%E0%20%D8%F3%F0%F8%F3%ED%F7%E8%EA.pdf))
+[Ссылка на Руководство Оператора]([Руководство оператора Шуршунчик.pdf](docs/documentation_espd/operator_doc.pdf))
 <br> [Ссылка на Руководство Программиста]([Руководство программиста Шуршунчик.pdf](docs%2F%C4%EE%EA%F3%EC%E5%ED%F2%E0%F6%E8%FF%20%C5%D1%CF%C4%2F%D0%F3%EA%EE%E2%EE%E4%F1%F2%E2%EE%20%EF%F0%EE%E3%F0%E0%EC%EC%E8%F1%F2%E0%20%D8%F3%F0%F8%F3%ED%F7%E8%EA.pdf))
 <br>[Ссылка на YouTrack, где распределены все задачи по ходу проекта](https://km-pgithubroject.youtrack.cloud/agiles/160-2/current)
 <br>[Ссылка на UML-диаграмму](https://drive.google.com/file/d/1ucT0xLzZWOYp1hiXnceom4LKOXFYfxBC/view?usp=sharing)
