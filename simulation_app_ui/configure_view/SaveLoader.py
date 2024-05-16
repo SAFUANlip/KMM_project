@@ -5,7 +5,7 @@
 
 import os.path
 import json
-from SimulationAppUI.ConfigureView.Models import *
+from simulation_app_ui.configure_view.Models import *
 
 class SaveLoader:
     @staticmethod

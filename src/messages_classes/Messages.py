@@ -1,6 +1,6 @@
 import numpy as np
 
-from config.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
+from src.constants import MSG_RADAR2CCP_type, MSG_CCP2SD_type, \
     MSG_SD2CCP_MS_type, MSG_SD2CCP_NS_type, MSG_CCP2RADAR_type, MSG_RADAR2GM_type, MSG_RADAR2DRAWER_type, \
     MSG_GM2RADAR_type, MSG_CCP2DRAWER_type, MSG_RADAR2CCP_GM_HIT_type, MSG_AEROENV2DISPATCHER_type, \
     MSG_AEROENV2DISPATCHER_VIEW_type, MSG_CCP2DISPATCHER_INIT_type, MSG_CCP2DISPATCHER_VIEW_type, \

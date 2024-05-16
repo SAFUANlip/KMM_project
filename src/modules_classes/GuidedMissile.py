@@ -1,9 +1,9 @@
 import numpy as np
 
-from config.constants import (GuidedMissile_SPEED, EPS,
-                              GuidedMissile_LifeTime, GuidedMissile_ExplRadius,
-                              GuidedMissile_MaxRotAngle, GuidedMissile_SIZE, GuidedMissile_ExplRadiusError,
-                              MSG_RADAR2GM_type)
+from src.constants import (GuidedMissile_SPEED, EPS,
+                           GuidedMissile_LifeTime, GuidedMissile_ExplRadius,
+                           GuidedMissile_MaxRotAngle, GuidedMissile_SIZE, GuidedMissile_ExplRadiusError,
+                           MSG_RADAR2GM_type)
 from src.messages_classes.Messages import GuidedMissileHit2RadarMsg
 from src.modules_classes.ModelDispatcher import ModelDispatcher
 from src.modules_classes.Movable import Movable, angle_between, dist
@@ -119,14 +119,11 @@ class GuidedMissile(Movable):
         :param time: текущее время в симуляции
         :return:
         """
-        # logger.guided_missile(f"жду сообщения типа {MSG_CCP2GM_type}")
         messages = self._checkAvailableMessagesByType(msg_type=MSG_RADAR2GM_type)
         messages.sort(key=lambda x: x.priority, reverse=True)
 
         pos_target = self.pos_target
         target_vel = self.target_vel
-
-        # logger.guided_missile(f"ЗУР ID: {self._ID}, получила сообщение от ПБУ, столько сообщение: {len(messages_classes)}")
 
         if len(messages) != 0:
             pos_target = messages[0].new_target_coord

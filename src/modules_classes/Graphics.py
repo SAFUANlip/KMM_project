@@ -4,7 +4,7 @@ from src.modules_classes.Simulated import Simulated
 from src.modules_classes.GuidedMissile import GuidedMissile
 import matplotlib.pyplot as plt
 from src.modules_classes.AeroEnv import AeroEnv, Airplane, Helicopter
-from config.constants import MSG_RADAR2DRAWER_type, MISSILE_TYPE_DRAWER, MSG_CCP2DRAWER_type
+from src.constants import MSG_RADAR2DRAWER_type, MISSILE_TYPE_DRAWER, MSG_CCP2DRAWER_type
 
 import time as time_python
 

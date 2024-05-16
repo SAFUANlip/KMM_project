@@ -1,6 +1,6 @@
-from SimulationAppUI.ConfigureView.Models import *
-from SimulationAppUI.ConfigureView.GraphicComponents import *
-from SimulationAppUI.ConfigureView.GraphicComponentPresenter import *
+from simulation_app_ui.configure_view.Models import *
+from simulation_app_ui.configure_view.GraphicComponents import *
+from simulation_app_ui.configure_view.GraphicComponentPresenter import *
 
 
 class MVPCreator:

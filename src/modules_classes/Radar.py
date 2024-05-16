@@ -1,6 +1,6 @@
 import numpy as np
 
-from config.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID, EPS, \
+from src.constants import MSG_CCP2RADAR_type, TARGET_TYPE_DRAWER, DRAWER_ID, MSG_GM2RADAR_type, DISPATCHER_ID, EPS, \
     MAX_ERROR_DIST, RATE_ERROR_SPEED, MIN_DIST_DETECTION
 from src.messages_classes.Messages import Radar2CombatControlMsg, Radar2MissileMsg, Radar2DrawerMsg, \
     GuidedMissileHit2CCPMsg, Radar_InitMessage, Radar_ViewMessage

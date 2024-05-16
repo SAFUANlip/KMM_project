@@ -23,8 +23,8 @@ from PyQt5.QtCore import Qt, QPointF, QRectF
 from PyQt5.QtCore import pyqtSignal, QObject
 
 
-from SimulationAppUI.ConfigureView.Models import RadarSource
-from SimulationAppUI.ConfigureView.Grid2D import GraphicsPlotNocksTube, Graphics2DPlotGrid, GraphicsPlotItem
+from simulation_app_ui.configure_view.Models import RadarSource
+from simulation_app_ui.configure_view.Grid2D import GraphicsPlotNocksTube, Graphics2DPlotGrid, GraphicsPlotItem
 
 def filter_sorted_traj(traj, time):
     res = []
@@ -32,6 +32,10 @@ def filter_sorted_traj(traj, time):
         if el[3] > time:
             break
         res.append(el)
+
+    if not len(res):
+        return []
+
     final_res = [res[0]]
     for i in range(1, len(res)):
         if res[i][0] != res[i - 1][0] or res[i][1] != res[i - 1][1]: #or res[i][2] != res[i - 1][2]:

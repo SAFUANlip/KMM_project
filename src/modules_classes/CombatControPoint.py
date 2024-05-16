@@ -2,9 +2,10 @@ import typing
 
 import numpy as np
 
-from config.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
+from src.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
     MSG_SD2CCP_MS_type, MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2CCP_GM_HIT_type, NEW_TARGET, OLD_TARGET, \
-    OLD_GM, DISPATCHER_ID, MISSILE_TYPE_DRAWER, TARGET_TYPE_DRAWER, DRAWER_ID, ccp_rad
+    OLD_GM, DISPATCHER_ID, MISSILE_TYPE_DRAWER, TARGET_TYPE_DRAWER, DRAWER_ID, ccp_rad, GuidedMissile_SPEED_MIN, \
+    GuidedMissile_LifeTime
 from src.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2RadarMsg, MissileCapacityMsg, \
     CombatControlPoint_ViewMessage, CombatControlPoint_InitMessage, CombatControl2DrawerMsg
 from src.modules_classes.Simulated import Simulated, ModelDispatcher
@@ -98,7 +99,6 @@ class CombatControlPoint(Simulated):
         self.missile_order = 0
         self.start = True
 
-
         logger.combat_control(f"starting_devices_coords {starting_devices_coords}")
         logger.combat_control(f"Создан ПБУ с ID {ID}")
 
@@ -128,10 +128,12 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_target_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, target_speed_mod *(time_went - ccp_rad*tick)- obj_error)}, {coord_dif}, {max(0, target_speed_mod * (time_went + ccp_rad*tick)+  obj_error)}")
+            logger.combat_control(
+                f"ПБУ видит объект, {max(0, target_speed_mod * (time_went - ccp_rad * tick) - obj_error)},"
+                f" {coord_dif}, {max(0, target_speed_mod * (time_went + ccp_rad * tick) + obj_error)}")
             if (coord_dif < min_diff and max(0, target_speed_mod *
-                                                (time_went - ccp_rad*tick) - obj_error) <= coord_dif
-                    <= max(0, target_speed_mod * (time_went + ccp_rad*tick) + obj_error)):
+                                                (time_went - ccp_rad * tick) - obj_error) <= coord_dif
+                    <= max(0, target_speed_mod * (time_went + ccp_rad * tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_TARGET
                 sim_obj_key = key
@@ -144,12 +146,13 @@ class CombatControlPoint(Simulated):
 
             time_went = cur_time - last_missile_time
 
-            logger.combat_control(f"ПБУ видит объект, {max(0, missile_speed_mod *(time_went - ccp_rad*tick)- obj_error)}, {coord_dif}, {max(0, missile_speed_mod * (time_went + ccp_rad*tick)+ obj_error)}")
+            logger.combat_control(
+                f"ПБУ видит объект, {max(0, missile_speed_mod * (time_went - ccp_rad * tick) - obj_error)}, "
+                f"{coord_dif}, {max(0, missile_speed_mod * (time_went + ccp_rad * tick) + obj_error)}")
 
-
-            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - ccp_rad*tick) - obj_error)
+            if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - ccp_rad * tick) - obj_error)
                     <= coord_dif <= max(0,
-                                        missile_speed_mod * (time_went + ccp_rad*tick) + obj_error)):
+                                        missile_speed_mod * (time_went + ccp_rad * tick) + obj_error)):
                 min_diff = coord_dif
                 obj_type = OLD_GM
                 sim_obj_key = key
@@ -169,6 +172,7 @@ class CombatControlPoint(Simulated):
     def delete_missile(self, missile_id: int):
         to_del = []
         target_coord = None
+
         # нужно удалить ракету и цель, за которой она следила из обоих списков
         for key, missile in self.missile_dict.items():
             if missile.id == missile_id:
@@ -230,7 +234,7 @@ class CombatControlPoint(Simulated):
 
                 self.missile_order = self.missile_order + 1
                 self.missile_dict[self.missile_order] = CCMissile(missile_coord, missile_id,
-                                                   target_coord, target_vel, target_speed, time)
+                                                                  target_coord, target_vel, target_speed, time)
                 logger.combat_control(
                     f"ПБУ получил от ПУ id ЗУР:{missile_id}, начальные координаты ЗУР:{missile_coord}")
                 # коорд зур, коорд ее цели, id зур, скорость зур
@@ -285,7 +289,6 @@ class CombatControlPoint(Simulated):
         """
         :param time: текущее время
         """
-        # logger.combat_control(f"ПУ запустили столько ЗУР:{self.starting_devices_launched}")
         self.get_hit_guided_missiles()
 
         if self.start:
@@ -328,20 +331,25 @@ class CombatControlPoint(Simulated):
                                     sd_id = key
                                     min_dist = dist
 
-                        if sd_id is not None:
-                            self.target_order = self.target_order + 1
-                            self.target_dict[self.target_order] = CCTarget(obj_coord, obj_speed_direct, obj_speed_mod, time)
+                        if min_dist < GuidedMissile_SPEED_MIN * GuidedMissile_LifeTime:
 
-                            msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
-                                                                                 self._ID, sd_id, self.target_order,
-                                                                                 obj_coord, radar_id)
+                            if sd_id is not None:
+                                self.target_order = self.target_order + 1
+                                self.target_dict[self.target_order] = CCTarget(obj_coord, obj_speed_direct,
+                                                                               obj_speed_mod, time)
 
+                                msg2StartingDevice = CombatControl2StartingDeviceMsg(time,
+                                                                                     self._ID, sd_id, self.target_order,
+                                                                                     obj_coord, radar_id)
 
-                            logger.combat_control(f"ПБУ отправил ПУ id {sd_id} координаты новой цели: {obj_coord}")
-                            self.starting_devices_launched[key] = self.starting_devices_launched[key] + 1
-                            self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
+                                logger.combat_control(f"ПБУ отправил ПУ id {sd_id} координаты новой цели: {obj_coord}")
+                                self.starting_devices_launched[key] = self.starting_devices_launched[key] + 1
+                                self._sendMessage(msg2StartingDevice)  # сказала ПУ, что нужно запустить
+                            else:
+                                logger.warning(f"Не осталось свободных ЗУР!!!")
+
                         else:
-                            logger.warning(f"Не осталось свободных ЗУР!!!")
+                            logger.warning(f"ЗУР не успеет долететь до цели")
 
                         # ЗУР по координатам coord
 
@@ -379,4 +387,3 @@ class CombatControlPoint(Simulated):
                         self.missile_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
 
         self.send_vis_objects2gui(time)
-        self.send_vis_objects2drawer(time)

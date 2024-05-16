@@ -1,4 +1,4 @@
-from config.constants import DRAWER_ID
+from src.constants import DRAWER_ID
 from src.modules_classes.AeroEnv import AeroEnv, Airplane
 from src.modules_classes.CombatControPoint import CombatControlPoint
 from src.modules_classes.Radar import RadarRound, RadarSector

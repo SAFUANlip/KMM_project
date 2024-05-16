@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from config.constants import NUMBER_OF_MISSILES, MSG_CCP2SD_type, MSG_CCP_MISSILE_CAPACITY_type
+from src.constants import NUMBER_OF_MISSILES, MSG_CCP2SD_type, MSG_CCP_MISSILE_CAPACITY_type
 from src.modules_classes.AeroEnv import AeroEnv
 from src.modules_classes.GuidedMissile import GuidedMissile
 from src.modules_classes.ModelDispatcher import ModelDispatcher

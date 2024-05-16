@@ -9,15 +9,15 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QToolBar, QListWidget, QAction, QSlider, QLabel)
 from PyQt5.QtWidgets import QPushButton, QListWidgetItem, QSizePolicy
 
-from SimulationAppUI.ConfigureView.ConfiguratingViewport import ConfiguratingViewport
-from SimulationAppUI.SimulationModule import SimulationModule
-from SimulationAppUI.TrajectoryViews import TrajectoryViews, СhooseViewWidget, CustomCheckBox
+from simulation_app_ui.configure_view.ConfiguratingViewport import ConfiguratingViewport
+from simulation_app_ui.SimulationModule import SimulationModule
+from simulation_app_ui.TrajectoryViews import TrajectoryViews, СhooseViewWidget, CustomCheckBox
 
 from PyQt5.QtCore import (Qt, pyqtSignal, pyqtSlot)
-from SimulationAppUI.TrajectoryViews import TrajectoryViews, ZoomGraphicsView
-# from SimulationAppUI.TrajectoryViews import ZoomView
+from simulation_app_ui.TrajectoryViews import TrajectoryViews, ZoomGraphicsView
+# from simulation_app_ui.TrajectoryViews import ZoomView
 
-from SimulationAppUI.MessagesParser import parse_messages, fake_parse_messages
+from simulation_app_ui.MessagesParser import parse_messages, fake_parse_messages
 
 
 class MainWindow(QMainWindow):
@@ -35,18 +35,11 @@ class MainWindow(QMainWindow):
 
         print(head_path)
 
-        self.pixmaps = {1 : QPixmap(str(head_path/Path(('SimulationAppUI/images/control_station_icon.png')))).scaledToHeight(50),
-                2 : QPixmap(str(head_path/Path(('SimulationAppUI/images/radar_icon.png')))).scaledToHeight(50),
-                3 : QPixmap(str(head_path/Path(('SimulationAppUI/images/missile_launcher_icon.png')))).scaledToHeight(50),
-                4 : QPixmap(str(head_path/Path(('SimulationAppUI/images/aircraft_icon.png')))).scaledToHeight(25)}
-        #
-        # self.pixmaps = {1 : QPixmap(('SimulationAppUI/images/control_station_icon.png')).scaledToHeight(50),
-        #         2 : QPixmap(('SimulationAppUI/images/radar_icon.png')).scaledToHeight(50),
-        #         3 : QPixmap(('SimulationAppUI/images/missile_launcher_icon.png')).scaledToHeight(50),
-        #         4 : QPixmap(('SimulationAppUI/images/aircraft_icon.png')).scaledToHeight(25)}
-
-
-        # потом перепишем)
+        self.pixmaps = {
+            1: QPixmap(str(head_path / Path(('simulation_app_ui/images/control_station_icon.png')))).scaledToHeight(50),
+            2: QPixmap(str(head_path / Path(('simulation_app_ui/images/radar_icon.png')))).scaledToHeight(50),
+            3: QPixmap(str(head_path / Path(('simulation_app_ui/images/missile_launcher_icon.png')))).scaledToHeight(50),
+            4: QPixmap(str(head_path / Path(('simulation_app_ui/images/aircraft_icon.png')))).scaledToHeight(25)}
 
         self.sigRadar.connect(self.sigItemAddRequested)
         self.sigMissileLauncher.connect(self.sigItemAddRequested)
@@ -107,7 +100,6 @@ class MainWindow(QMainWindow):
         tool_bar.addAction(action3)
         tool_bar.addAction(action4)
         action1.setVisible(False)
-
 
         self.traj_view = False
         self.configure_view = False
@@ -193,7 +185,6 @@ class MainWindow(QMainWindow):
         # --------------------------------------------------------------------------
         self.layout.addWidget(self.right_widget)
 
-
         self.choose_views_list = QListWidget()
         self.choose_views_list.hide()
         self.layout.addWidget(self.choose_views_list)
@@ -228,7 +219,6 @@ class MainWindow(QMainWindow):
         self.choose_views_list.hide()
         self.left_conf_widget.show()
         self.right_widget.show()
-
 
     def setViewTraj(self):
         self.left_conf_widget.hide()
@@ -299,12 +289,11 @@ class MainWindow(QMainWindow):
         conf_items = self.left_conf_widget.models
         self.configure_choosing_view_widgets(objs, trajs, conf_items)
 
-
         self.setViewTraj()
         self.action_toolbar()
 
-
-    def configure_choosing_view_widgets(self, obj_viewing: dict[str, list[int]], obj_trajs, conf_items): #: dict[str, dict(int, dict(int,list[np.array])):
+    def configure_choosing_view_widgets(self, obj_viewing: dict[str, list[int]], obj_trajs,
+                                        conf_items):  #: dict[str, dict(int, dict(int,list[np.array])):
         self.choose_views_list.clear()
         self.left_traj_widget.setTrajectories(obj_trajs)
         filtered_items = conf_items[1:]
