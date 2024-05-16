@@ -4,6 +4,7 @@
 
 **Цель**: Моделирование работы ЗРС
 
+![sim_app.gif](docs%2Fgif%2Fsim_app.gif)
 
 ## Архитектура проекта:
 ![img.png](docs/img/img.png)
@@ -16,7 +17,8 @@
 ```
 - docs/
   - img/ изображения
-  - documentation_espd документация
+  - documentation_espd/ документация
+  - gif/ гиф
 - exec/ 
   - simulation_app_ui/ 
   - example_configs/ примеры конфигураций ВО
@@ -25,10 +27,9 @@
   - configure_view/ - гуи 
   - images/ - спрайты
 - simulation_process/
-  - classes/ - классы модулей
-    - pass
-  - messages/ - классы сообщений
-    - pass
+  - modules_classes/ - классы модулей
+  - messages_classes/ - классы сообщений
+  - utils/ 
 - tests/ - тесты
 ```
 
