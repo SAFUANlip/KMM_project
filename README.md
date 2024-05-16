@@ -13,6 +13,7 @@
 
 
 ### Структура репозитория
+```
 - docs/
   - img/ изображения
   - documentation_espd документация
@@ -29,12 +30,29 @@
   - messages/ - классы сообщений
     - pass
 - tests/ - тесты
+```
 
-[Ссылка на Руководство Оператора](docs/documentation_espd/operator_manual.pdf)
+<br>[Ссылка на Руководство Оператора](docs/documentation_espd/operator_manual.pdf)
 <br> [Ссылка на Руководство Программиста](docs/documentation_espd/programmist_manual.pdf)
 <br>[Ссылка на YouTrack, где распределены все задачи по ходу проекта](https://km-pgithubroject.youtrack.cloud/agiles/160-2/current)
 <br>[Ссылка на UML-диаграмму](https://drive.google.com/file/d/1ucT0xLzZWOYp1hiXnceom4LKOXFYfxBC/view?usp=sharing)
-## РЛС
+
+
+### Настройка окружения
+
+Установка окружения
+
+```
+pip install -r requirements.txt
+```
+
+### Как запустить проект?
+- запустить файл app.py (нужен питон)
+- запустить файл [exec/app.exec](exec/app.exe) (не нужен питон)
+
+
+## Справочная информация
+### РЛС
 В РЛС кругового типа обзор происходит по винтовой траектории:
 ![RadarRound](docs/img/img_RadarRound.png)
 В РЛС секторного типа обзор происходит по зигзагообразной траектории:
@@ -60,11 +78,11 @@
 Источники для ошибки определения скорости объектов:
 1. http://www.mes-conference.ru/data/year2022/pdf/D028.pdf
 
-## Самолет
+### Самолет
 - изначально скорость равна **555 м/c**
 - ограничение скорости для самолета **220 - 700 м/c**
 
-## ЗУР
+### ЗУР
 - Дефолтная скорость равна **1200 м/с**
 - ограничение скорости для самолета **1100 - 2200 м/c**
 
