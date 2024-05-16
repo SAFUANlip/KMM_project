@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QSpinBox, QComboBox, QFormLayout
-from src.constants import Airplane_SPEED_MIN, Airplane_SPEED_MAX, env_limits, min_model_time, max_model_time
+from simulation_process.constants import Airplane_SPEED_MIN, Airplane_SPEED_MAX, env_limits, min_model_time, max_model_time
 
 
 class DispatcherConfigWindow(QDialog):

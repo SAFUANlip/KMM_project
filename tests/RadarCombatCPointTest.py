@@ -1,10 +1,10 @@
-from src.constants import DRAWER_ID
-from src.modules_classes.AeroEnv import AeroEnv, Airplane
-from src.modules_classes.CombatControPoint import CombatControlPoint
-from src.modules_classes.Radar import RadarRound, RadarSector
-from src.modules_classes.StartingDevice import StartingDevice
-from src.modules_classes.ModelDispatcher import ModelDispatcher
-from src.modules_classes.Graphics import Graphics
+from simulation_process.constants import DRAWER_ID
+from simulation_process.modules_classes.AeroEnv import AeroEnv, Airplane
+from simulation_process.modules_classes.CombatControPoint import CombatControlPoint
+from simulation_process.modules_classes.Radar import RadarRound, RadarSector
+from simulation_process.modules_classes.StartingDevice import StartingDevice
+from simulation_process.modules_classes.ModelDispatcher import ModelDispatcher
+from simulation_process.modules_classes.Graphics import Graphics
 import numpy as np
 
 if __name__ == '__main__':

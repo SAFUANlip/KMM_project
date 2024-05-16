@@ -1,15 +1,12 @@
 import numpy as np
 
-from src.modules_classes.Radar import RadarRound
-from src.modules_classes.StartingDevice import StartingDevice
-from src.modules_classes.CombatControPoint import CombatControlPoint
+from simulation_process.messages_classes.Messages import (CombatControlPoint_InitMessage,
+                                                          CombatControlPoint_ViewMessage,
+                                                          AeroEnv_InitMessage,
+                                                          AeroEnv_ViewMessage,
+                                                          Radar_InitMessage,
+                                                          Radar_ViewMessage)
 
-from src.messages_classes.Messages import (CombatControlPoint_InitMessage,
-                                           CombatControlPoint_ViewMessage,
-                                           AeroEnv_InitMessage,
-                                           AeroEnv_ViewMessage,
-                                           Radar_InitMessage,
-                                           Radar_ViewMessage)
 
 def parse_messages(all_messages):
     objs = {
@@ -26,7 +23,7 @@ def parse_messages(all_messages):
     mixed_messages = []
     for el in all_messages:
         mixed_messages += el
-    # print(all_messages)
+
     # AeroEnv messages
 
     env_view_messages = []
@@ -39,10 +36,6 @@ def parse_messages(all_messages):
     trajs["vo"], trajs["max_time"] = parse_env_trajectories(env_view_messages)
 
     print("Parsed VO views")
-    # print(env_view_messages)
-    # print(len(env_view_messages))
-    # print(objs)
-
 
     # Controls messages
     cc_view_messages = []
@@ -56,9 +49,6 @@ def parse_messages(all_messages):
         trajs["controls"][control_id] = parse_control_trajectories(control_id, cc_view_messages)
 
     print("Parsed control views")
-    # print(cc_view_messages)
-    # print(len(cc_view_messages))
-    # print(objs)
 
     # Radars messages
     # Controls messages
@@ -77,19 +67,12 @@ def parse_messages(all_messages):
     return objs, trajs
 
 
-# def time_cmp(msg1, msg2):
-#     if msg1.time > msg2:
-#         return True
-#     return False
-
 def parse_control_trajectories(control_id, messages):
     control_messages = []
     for msg in messages:
         if msg.sender_ID == control_id:
             control_messages.append(msg)
 
-    # print(control_messages)
-    # print("cc_s_len=", len(control_messages))
     control_messages.sort(key=lambda c_msg: c_msg.time)
     objects = {
         "targets": [],
@@ -113,7 +96,6 @@ def parse_control_trajectories(control_id, messages):
             obj_pos = list(obj_pos) + [msg.time]
             objects["targets"].append(obj_pos)
 
-    # print("res_trajs:", objects["targets"])
     return objects
 
 
@@ -123,8 +105,7 @@ def parse_radar_trajectories(radar_id, messages):
         if msg.sender_ID == radar_id:
             radar_messages.append(msg)
 
-    # print(radar_messages)
-    # print("radar_s_len=", len(radar_messages))
+
     radar_messages.sort(key=lambda c_msg: c_msg.time)
     objects = {
         "targets": [],
@@ -132,16 +113,15 @@ def parse_radar_trajectories(radar_id, messages):
     }
 
     for msg in radar_messages:
-        # keys = ["targets", "missiles"]
         for pos in msg.pos_objects:
             # obj_id - None
             position_and_time = list(pos) + [msg.time]
             objects["targets"].append(position_and_time)
     return objects
 
+
 def parse_env_trajectories(messages):
-    #print(messages)
-    #print("env_msgs_len=", len(messages))
+
     messages.sort(key=lambda c_msg: c_msg.time)
     objects = {
         "targets": {},
@@ -152,7 +132,6 @@ def parse_env_trajectories(messages):
 
     max_time = messages[-1].time
     for msg in messages:
-        # print(msg.view_dict)
         time_stamp = msg.time
         keys = ["targets", "missiles"]
         for key in keys:
@@ -165,7 +144,6 @@ def parse_env_trajectories(messages):
                 else:
                     objects[key][obj_id] = [obj_pos]
 
-    # print("res_trajs:", objects["targets"])
     return objects, max_time
 
 
@@ -183,18 +161,17 @@ def fake_parse_messages(all_messages):
                         260: [np.array([100, 200]), np.array([200, 200]), np.array([300, 300])]}
                    },
         "controls": {1:
-                          {259: [np.array([10, 10]), np.array([20, 20]), np.array([30, 30])],
-                           260: [np.array([100, 200]), np.array([200, 200]), np.array([300, 300])]},
-                      2:
-                          {259: [np.array([10, 10]), np.array([20, 20]), np.array([400, 50])],
-                           260: [np.array([100, 200]), np.array([200, 200]), np.array([300, 300])]}
-                      },
+                         {259: [np.array([10, 10]), np.array([20, 20]), np.array([30, 30])],
+                          260: [np.array([100, 200]), np.array([200, 200]), np.array([300, 300])]},
+                     2:
+                         {259: [np.array([10, 10]), np.array([20, 20]), np.array([400, 50])],
+                          260: [np.array([100, 200]), np.array([200, 200]), np.array([300, 300])]}
+                     },
         "vo": {
             "targets":
                 {259: [np.array([20000, 20000]), np.array([20000, 6000]), np.array([30, 30])],
-                260: [np.array([100, 200]), np.array([200, 200]), np.array([300, 300])]},
+                 260: [np.array([100, 200]), np.array([200, 200]), np.array([300, 300])]},
             "missiles": {}
-               },
+        },
     }
     return objs, trajs
-

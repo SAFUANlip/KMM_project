@@ -1,12 +1,12 @@
 import numpy as np
 
-from src.constants import (GuidedMissile_SPEED, EPS,
-                           GuidedMissile_LifeTime, GuidedMissile_ExplRadius,
-                           GuidedMissile_MaxRotAngle, GuidedMissile_SIZE, GuidedMissile_ExplRadiusError,
-                           MSG_RADAR2GM_type)
-from src.messages_classes.Messages import GuidedMissileHit2RadarMsg
-from src.modules_classes.ModelDispatcher import ModelDispatcher
-from src.modules_classes.Movable import Movable, angle_between, dist
+from simulation_process.constants import (GuidedMissile_SPEED, EPS,
+                                          GuidedMissile_LifeTime, GuidedMissile_ExplRadius,
+                                          GuidedMissile_MaxRotAngle, GuidedMissile_SIZE, GuidedMissile_ExplRadiusError,
+                                          MSG_RADAR2GM_type)
+from simulation_process.messages_classes.Messages import GuidedMissileHit2RadarMsg
+from simulation_process.modules_classes.ModelDispatcher import ModelDispatcher
+from simulation_process.modules_classes.Movable import Movable, angle_between, dist
 from logs.logger import logger
 
 

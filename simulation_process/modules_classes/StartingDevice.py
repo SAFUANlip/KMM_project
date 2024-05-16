@@ -2,12 +2,12 @@ from typing import List, Tuple
 
 import numpy as np
 
-from src.constants import NUMBER_OF_MISSILES, MSG_CCP2SD_type, MSG_CCP_MISSILE_CAPACITY_type
-from src.modules_classes.AeroEnv import AeroEnv
-from src.modules_classes.GuidedMissile import GuidedMissile
-from src.modules_classes.ModelDispatcher import ModelDispatcher
-from src.modules_classes.Simulated import Simulated
-from src.messages_classes.Messages import NoMissiles, MissileStarted, MissileCapacityMsg
+from simulation_process.constants import NUMBER_OF_MISSILES, MSG_CCP2SD_type, MSG_CCP_MISSILE_CAPACITY_type
+from simulation_process.modules_classes.AeroEnv import AeroEnv
+from simulation_process.modules_classes.GuidedMissile import GuidedMissile
+from simulation_process.modules_classes.ModelDispatcher import ModelDispatcher
+from simulation_process.modules_classes.Simulated import Simulated
+from simulation_process.messages_classes.Messages import NoMissiles, MissileStarted, MissileCapacityMsg
 from logs.logger import logger
 
 

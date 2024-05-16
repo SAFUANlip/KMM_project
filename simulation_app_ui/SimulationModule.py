@@ -1,17 +1,14 @@
-from PyQt5.QtWidgets import QApplication
-import sys
-
-from PyQt5.QtWidgets import QProgressDialog, QMessageBox
-from PyQt5.QtCore import Qt, QThread, QObject, pyqtSlot, pyqtSignal, QTimer
-import numpy as np
-from math import floor
 from enum import Enum
 
-from src.modules_classes.AeroEnv import *
-from src.modules_classes.CombatControPoint import *
-from src.modules_classes.Radar import *
-from src.modules_classes.StartingDevice import *
-from src.modules_classes.ModelDispatcher import *
+from PyQt5.QtCore import Qt, QThread, pyqtSlot, QTimer
+from PyQt5.QtWidgets import QProgressDialog, QMessageBox
+
+from simulation_process.modules_classes.AeroEnv import *
+from simulation_process.modules_classes.CombatControPoint import *
+from simulation_process.modules_classes.ModelDispatcher import *
+from simulation_process.modules_classes.Radar import *
+from simulation_process.modules_classes.StartingDevice import *
+
 
 class STATUS(Enum):
     NO_ERROR = 1

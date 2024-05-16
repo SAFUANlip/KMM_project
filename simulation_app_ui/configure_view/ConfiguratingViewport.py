@@ -1,21 +1,17 @@
-import sys
-import pathlib
-from copy import deepcopy
 from enum import Enum
-from PyQt5.QtCore import QObject, pyqtSlot, Qt, QDir, QPointF
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QDialog, QFileDialog, QMessageBox
-from PyQt5.QtGui import QCursor
 
-from .Grid2D import GraphicsPlotItem
-from .GraphicComponents import *
+from PyQt5.QtGui import QCursor
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QFileDialog, QMessageBox
+
+from .ConfigurationPresenters import *
+from .ConfigurationWindows import *
+from .CoordinatesTranslator import CoordinatesTranslator
 from .GraphicComponentPresenter import *
+from .GraphicComponents import *
+from .Grid2D import GraphicsPlotItem
+from .MVPCreator import MVPCreator
 from .Models import *
 from .SaveLoader import SaveLoader
-
-from .ConfigurationWindows import *
-from .ConfigurationPresenters import *
-from .CoordinatesTranslator import CoordinatesTranslator
-from .MVPCreator import MVPCreator
 
 world_max_coord = 100000
 
@@ -115,9 +111,6 @@ class ConfiguratingViewport(QGraphicsView):
         super().leaveEvent(event)
 
     def resizeEvent(self, event):
-        #new_size = event.size()
-        #self.translator.setNewWidgetSize(new_size.width() // 2, new_size.height() // 2)
-        #super().resizeEvent(event)
         self.view.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
     
     def drawForeground(self, painter, rect):

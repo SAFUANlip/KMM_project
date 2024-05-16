@@ -2,13 +2,13 @@ import typing
 
 import numpy as np
 
-from src.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
+from simulation_process.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
     MSG_SD2CCP_MS_type, MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2CCP_GM_HIT_type, NEW_TARGET, OLD_TARGET, \
     OLD_GM, DISPATCHER_ID, MISSILE_TYPE_DRAWER, TARGET_TYPE_DRAWER, DRAWER_ID, ccp_rad, GuidedMissile_SPEED_MIN, \
     GuidedMissile_LifeTime
-from src.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2RadarMsg, MissileCapacityMsg, \
+from simulation_process.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2RadarMsg, MissileCapacityMsg, \
     CombatControlPoint_ViewMessage, CombatControlPoint_InitMessage, CombatControl2DrawerMsg
-from src.modules_classes.Simulated import Simulated, ModelDispatcher
+from simulation_process.modules_classes.Simulated import Simulated, ModelDispatcher
 from logs.logger import logger
 
 

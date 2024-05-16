@@ -3,9 +3,10 @@
 # https://github.com/SAFUANlip/KMM_project/blob/Alina/save/Saver.py
 #
 
-import os.path
 import json
+
 from simulation_app_ui.configure_view.Models import *
+
 
 class SaveLoader:
     @staticmethod

@@ -1,9 +1,9 @@
-from src.modules_classes.Simulated import Simulated, ModelDispatcher
-from src.modules_classes.Movable import Movable, angle_between, dist
-from src.modules_classes.GuidedMissile import GuidedMissile
+from simulation_process.modules_classes.Simulated import Simulated, ModelDispatcher
+from simulation_process.modules_classes.Movable import Movable, angle_between, dist
+from simulation_process.modules_classes.GuidedMissile import GuidedMissile
 from logs.logger import logger
-from src.constants import (Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZE, Airplane_DistUpdate, EPS, DISPATCHER_ID)
-from src.messages_classes.Messages import AeroEnv_InitMessage, AeroEnv_ViewMessage
+from simulation_process.constants import (Airplane_MaxRotAngle, Airplane_SPEED, Airplane_SIZE, Airplane_DistUpdate, EPS, DISPATCHER_ID)
+from simulation_process.messages_classes.Messages import AeroEnv_InitMessage, AeroEnv_ViewMessage
 
 import numpy as np
 

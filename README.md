@@ -24,7 +24,7 @@
 - simulation_app_ui/ 
   - configure_view/ - гуи 
   - images/ - спрайты
-- src/
+- simulation_process/
   - classes/ - классы модулей
     - pass
   - messages/ - классы сообщений

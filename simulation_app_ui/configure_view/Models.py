@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
-from src.constants import Airplane_SPEED
+from simulation_process.constants import Airplane_SPEED
 
 
 class DispatcherSource:

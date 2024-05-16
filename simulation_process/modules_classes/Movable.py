@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.modules_classes.ModelDispatcher import ModelDispatcher, Simulated
+from simulation_process.modules_classes.ModelDispatcher import ModelDispatcher, Simulated
 
 
 def unit_vector(vector):
