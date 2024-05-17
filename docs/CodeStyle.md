@@ -10,11 +10,11 @@ The style guide for Python is based on [Guido’s ](https://www.python.org/doc/e
 | Modules | `lower_with_under`   | `_lower_with_under` |
 | Classes | `CapWords`           | `_CapWords` |
 | Exceptions | `CapWords`           |  |
-| Functions | `camelCase()`        | `_lower_with_under()` |
+| Functions | `camelCase()`        | `camelCase()`  |
 | Global/Class Constants | `CAPS_WITH_UNDER`    | `_CAPS_WITH_UNDER` |
 | Global/Class Variables | `lower_with_under`   | `_lower_with_under` |
 | Instance Variables | `lower_with_under`   | `_lower_with_under` |
-| Method Names | `lower_with_under()` | `_lower_with_under()` |
+| Method Names |`camelCase()`  | `camelCase()`  |
 | Function/Method Parameters | `lower_with_under`   |  |
 | Local Variables | `lower_with_under`   |  |
 
@@ -61,5 +61,5 @@ class SampleClass:
 
 if i & (i-1) == 0:  # True if i is 0 or a power of 2.
  ```
-**Начало** комментария - **заглавная** буква
+**Начало** комментария - **строчная** буква
 
