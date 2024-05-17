@@ -27,7 +27,7 @@ EPS = 1e-7  # слагаемое, чтобы избежать деление н�
 RATE_ERROR_DIST = 0.05
 RATE_ERROR_SPEED = 0.001
 MIN_DIST_DETECTION = 30  # м
-
+MAX_DIST_DETECTION = 50000 # м
 NUMBER_OF_MISSILES = 10
 
 DISPATCHER_ID = 0

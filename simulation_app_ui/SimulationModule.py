@@ -86,7 +86,11 @@ class SimulationModule(QObject):
         cp_id = cp_source[0].id if len(cp_source) > 0 else -2000
 
         # radars
+        radar_info = {}
         for r_s in [model_source for model_source in model_sources[1:] if model_source.model_type // 1000 == 2]:
+            pos = np.array([r_s.x, r_s.y, r_s.z])
+            radar_info[r_s.id] = [pos]
+
             if r_s.overview_mode == 0:
                 configuration.append(RadarRound(dispatcher, r_s.id, cp_id, env, np.array([r_s.x, r_s.y, r_s.z]), 
                                                 r_s.pan_start, r_s.tilt_start, r_s.view_distance,
@@ -98,7 +102,7 @@ class SimulationModule(QObject):
 
         # CP
         if len(cp_source) > 0:
-            configuration.append(CombatControlPoint(dispatcher, cp_source[0].id, sd_info))
+            configuration.append(CombatControlPoint(dispatcher, cp_source[0].id, sd_info, radar_info))
         dispatcher.configurate(configuration)
         return dispatcher
 

@@ -13,7 +13,7 @@ class Radar2CombatControlMsg(BaseMessage):
     def __init__(self, time: float, sender_ID: int, receiver_ID: int, visible_objects: list):
         '''
         :param visible_objects: список видимых объектов из списков типа
-                                [положение объекта, направление скорости объекта, модуль скорости объекта, ошибка определения дальности]
+                                [положение объекта, направление скорости объекта, модуль скорости объекта, ошибка определения дальности, дальность до объекта]
         '''
         super().__init__(MSG_RADAR2CCP_type, 1, time, sender_ID, receiver_ID)
         self.visible_objects = visible_objects

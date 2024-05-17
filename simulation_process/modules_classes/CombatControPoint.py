@@ -5,7 +5,7 @@ import numpy as np
 from simulation_process.constants import GuidedMissile_SPEED, MSG_RADAR2CCP_type, \
     MSG_SD2CCP_MS_type, MSG_CCP_MISSILE_CAPACITY_type, MSG_RADAR2CCP_GM_HIT_type, NEW_TARGET, OLD_TARGET, \
     OLD_GM, DISPATCHER_ID, MISSILE_TYPE_DRAWER, TARGET_TYPE_DRAWER, DRAWER_ID, ccp_rad, GuidedMissile_SPEED_MIN, \
-    GuidedMissile_LifeTime
+    GuidedMissile_LifeTime, MAX_DIST_DETECTION
 from simulation_process.messages_classes.Messages import CombatControl2StartingDeviceMsg, CombatControl2RadarMsg, MissileCapacityMsg, \
     CombatControlPoint_ViewMessage, CombatControlPoint_InitMessage, CombatControl2DrawerMsg
 from simulation_process.modules_classes.Simulated import Simulated, ModelDispatcher
@@ -88,11 +88,12 @@ class CCMissile:
 
 
 class CombatControlPoint(Simulated):
-    def __init__(self, dispatcher: ModelDispatcher, ID: int, starting_devices_coords: dict):
+    def __init__(self, dispatcher: ModelDispatcher, ID: int, starting_devices_coords: dict, radars_coords: dict):
         super().__init__(dispatcher, ID, None)
         self.target_dict = {}
         self.missile_dict = {}
         self.starting_devices_coords = starting_devices_coords
+        self.radars_coords = radars_coords
         self.starting_devices_capacity = {}
         self.starting_devices_launched = {}
         self.target_order = 0
@@ -285,6 +286,16 @@ class CombatControlPoint(Simulated):
         self._sendMessage(msg2drawer)
         logger.combat_control(f"ПБУ отправил {len(list_for_drawer)} смс Рисовальщику")
 
+    def send_target_coords2gm_through_radar(self, gm_new_target_coords, time):
+        for missile_id in gm_new_target_coords.keys():
+            dist_radar2missile, radar_id, target_coord, target_vel = gm_new_target_coords[missile_id]
+            msg2radar = CombatControl2RadarMsg(time, self._ID, radar_id, target_coord, target_vel,
+                                               missile_id)
+            self._sendMessage(msg2radar)
+
+            logger.combat_control(
+                f"ПБУ отправил сообщение Радару {radar_id}, что у ЗУР с id:{missile_id}, новые координаты ее цели:{target_coord}")
+
     def runSimulationStep(self, time: float) -> None:
         """
         :param time: текущее время
@@ -305,12 +316,16 @@ class CombatControlPoint(Simulated):
 
         msg_from_radar = self._checkAvailableMessagesByType(MSG_RADAR2CCP_type)
         logger.combat_control(f"ПБУ получил сообщения от {len(msg_from_radar)} МФР")
+
+
+        gm_new_target_coords = {}
+
         if len(msg_from_radar) != 0:
-            radar_id = msg_from_radar[0].sender_ID
 
             # отделить новые цели от всего что было раньше
             for msg in msg_from_radar:
-                logger.combat_control(f"ПБУ получил {len(msg.visible_objects)} сообщений от МФР с id {msg.sender_ID}")
+                logger.combat_control(f"ПБУ получил {len(msg.visible_objects)}, {msg.visible_objects} сообщений от МФР с id {msg.sender_ID}")
+                radar_id = msg.sender_ID
 
                 visible_objects = msg.visible_objects
                 for visible_object in visible_objects:
@@ -370,13 +385,27 @@ class CombatControlPoint(Simulated):
                                 self.missile_dict[key].updTargetVel(obj_speed_direct)
 
                                 missile_id = self.missile_dict[key].id
+                                missile_coord = self.missile_dict[key].coord
                                 target_vel = self.missile_dict[key].target_vel
-                                msg2radar = CombatControl2RadarMsg(time, self._ID, radar_id, obj_coord, target_vel,
-                                                                   missile_id)
-                                self._sendMessage(msg2radar)
+                                target_coord = self.missile_dict[key].target_coord
+                                dist_radar2missile = np.linalg.norm(self.radars_coords[radar_id] - missile_coord)
 
-                                logger.combat_control(
-                                    f"ПБУ отправил сообщение Радару, что у ЗУР с id:{missile_id}, новые координаты ее цели:{obj_coord}")
+                                if dist_radar2missile < MAX_DIST_DETECTION:
+                                    if not missile_id in gm_new_target_coords.keys():
+                                        gm_new_target_coords[missile_id] = [dist_radar2missile, radar_id, target_coord, target_vel]
+                                        logger.combat_control(
+                                            f"инфу о ЗУР с id {missile_id} ПБУ передал Радару с id {radar_id}, расст от него до ЗУР = {dist_radar2missile}")
+
+                                    else:
+                                        old_radar2missile_dist = gm_new_target_coords[missile_id][0]
+                                        if dist_radar2missile < old_radar2missile_dist:
+                                            gm_new_target_coords[missile_id] = [dist_radar2missile, radar_id,
+                                                                                target_coord, target_vel]
+
+                                            logger.combat_control(
+                                                f"инфу о ЗУР с id {missile_id} ПБУ передал Радару с id {radar_id}, расст от него до ЗУР = {dist_radar2missile}")
+
+
                                 break
 
                     elif obj_type == OLD_GM:  # старая ЗУР, нужно обновить поля в листе ЗУР
@@ -386,4 +415,5 @@ class CombatControlPoint(Simulated):
                         self.missile_dict[sim_obj_key].updСoord(obj_coord, time)
                         self.missile_dict[sim_obj_key].updSpeedMod(obj_speed_mod, time)
 
+        self.send_target_coords2gm_through_radar(gm_new_target_coords, time)
         self.send_vis_objects2gui(time)
