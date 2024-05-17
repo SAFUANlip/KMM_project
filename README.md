@@ -47,6 +47,11 @@
 pip install -r requirements.txt
 ```
 
+### Как собрать exe?
+```
+pyinstaller.exe --onefile --windowed app.py
+```
+
 ### Как запустить проект?
 - запустить файл app.py (нужен питон)
 - запустить файл [exec/app.exec](exec/app.exe) (не нужен питон)
