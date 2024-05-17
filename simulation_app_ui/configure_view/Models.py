@@ -99,7 +99,7 @@ class AeroTargetSource(BaseSource):
         self.speed = Airplane_SPEED
         self.direction = 0
         self.time_start = 0
-        self.time_finish = 100
+        self.time_finish = 250
         self.track = TrackSource(self)
 
     def setSpeed(self, speed):
