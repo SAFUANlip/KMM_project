@@ -57,6 +57,7 @@ class AeroEnv(Simulated):
                     entity.runSimulationStep(time)
                 else:
                     to_del.append(entity)
+                    logger.aero_env(f"AeroEnv самолет с ID: {entity._ID} перестал существовать, текущее время: {time}, время начала полета: {entity.start_time}, время окончания полета: {entity.end_time}, координаты: {entity.pos}")
             else:
                 entity.runSimulationStep(time)
 
