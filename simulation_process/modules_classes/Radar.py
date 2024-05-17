@@ -60,6 +60,8 @@ class RadarRound(Simulated):
                 if self.pan_cur < pan < self.pan_cur + self.pan_per_sec and self.tilt_cur < tilt < self.tilt_cur + self.tilt_per_sec:
                     logger.radar(
                         f"Radar с id {self._ID} видит объект с сферическими координатами (dist, pan, tilt): {r, pan, tilt}")
+                    logger.radar(
+                        f"Radar с id {self._ID} видит объект с  координатами x, y, z: {x, y, z}")
                     error_dist = np.random.randint(-MAX_ERROR_DIST, MAX_ERROR_DIST, size=3)
                     pos = obj.pos + error_dist
                     error_r = int(np.mean(error_dist)) + 1

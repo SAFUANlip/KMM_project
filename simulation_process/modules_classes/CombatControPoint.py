@@ -21,6 +21,7 @@ class CCTarget:
         :param upd_time: время, в которое произошло посл изменение класса
         """
         self.coord = coord
+        self.seen_time = -1
         self.speed_dir = speed_dir
         self.speed_mod = speed_mod
         self.upd_time = upd_time
@@ -34,6 +35,11 @@ class CCTarget:
         self.coord = new_coord
         self.upd_time = time
 
+    def updSeenTime(self, time: float) -> None:
+        """
+
+        """
+        self.seen_time = time
     def updSpeedMod(self, new_speed_mod: float, time: float) -> None:
         """
         Функция для обновления модуля скорости цели
@@ -48,6 +54,7 @@ class CCMissile:
     def __init__(self, missile_coord, missile_id, target_coord, target_vel, target_speed, time):
         self.coord = missile_coord
         self.target_coord = target_coord
+        self.seen_time = -1
         self.id = missile_id
         self.speed_mod = GuidedMissile_SPEED
         self.target_speed = target_speed
@@ -62,6 +69,13 @@ class CCMissile:
         """
         self.coord = new_coord
         self.upd_time = time
+
+    def updSeenTime(self, time: float) -> None:
+        """
+
+        """
+        self.seen_time = time
+
 
     def updSpeedMod(self, new_speed_mod: float, time: float) -> None:
         """
@@ -121,6 +135,8 @@ class CombatControlPoint(Simulated):
         tick = self._simulating_tick
 
         for key, target in self.target_dict.items():
+            if target.seen_time == cur_time:
+                continue
             target_coord = target.coord
             target_speed_mod = target.speed_mod
             last_target_time = target.upd_time
@@ -130,8 +146,14 @@ class CombatControlPoint(Simulated):
             time_went = cur_time - last_target_time
 
             logger.combat_control(
-                f"ПБУ видит объект, {max(0, target_speed_mod * (time_went - ccp_rad * tick) - obj_error)},"
-                f" {coord_dif}, {max(0, target_speed_mod * (time_went + ccp_rad * tick) + obj_error)}")
+                f"ПБУ видит объект, {max(0, target_speed_mod * (time_went - ccp_rad * tick) - obj_error)}, "
+                f" {coord_dif}, {max(0, target_speed_mod * (time_went + ccp_rad * tick) + obj_error)}, "
+                f"ccp rad {ccp_rad}, tick {tick}, target_speed_mod {target_speed_mod}, obj_error {obj_error},"
+                f"time went {time_went}, coord_dif {coord_dif}")
+
+            logger.combat_control(
+                f"координата текущей target {target_coord}, координата текущего объекта {obj_coord}\n")
+
             if (coord_dif < min_diff and max(0, target_speed_mod *
                                                 (time_went - ccp_rad * tick) - obj_error) <= coord_dif
                     <= max(0, target_speed_mod * (time_went + ccp_rad * tick) + obj_error)):
@@ -140,6 +162,8 @@ class CombatControlPoint(Simulated):
                 sim_obj_key = key
 
         for key, missile in self.missile_dict.items():
+            if missile.seen_time == cur_time:
+                continue
             missile_coord = missile.coord
             missile_speed_mod = missile.speed_mod
             last_missile_time = missile.upd_time
@@ -149,7 +173,12 @@ class CombatControlPoint(Simulated):
 
             logger.combat_control(
                 f"ПБУ видит объект, {max(0, missile_speed_mod * (time_went - ccp_rad * tick) - obj_error)}, "
-                f"{coord_dif}, {max(0, missile_speed_mod * (time_went + ccp_rad * tick) + obj_error)}")
+                f"{coord_dif}, {max(0, missile_speed_mod * (time_went + ccp_rad * tick) + obj_error)}, "
+                f"ccp rad {ccp_rad}, tick {tick}, target_speed_mod {missile_speed_mod}, obj_error {obj_error}, "
+                f"time went {time_went}, coord_dif {coord_dif}")
+
+            logger.combat_control(
+                f"координата текущей зур {missile_coord}, координата текущего объекта {obj_coord}\n")
 
             if (coord_dif < min_diff and max(0, missile_speed_mod * (time_went - ccp_rad * tick) - obj_error)
                     <= coord_dif <= max(0,
@@ -157,6 +186,16 @@ class CombatControlPoint(Simulated):
                 min_diff = coord_dif
                 obj_type = OLD_GM
                 sim_obj_key = key
+
+        if obj_type == 2:
+            self.missile_dict[sim_obj_key].updSeenTime(cur_time)
+            logger.combat_control(
+                f"ПБУ обновила SeenTime у зур с id {self.missile_dict[sim_obj_key].id}, координатами {self.missile_dict[sim_obj_key].coord}")
+        if obj_type == 1:
+            self.target_dict[sim_obj_key].updSeenTime(cur_time)
+            logger.combat_control(
+                f"ПБУ обновила SeenTime у цели с id {self.target_dict[sim_obj_key]}, координатами ")
+
         logger.combat_control(
             f"ПБУ решила что объект с координатами {obj_coord} это {obj_type}, ЗУР - 2, Цель старая - 1, Цель новая - 0")
         return obj_type, sim_obj_key
@@ -321,6 +360,11 @@ class CombatControlPoint(Simulated):
         gm_new_target_coords = {}
 
         if len(msg_from_radar) != 0:
+
+            for key in self.missile_dict.keys():
+                self.missile_dict[key].updSeenTime(-1)
+            for key in self.target_dict.keys():
+                self.target_dict[key].updSeenTime(-1)
 
             # отделить новые цели от всего что было раньше
             for msg in msg_from_radar:

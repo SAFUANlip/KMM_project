@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
-from simulation_process.constants import Airplane_SPEED
+from simulation_process.constants import Airplane_SPEED, MAX_DIST_DETECTION
 
 
 class DispatcherSource:
@@ -61,7 +61,7 @@ class RadarSource(BaseSource):
         self.tilt_start = 0
         self.pan_per_sec = 60
         self.tilt_per_sec = 120
-        self.view_distance = 50000
+        self.view_distance = MAX_DIST_DETECTION
         self.type = 'horizontal'
         self.pan_angle = self.pan_per_sec
         self.tilt_angle = self.tilt_per_sec
